@@ -1,11 +1,11 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
+import { createRootRoute } from '@tanstack/react-router'
 import { APP_ASSETS, APP_DESCRIPTION, APP_NAME } from '#/config/app.constants'
-
+import { NotFoundPage } from '#/pages/not-found-page'
 import appCss from '../styles.css?url'
+import { RootDocument } from './root-document'
 
 export const Route = createRootRoute({
+  notFoundComponent: NotFoundPage,
   head: () => ({
     meta: [
       {
@@ -44,36 +44,7 @@ export const Route = createRootRoute({
         rel: 'icon',
         href: APP_ASSETS.favicon,
       },
-      {
-        rel: 'apple-touch-icon',
-        href: APP_ASSETS.logo,
-      },
     ],
   }),
   shellComponent: RootDocument,
 })
-
-function RootDocument({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
-        <Scripts />
-      </body>
-    </html>
-  )
-}
