@@ -3,7 +3,6 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
-import { APP_ROUTES } from '#/config/routes.constants'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -23,7 +22,7 @@ function Home() {
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
         <header className="relative z-20 flex items-center justify-between gap-5">
           <Link
-            to={APP_ROUTES.home}
+            to="/"
             className="display-title text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl"
           >
             {APP_NAME}
@@ -31,10 +30,10 @@ function Home() {
 
           <div className="hidden items-center gap-5 sm:flex">
             <nav className="flex items-center gap-4 text-sm">
-              <Link to={APP_ROUTES.login} className="app-link">
+              <Link to="/login" className="app-link">
                 Login
               </Link>
-              <Link to={APP_ROUTES.register} className="app-link">
+              <Link to="/register" className="app-link">
                 Create account
               </Link>
             </nav>
@@ -82,14 +81,14 @@ function Home() {
           >
             <nav className="flex flex-col gap-5">
               <Link
-                to={APP_ROUTES.login}
+                to="/login"
                 className="display-title text-5xl font-semibold text-[var(--sea-ink)]"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Login
               </Link>
               <Link
-                to={APP_ROUTES.register}
+                to="/register"
                 className="display-title text-5xl font-semibold text-[var(--sea-ink)]"
                 onClick={() => setIsMenuOpen(false)}
               >

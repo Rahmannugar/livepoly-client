@@ -9,6 +9,19 @@ import type {
 
 let unauthorizedInterceptor: ApiClientInterceptor | null = null
 let forbiddenInterceptor: ApiClientInterceptor | null = null
+let accessToken: string | null = null
+
+export function getClientAccessToken() {
+  return accessToken
+}
+
+export function setClientAccessToken(token: string | null) {
+  accessToken = token
+}
+
+export function clearClientAccessToken() {
+  accessToken = null
+}
 
 export function setUnauthorizedInterceptor(
   interceptor: ApiClientInterceptor | null,
@@ -42,10 +55,12 @@ function buildHeaders(options: ApiRequestOptions): Headers {
     headers.set('Content-Type', 'application/json')
   }
 
-  if (options.authToken) {
-    headers.set('Authorization', `Bearer ${options.authToken}`)
-  }
+  const token = options.authToken ?? getClientAccessToken()
 
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
+  
   return headers
 }
 
