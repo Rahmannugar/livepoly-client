@@ -1,6 +1,6 @@
 import { DiscordIcon } from '#/components/icons/discord-icon'
 import { GoogleIcon } from '#/components/icons/google-icon'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { AuthLayout } from '#/components/auth/auth-layout'
 import { useToast } from '#/components/common/toast'
@@ -9,6 +9,7 @@ import { useAuth } from '#/lib/auth/useAuth'
 
 export function RegisterPage() {
   const auth = useAuth()
+  const navigate = useNavigate()
   const { showToast } = useToast()
 
   const {
@@ -25,6 +26,10 @@ export function RegisterPage() {
           message:
             response.message ??
             'Account created. Check your email to verify your account.',
+        })
+        navigate({
+          to: '/auth/verify-email',
+          search: { email: input.email },
         })
       },
       onError: (error) => {
