@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { AuthLayout } from '#/components/auth/auth-layout'
+import { PasswordField } from '#/components/auth/password-field'
 import { useToast } from '#/components/common/toast'
 import type { ResetPasswordRequest } from '#/lib/auth/auth.types'
 import { useAuth } from '#/lib/auth/useAuth'
@@ -132,10 +133,8 @@ export function ResetPasswordPage() {
             <span className="text-sm font-bold text-[var(--sea-ink)]">
               New password
             </span>
-            <input
-              type="password"
+            <PasswordField
               autoComplete="new-password"
-              className="h-10 rounded-2xl border border-[var(--line)] bg-[var(--bg-base)] px-4 text-sm font-semibold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
               {...register('password', { required: 'New password is required' })}
             />
             {errors.password ? (
