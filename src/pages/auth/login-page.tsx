@@ -44,6 +44,10 @@ export function LoginPage() {
           <Link to="/auth/register" className="app-link">
             Create account
           </Link>
+          <span className="mx-2 text-[var(--sea-ink-soft)]">·</span>
+          <Link to="/auth/forgot-password" className="app-link">
+            Forgot password?
+          </Link>
         </>
       }
     >
