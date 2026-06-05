@@ -1,4 +1,4 @@
-import { blockIf, createRail, requireAuth, requireRole } from 'authrail'
+import { blockIf, createRail, requireAuth } from 'authrail'
 import type { AuthUser } from './auth.types'
 
 export type AuthRailContext = {
@@ -15,6 +15,6 @@ export const authenticatedRail = createRail<AuthRailContext>(
 
 export const adminRail = createRail<AuthRailContext>('admin', [
   requireAuth('/auth/login'),
-  requireRole('admin'),
   blockIf((context) => context.user?.status === 'suspended'),
+  blockIf((context) => context.user?.role !== 'admin'),
 ])

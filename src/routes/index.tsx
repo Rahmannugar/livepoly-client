@@ -3,10 +3,34 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
+import { useAuth } from '#/lib/auth/useAuth'
+import { AppHomePage } from '#/pages/home-page'
 
 export const Route = createFileRoute('/')({ component: Home })
 
 function Home() {
+  const auth = useAuth()
+  const isHydrated = auth.hydration.data
+  const user = auth.currentUser.data
+
+  if (!isHydrated) {
+    return (
+      <main className="grid min-h-screen place-items-center px-5">
+        <p className="display-title text-3xl font-semibold text-[var(--sea-ink)]">
+          Setting the table...
+        </p>
+      </main>
+    )
+  }
+
+  if (user) {
+    return <AppHomePage />
+  }
+
+  return <LandingPage />
+}
+
+function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
