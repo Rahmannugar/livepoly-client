@@ -177,6 +177,19 @@ select {
   font: inherit;
 }
 
+button,
+[role='button'],
+input[type='button'],
+input[type='submit'],
+input[type='reset'] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 .display-title {
   font-family: var(--font-display);
 }
@@ -264,6 +277,19 @@ select {
   color: #d7ece8;
   transform: translateX(26px);
   background: rgba(10, 20, 24, 0.96);
+}
+
+button,
+[role='button'],
+input[type='button'],
+input[type='submit'],
+input[type='reset'] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
 }
 
 @layer base {

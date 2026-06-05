@@ -2,7 +2,7 @@ import { createRootRoute } from '@tanstack/react-router'
 import { APP_ASSETS, APP_DESCRIPTION, APP_NAME } from '#/config/app.constants'
 import { NotFoundPage } from '#/pages/not-found-page'
 import appCss from '../styles.css?url'
-import { RootDocument } from './root-document'
+import { RootDocument } from './-root-document'
 
 export const Route = createRootRoute({
   notFoundComponent: NotFoundPage,

@@ -30,14 +30,13 @@ function Home() {
 
           <div className="hidden items-center gap-5 sm:flex">
             <nav className="flex items-center gap-4 text-sm">
-              <Link to="/login" className="app-link">
+              <Link to="/auth/login" className="app-link">
                 Login
               </Link>
-              <Link to="/register" className="app-link">
+              <Link to="/auth/register" className="app-link">
                 Create account
               </Link>
             </nav>
-            <ThemeToggle />
           </div>
 
           <button
@@ -81,14 +80,14 @@ function Home() {
           >
             <nav className="flex flex-col gap-5">
               <Link
-                to="/login"
+                to="/auth/login"
                 className="display-title text-5xl font-semibold text-[var(--sea-ink)]"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Login
               </Link>
               <Link
-                to="/register"
+                to="/auth/register"
                 className="display-title text-5xl font-semibold text-[var(--sea-ink)]"
                 onClick={() => setIsMenuOpen(false)}
               >
