@@ -98,7 +98,8 @@ export function ResetPasswordPage() {
             <input
               type="email"
               autoComplete="email"
-              className="h-10 rounded-2xl border border-[var(--line)] bg-[var(--bg-base)] px-4 text-sm font-semibold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
+              readOnly
+              className="h-10 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_75%,var(--line))] px-4 text-sm font-semibold text-[var(--sea-ink)] outline-none"
               {...register('email', { required: 'Email is required' })}
             />
             {errors.email ? (

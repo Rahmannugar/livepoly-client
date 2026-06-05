@@ -40,11 +40,16 @@ function createApiClientError(
   error: ApiErrorBody,
   statusCode: number,
 ): ApiClientError {
+  const nestedError =
+    typeof error.error === 'object' && error.error !== null
+      ? error.error
+      : null
+
   return Object.assign(new Error(message), {
     name: 'ApiClientError',
     statusCode,
-    code: error.code,
-    details: error.details,
+    code: nestedError?.code ?? error.code,
+    details: nestedError?.details ?? error.details,
   })
 }
 
@@ -60,7 +65,7 @@ function buildHeaders(options: ApiRequestOptions): Headers {
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)
   }
-  
+
   return headers
 }
 
@@ -84,6 +89,23 @@ function getErrorMessage(body: unknown, fallback: string): string {
 
     if (typeof message === 'string' && message.trim()) {
       return message
+    }
+  }
+
+  if (typeof body === 'object' && body !== null && 'error' in body) {
+    const error = (body as ApiErrorBody).error
+
+    if (typeof error === 'string' && error.trim()) {
+      return error
+    }
+
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      typeof error.message === 'string' &&
+      error.message.trim()
+    ) {
+      return error.message
     }
   }
 

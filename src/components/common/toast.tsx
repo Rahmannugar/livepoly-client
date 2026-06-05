@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { XIcon } from '@phosphor-icons/react'
 import { createContext, useCallback, useContext, useState } from 'react'
 
 type ToastKind = 'success' | 'error' | 'info'
@@ -31,6 +32,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const dismissToast = useCallback((id: string) => {
+    setToasts((current) => current.filter((toast) => toast.id !== id))
+  }, [])
+
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
@@ -40,7 +45,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             className={[
-              'rounded-3xl border px-4 py-3 text-sm font-bold shadow-[0_20px_50px_rgba(8,28,32,0.18)] backdrop-blur-xl',
+              'flex items-start gap-3 rounded-3xl border px-4 py-3 text-sm font-bold shadow-[0_20px_50px_rgba(8,28,32,0.18)] backdrop-blur-xl',
               toast.kind === 'success'
                 ? 'border-emerald-400/30 bg-emerald-400/15 text-emerald-700 dark:text-emerald-200'
                 : '',
@@ -52,7 +57,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 : '',
             ].join(' ')}
           >
-            {toast.message}
+            <span className="min-w-0 flex-1">{toast.message}</span>
+            <button
+              type="button"
+              aria-label="Dismiss notification"
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-current opacity-70 transition hover:bg-current/10 hover:opacity-100"
+              onClick={() => dismissToast(toast.id)}
+            >
+              <XIcon weight="bold" className="h-3.5 w-3.5" />
+            </button>
           </div>
         ))}
       </div>

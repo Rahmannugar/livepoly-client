@@ -7,7 +7,14 @@ export type ApiEnvelope<T> = {
 export type ApiErrorBody = {
   success?: boolean
   message?: string
-  error?: string
+  error?:
+    | string
+    | {
+        code?: string
+        statusCode?: number
+        message?: string
+        details?: unknown
+      }
   code?: string
   statusCode?: number
   details?: unknown
