@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
 
 type AuthLayoutProps = {
@@ -18,13 +19,14 @@ export function AuthLayout({
   return (
     <main className="min-h-screen px-5 py-5 sm:px-8">
       <section className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-5xl flex-col">
-        <header className="flex items-center">
+        <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
             className="display-title text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl"
           >
             {APP_NAME}
           </Link>
+          <ThemeToggle />
         </header>
 
         <div className="flex flex-1 items-center justify-center py-8">
@@ -40,7 +42,7 @@ export function AuthLayout({
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="grid grid-cols-3 gap-3 text-center mt-4">
                 {['Roll', 'Buy', 'Build'].map((item) => (
                   <div
                     key={item}

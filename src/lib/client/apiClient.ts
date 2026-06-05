@@ -112,8 +112,12 @@ function getErrorMessage(body: unknown, fallback: string): string {
   return fallback
 }
 
-function runStatusInterceptor(error: ApiClientError) {
-  if (error.statusCode === 401) {
+function isAuthEndpoint(path: string) {
+  return path.startsWith('/auth/')
+}
+
+function runStatusInterceptor(error: ApiClientError, path: string) {
+  if (error.statusCode === 401 && !isAuthEndpoint(path)) {
     unauthorizedInterceptor?.(error)
     return
   }
@@ -146,7 +150,7 @@ export async function apiClient<T>(
       response.status,
     )
 
-    runStatusInterceptor(error)
+    runStatusInterceptor(error, path)
 
     throw error
   }

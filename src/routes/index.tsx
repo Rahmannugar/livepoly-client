@@ -69,6 +69,7 @@ function LandingPage() {
                 Create account
               </Link>
             </nav>
+            <ThemeToggle />
           </div>
 
           <button

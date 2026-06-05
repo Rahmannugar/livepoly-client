@@ -1,9 +1,15 @@
 import { Link } from '@tanstack/react-router'
+import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
 
 export function NotFoundPage() {
   return (
-    <main className="flex min-h-screen items-center px-5 py-8 sm:px-8">
+    <main className="min-h-screen px-5 py-6 sm:px-8">
+      <header className="mx-auto flex w-full max-w-3xl justify-end">
+        <ThemeToggle />
+      </header>
+
+      <div className="flex min-h-[calc(100vh-5.5rem)] items-center">
       <section className="mx-auto w-full max-w-3xl">
         <p className="app-kicker">Wrong square</p>
 
@@ -23,6 +29,7 @@ export function NotFoundPage() {
           Back to home
         </Link>
       </section>
+      </div>
     </main>
   )
 }

@@ -5,11 +5,13 @@ import {
   MedalIcon,
   PlusIcon,
   SignOutIcon,
+  UserIcon,
   UsersIcon,
 } from '@phosphor-icons/react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { APP_NAME } from '#/config/app.constants'
 import { useToast } from '#/components/common/toast'
+import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useAuth } from '#/lib/auth/useAuth'
 
 const homeActions = [
@@ -47,6 +49,7 @@ const homeActions = [
 
 export function HomePage() {
   const auth = useAuth()
+  const navigate = useNavigate()
   const { showToast } = useToast()
   const user = auth.currentUser.data
   const displayName = user?.username ?? 'player'
@@ -55,6 +58,7 @@ export function HomePage() {
     auth.logout.mutate(undefined, {
       onSuccess: () => {
         showToast({ kind: 'success', message: 'You have signed out.' })
+        navigate({ to: '/auth/login' })
       },
       onError: (error) => {
         showToast({
@@ -69,15 +73,15 @@ export function HomePage() {
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
-        <header className="flex items-center justify-between gap-4">
+        <header className="grid grid-cols-[1fr_auto] items-center gap-3 sm:flex sm:justify-between">
           <Link
             to="/"
-            className="display-title text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl"
+            className="display-title min-w-0 text-[clamp(1.55rem,9vw,2.25rem)] font-semibold leading-none text-[var(--sea-ink)] sm:text-4xl"
           >
             {APP_NAME}
           </Link>
 
-          <div className="flex items-center gap-3 pr-16 sm:pr-20">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-bold text-[var(--sea-ink)]">
                 {displayName}
@@ -89,20 +93,22 @@ export function HomePage() {
 
             <div
               aria-hidden="true"
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-sm font-black uppercase text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)]"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] sm:h-10 sm:w-10"
             >
-              {displayName.slice(0, 1)}
+              <UserIcon weight="bold" className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
             </div>
 
             <button
               type="button"
               aria-label="Sign out"
               disabled={auth.logout.isPending}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:w-10"
               onClick={handleLogout}
             >
               <SignOutIcon weight="bold" className="h-5 w-5" />
             </button>
+
+            <ThemeToggle />
           </div>
         </header>
 
