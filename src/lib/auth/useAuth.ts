@@ -1,15 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AUTH_QUERY_KEYS } from './auth.constants'
 import * as authService from './auth.service'
-import type { AuthSession } from './auth.types'
+import type { AuthSession, AuthUser } from './auth.types'
 
 export function useAuth() {
   const queryClient = useQueryClient()
 
-  const currentUser = useQuery({
+  const currentUser = useQuery<AuthUser | null>({
     queryKey: AUTH_QUERY_KEYS.currentUser,
     queryFn: () => null,
     enabled: false,
+    initialData: null,
   })
 
   const hydration = useQuery({

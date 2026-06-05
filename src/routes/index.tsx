@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
 import { useAuth } from '#/lib/auth/useAuth'
-import { AppHomePage } from '#/pages/home-page'
+import { HomePage } from '#/pages/home/home-page'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -24,7 +24,7 @@ function Home() {
   }
 
   if (user) {
-    return <AppHomePage />
+    return <HomePage />
   }
 
   return <LandingPage />
