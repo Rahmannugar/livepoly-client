@@ -212,6 +212,12 @@ button:disabled,
   color: var(--sea-ink);
 }
 
+@media (max-width: 639px) {
+  body.landing-page .global-theme-toggle {
+    display: none;
+  }
+}
+
 .theme-toggle {
   display: inline-flex;
   border: 0;

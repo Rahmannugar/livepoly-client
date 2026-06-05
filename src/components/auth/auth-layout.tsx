@@ -35,8 +35,8 @@ export function AuthLayout({
                   Roll in. Build up. Stay in the game.
                 </h1>
                 <p className="mt-5 text-base leading-7 text-[var(--sea-ink-soft)]">
-                  Join rooms, make your moves, grow your net worth, and outlast
-                  the table.
+                  Play with friends, buy properties, build your position, and
+                  stay alive till the final turn.
                 </p>
               </div>
 

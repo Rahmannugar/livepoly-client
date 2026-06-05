@@ -42,7 +42,7 @@ export function RegisterPage() {
   return (
     <AuthLayout
       title="Join LivePoly."
-      subtitle="Claim your username and start building your table record."
+      subtitle="Choose your username, join a room, and start making your moves."
       footer={
         <>
           Already playing?{' '}

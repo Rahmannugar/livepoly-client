@@ -10,6 +10,14 @@ function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
+    document.body.classList.add('landing-page')
+
+    return () => {
+      document.body.classList.remove('landing-page')
+    }
+  }, [])
+
+  useEffect(() => {
     document.body.style.overflow = isMenuOpen ? 'hidden' : ''
 
     return () => {

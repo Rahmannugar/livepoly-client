@@ -15,7 +15,7 @@ export function RootDocument({ children }: { children: React.ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <ToastProvider>
-              <div className="fixed right-5 top-5 z-50 hidden sm:block">
+              <div className="global-theme-toggle fixed right-5 top-5 z-50">
                 <ThemeToggle />
               </div>
               {children}
