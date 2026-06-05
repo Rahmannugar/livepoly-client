@@ -53,9 +53,9 @@ export function ForgotPasswordPage() {
         </>
       }
     >
-      <div className="rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-4 shadow-[0_22px_60px_rgba(8,28,32,0.14)] backdrop-blur-xl">
-        <form className="grid gap-3" onSubmit={handleSubmit(onSubmit)}>
-          <label className="grid gap-1.5">
+      <div className="rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-5 shadow-[0_22px_60px_rgba(8,28,32,0.14)] backdrop-blur-xl sm:p-6">
+        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <label className="grid gap-2">
             <span className="text-sm font-bold text-[var(--sea-ink)]">
               Email
             </span>
@@ -75,7 +75,7 @@ export function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={auth.forgotPassword.isPending}
-            className="mt-1 inline-flex h-10 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 inline-flex h-10 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {auth.forgotPassword.isPending ? 'Sending code...' : 'Send code'}
           </button>

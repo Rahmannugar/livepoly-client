@@ -5,7 +5,7 @@ import { APP_NAME } from '#/config/app.constants'
 type AuthLayoutProps = {
   title: string
   subtitle: string
-  footer: ReactNode
+  footer?: ReactNode
   children: ReactNode
 }
 
@@ -64,9 +64,11 @@ export function AuthLayout({
 
               <div className="mt-5">{children}</div>
 
-              <div className="mt-4 text-center text-sm font-semibold text-[var(--sea-ink-soft)]">
-                {footer}
-              </div>
+              {footer ? (
+                <div className="mt-4 text-center text-sm font-semibold text-[var(--sea-ink-soft)]">
+                  {footer}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

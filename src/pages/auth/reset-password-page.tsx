@@ -90,9 +90,9 @@ export function ResetPasswordPage() {
         </>
       }
     >
-      <div className="rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-4 shadow-[0_22px_60px_rgba(8,28,32,0.14)] backdrop-blur-xl">
-        <form className="grid gap-3" onSubmit={handleSubmit(onSubmit)}>
-          <label className="grid gap-1.5">
+      <div className="rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-5 shadow-[0_22px_60px_rgba(8,28,32,0.14)] backdrop-blur-xl sm:p-6">
+        <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <label className="grid gap-2">
             <span className="text-sm font-bold text-[var(--sea-ink)]">
               Email
             </span>
@@ -110,7 +110,7 @@ export function ResetPasswordPage() {
             ) : null}
           </label>
 
-          <label className="grid gap-1.5">
+          <label className="grid gap-2">
             <span className="text-sm font-bold text-[var(--sea-ink)]">
               Reset code
             </span>
@@ -129,7 +129,7 @@ export function ResetPasswordPage() {
             ) : null}
           </label>
 
-          <label className="grid gap-1.5">
+          <label className="grid gap-2">
             <span className="text-sm font-bold text-[var(--sea-ink)]">
               New password
             </span>
@@ -147,7 +147,7 @@ export function ResetPasswordPage() {
           <button
             type="submit"
             disabled={auth.resetPassword.isPending}
-            className="mt-1 inline-flex h-10 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 inline-flex h-10 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {auth.resetPassword.isPending ? 'Resetting...' : 'Reset password'}
           </button>
@@ -156,7 +156,7 @@ export function ResetPasswordPage() {
         <button
           type="button"
           disabled={auth.forgotPassword.isPending}
-          className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[var(--bg-base)] px-4 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[var(--bg-base)] px-4 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
           onClick={resendCode}
         >
           {auth.forgotPassword.isPending ? 'Sending code...' : 'Resend code'}

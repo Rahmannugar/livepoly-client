@@ -40,7 +40,7 @@ export function ProtectedRoute({ rail, children }: ProtectedRouteProps) {
     return (
       <main className="grid min-h-screen place-items-center px-5">
         <p className="display-title text-3xl font-semibold text-[var(--sea-ink)]">
-          Setting the table...
+          Setting the board...
         </p>
       </main>
     )
