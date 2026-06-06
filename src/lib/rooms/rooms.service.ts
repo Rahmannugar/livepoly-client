@@ -39,6 +39,15 @@ export function spectateRoom(code: string) {
   )
 }
 
+export function stopSpectatingRoom(code: string) {
+  return apiClient<RoomMessageResponse>(
+    `/rooms/${encodeURIComponent(code)}/spectate`,
+    {
+      method: 'DELETE',
+    },
+  )
+}
+
 export function leaveRoom(code: string) {
   return apiClient<RoomMessageResponse>(
     `/rooms/${encodeURIComponent(code)}/leave`,

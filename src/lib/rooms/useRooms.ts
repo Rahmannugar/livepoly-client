@@ -46,6 +46,16 @@ export function useRooms() {
 
   const spectateRoom = useMutation({
     mutationFn: roomsService.spectateRoom,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
+    },
+  })
+
+  const stopSpectatingRoom = useMutation({
+    mutationFn: roomsService.stopSpectatingRoom,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
+    },
   })
 
   const startRoom = useMutation({
@@ -74,6 +84,7 @@ export function useRooms() {
     joinRoom,
     leaveRoom,
     spectateRoom,
+    stopSpectatingRoom,
     startRoom,
     inviteToRoom,
   }

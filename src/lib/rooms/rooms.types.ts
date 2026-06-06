@@ -8,6 +8,8 @@ export type RoomPlayerStatus = 'joined' | 'left' | 'kicked'
 
 export type RoomPlayerType = 'human' | 'bot'
 
+export type RoomAccess = 'player' | 'spectator' | 'none'
+
 export type CreateRoomRequest = {
   durationMinutes?: RoomDurationMinutes
 }
@@ -42,6 +44,7 @@ export type Room = {
   createdAt: string
   startedAt: string | null
   endedAt: string | null
+  currentUserAccess: RoomAccess
   players: RoomPlayer[]
 }
 

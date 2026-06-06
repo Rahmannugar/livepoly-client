@@ -43,7 +43,7 @@ export function RoomPage({ code }: RoomPageProps) {
     room &&
       user &&
       room.status === 'waiting' &&
-      playersAtTable.some((player) => player.userId === user.id),
+      room.currentUserAccess === 'player',
   )
   const userSearch = useUserSearch(debouncedInviteQuery, isInviteOpen)
   const inviteResults = room
@@ -56,10 +56,18 @@ export function RoomPage({ code }: RoomPageProps) {
   const canStartRoom = Boolean(
     room && isHost && room.status === 'waiting' && playersAtTable.length > 0,
   )
-  const leaveActionLabel =
-    isHost && room?.status === 'waiting' ? 'Cancel room' : 'Leave room'
-  const leavePendingLabel =
-    isHost && room?.status === 'waiting' ? 'Cancelling...' : 'Leaving...'
+  const exitActionLabel = getExitActionLabel({
+    access: room?.currentUserAccess,
+    isHost,
+    status: room?.status,
+  })
+  const exitPendingLabel = getExitPendingLabel({
+    access: room?.currentUserAccess,
+    isHost,
+    status: room?.status,
+  })
+  const exitIsPending =
+    rooms.leaveRoom.isPending || rooms.stopSpectatingRoom.isPending
 
   function copyRoomCode() {
     if (!room?.code) {
@@ -95,6 +103,40 @@ export function RoomPage({ code }: RoomPageProps) {
         })
       },
     })
+  }
+
+  function stopSpectatingRoom() {
+    if (!room?.code) {
+      return
+    }
+
+    rooms.stopSpectatingRoom.mutate(room.code, {
+      onSuccess: (response) => {
+        showToast({
+          kind: 'success',
+          message: response.message ?? 'Stopped spectating room.',
+        })
+        navigate({ to: '/' })
+      },
+      onError: (error) => {
+        showToast({
+          kind: 'error',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Could not stop spectating.',
+        })
+      },
+    })
+  }
+
+  function exitRoom() {
+    if (room?.currentUserAccess === 'spectator') {
+      stopSpectatingRoom()
+      return
+    }
+
+    leaveRoom()
   }
 
   function startRoom() {
@@ -313,17 +355,17 @@ export function RoomPage({ code }: RoomPageProps) {
                     </button>
                   ) : null}
 
-                  <button
-                    type="button"
-                    disabled={rooms.leaveRoom.isPending}
-                    className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.1)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
-                    onClick={leaveRoom}
-                  >
-                    <SignOutIcon weight="bold" className="h-4.5 w-4.5" />
-                    {rooms.leaveRoom.isPending
-                      ? leavePendingLabel
-                      : leaveActionLabel}
-                  </button>
+                  {exitActionLabel ? (
+                    <button
+                      type="button"
+                      disabled={exitIsPending}
+                      className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.1)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={exitRoom}
+                    >
+                      <SignOutIcon weight="bold" className="h-4.5 w-4.5" />
+                      {exitIsPending ? exitPendingLabel : exitActionLabel}
+                    </button>
+                  ) : null}
                 </aside>
               </section>
 
@@ -345,6 +387,42 @@ export function RoomPage({ code }: RoomPageProps) {
       </section>
     </main>
   )
+}
+
+function getExitActionLabel({
+  access,
+  isHost,
+  status,
+}: {
+  access?: string
+  isHost: boolean
+  status?: string
+}) {
+  if (access === 'spectator') {
+    return 'Stop spectating'
+  }
+
+  if (access !== 'player') {
+    return null
+  }
+
+  return isHost && status === 'waiting' ? 'Cancel room' : 'Leave room'
+}
+
+function getExitPendingLabel({
+  access,
+  isHost,
+  status,
+}: {
+  access?: string
+  isHost: boolean
+  status?: string
+}) {
+  if (access === 'spectator') {
+    return 'Stopping...'
+  }
+
+  return isHost && status === 'waiting' ? 'Cancelling...' : 'Leaving...'
 }
 
 function getRoomStatusCopy({
