@@ -11,6 +11,7 @@ import {
 import type {
   GameCommandRejectedEvent,
   GameConnectionStatus,
+  GameEngineEvent,
   GameEventLogItem,
   GameEventsEvent,
   GameEventsRecoveredEvent,
@@ -26,6 +27,10 @@ type SocketAck<T> = {
   data: T
 }
 
+type GameCommandStateResponse = GameStateEvent & {
+  events?: GameEngineEvent[]
+}
+
 export function useGame(gameId: string) {
   const socketRef = useRef<Socket | null>(null)
   const [status, setStatus] = useState<GameConnectionStatus>('connecting')
@@ -35,6 +40,7 @@ export function useGame(gameId: string) {
   const [presence, setPresence] = useState<GamePresenceEvent | null>(null)
   const [events, setEvents] = useState<GameEventLogItem[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [commandPending, setCommandPending] = useState(false)
 
   const currentPlayer = useMemo(() => {
     if (!state || !roomPlayerId) {
@@ -230,6 +236,42 @@ export function useGame(gameId: string) {
     }
   }, [requestGameEvent, gameId])
 
+  const runCommand = useCallback(
+    async (event: string) => {
+      setCommandPending(true)
+      setErrorMessage(null)
+
+      try {
+        const response = await requestGameEvent<GameCommandStateResponse>(
+          event,
+          GAME_SOCKET_EVENTS.state,
+          { gameId },
+        )
+
+        setState(response.state)
+
+        if (response.events?.length) {
+          setEvents((current) => [
+            ...response.events!.map((item) => ({
+              sequence: null,
+              type: item.type,
+              payload: item,
+              createdAt: new Date().toISOString(),
+            })),
+            ...current,
+          ])
+        }
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error ? error.message : 'Game command failed.',
+        )
+      } finally {
+        setCommandPending(false)
+      }
+    },
+    [gameId, requestGameEvent],
+  )
+
   return {
     status,
     state,
@@ -240,5 +282,8 @@ export function useGame(gameId: string) {
     presence,
     events,
     errorMessage,
+    commandPending,
+    rollAndMove: () => runCommand(GAME_SOCKET_EVENTS.rollAndMove),
+    endTurn: () => runCommand(GAME_SOCKET_EVENTS.endTurn),
   }
 }

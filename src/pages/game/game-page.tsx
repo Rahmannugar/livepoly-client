@@ -95,6 +95,11 @@ export function GamePage({ gameId }: GamePageProps) {
     ? state.properties.filter((property) => property.ownerRoomPlayerId)
     : []
   const recentEvents = game.events.slice(0, 5)
+  const primaryAction = getPrimaryAction({
+    access: game.access,
+    isCurrentTurn: game.isCurrentTurn,
+    phase: state?.phase,
+  })
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
@@ -205,13 +210,26 @@ export function GamePage({ gameId }: GamePageProps) {
             <GamePanel title="Actions" icon={DiceFiveIcon}>
               <button
                 type="button"
-                disabled
-                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] opacity-70 shadow-[0_14px_30px_rgba(23,58,64,0.18)] disabled:cursor-not-allowed"
+                disabled={!primaryAction.enabled || game.commandPending}
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={() => {
+                  if (primaryAction.command === 'roll') {
+                    void game.rollAndMove()
+                    return
+                  }
+
+                  if (primaryAction.command === 'endTurn') {
+                    void game.endTurn()
+                  }
+                }}
               >
-                Roll dice
+                {game.commandPending ? (
+                  <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
+                ) : null}
+                {game.commandPending ? 'Sending...' : primaryAction.label}
               </button>
               <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
-                <p>{getActionCopy(game.access, game.isCurrentTurn)}</p>
+                <p>{primaryAction.copy}</p>
                 {game.errorMessage ? (
                   <p className="text-red-500">{game.errorMessage}</p>
                 ) : null}
@@ -513,14 +531,64 @@ function formatDice(dice?: readonly [number, number] | null) {
   return `${dice[0]} + ${dice[1]}`
 }
 
-function getActionCopy(access: string | null, isCurrentTurn: boolean) {
+function getPrimaryAction({
+  access,
+  isCurrentTurn,
+  phase,
+}: {
+  access: string | null
+  isCurrentTurn: boolean
+  phase?: string
+}) {
   if (access === 'spectator') {
-    return 'Spectators can watch the game but cannot make moves.'
+    return {
+      command: null,
+      enabled: false,
+      label: 'Watching game',
+      copy: 'Spectators can watch the game but cannot make moves.',
+    } as const
   }
 
-  if (isCurrentTurn) {
-    return 'Your move is coming online in the next command slice.'
+  if (!isCurrentTurn) {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Waiting',
+      copy: 'Waiting for the active player.',
+    } as const
   }
 
-  return 'Waiting for the active player.'
+  if (phase === 'awaiting_roll') {
+    return {
+      command: 'roll',
+      enabled: true,
+      label: 'Roll dice',
+      copy: 'Roll to move around the game.',
+    } as const
+  }
+
+  if (phase === 'awaiting_turn_end') {
+    return {
+      command: 'endTurn',
+      enabled: true,
+      label: 'End turn',
+      copy: 'Pass play to the next player.',
+    } as const
+  }
+
+  if (phase === 'awaiting_property_decision') {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Property decision',
+      copy: 'Buying and auction choices come next.',
+    } as const
+  }
+
+  return {
+    command: null,
+    enabled: false,
+    label: 'No action',
+    copy: 'No move is available right now.',
+  } as const
 }

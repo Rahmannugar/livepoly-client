@@ -1,5 +1,5 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
-const configuredRealtimeBaseUrl = import.meta.env.VITE_REALTIME_BASE_URL?.replace(
+const realtimeBaseUrl = import.meta.env.VITE_REALTIME_BASE_URL?.replace(
   /\/$/,
   '',
 )
@@ -8,21 +8,11 @@ if (!apiBaseUrl) {
   throw new Error('Missing VITE_API_BASE_URL')
 }
 
-function getRealtimeBaseUrl() {
-  if (configuredRealtimeBaseUrl) {
-    return configuredRealtimeBaseUrl
-  }
-
-  const url = new URL(apiBaseUrl)
-
-  if (url.pathname === '/api') {
-    url.pathname = ''
-  }
-
-  return url.toString().replace(/\/$/, '')
+if (!realtimeBaseUrl) {
+  throw new Error('Missing VITE_REALTIME_BASE_URL')
 }
 
 export const env = {
   apiBaseUrl,
-  realtimeBaseUrl: getRealtimeBaseUrl(),
+  realtimeBaseUrl,
 } as const
