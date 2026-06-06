@@ -16,6 +16,7 @@ import { APP_NAME } from '#/config/app.constants'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useToast } from '#/components/common/toast'
 import { useAuth } from '#/lib/auth/useAuth'
+import { useDebouncedValue } from '#/lib/common/useDebouncedValue'
 import { useRoom, useRooms } from '#/lib/rooms/useRooms'
 import { useUserSearch } from '#/lib/users/useUsers'
 import type { RoomPlayer } from '#/lib/rooms/rooms.types'
@@ -33,6 +34,7 @@ export function RoomPage({ code }: RoomPageProps) {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [inviteQuery, setInviteQuery] = useState('')
   const [selectedInviteUsername, setSelectedInviteUsername] = useState('')
+  const debouncedInviteQuery = useDebouncedValue(inviteQuery, 250)
   const user = auth.currentUser.data
   const room = roomQuery.data
   const isHost = Boolean(room && user?.id === room.hostUserId)
@@ -43,7 +45,7 @@ export function RoomPage({ code }: RoomPageProps) {
       room.status === 'waiting' &&
       playersAtTable.some((player) => player.userId === user.id),
   )
-  const userSearch = useUserSearch(inviteQuery, isInviteOpen)
+  const userSearch = useUserSearch(debouncedInviteQuery, isInviteOpen)
   const inviteResults = room
     ? filterInviteResults({
         currentUsername: user?.username,
