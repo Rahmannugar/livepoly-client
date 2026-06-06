@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { io, type Socket } from 'socket.io-client'
 import { env } from '#/config/env'
+import { AUTH_QUERY_KEYS } from '#/lib/auth/auth.constants'
 import { getAccessToken } from '#/lib/auth/auth.service'
 import {
   GAME_HEARTBEAT_INTERVAL_MS,
@@ -31,7 +33,39 @@ type GameCommandStateResponse = GameStateEvent & {
   events?: GameEngineEvent[]
 }
 
+function getGameSocketErrorMessage(message: string) {
+  const normalized = message.trim()
+
+  if (!normalized) {
+    return 'Game connection failed.'
+  }
+
+  if (
+    normalized.includes('xhr poll error') ||
+    normalized.includes('websocket error') ||
+    normalized.includes('timeout')
+  ) {
+    return 'Could not connect to the game server.'
+  }
+
+  if (normalized === 'Authentication required') {
+    return 'Sign in again to continue this game.'
+  }
+
+  if (normalized === 'Game access denied') {
+    return 'You are not part of this game.'
+  }
+
+  return normalized
+}
+
 export function useGame(gameId: string) {
+  const authHydration = useQuery({
+    queryKey: AUTH_QUERY_KEYS.hydration,
+    queryFn: () => true,
+    enabled: false,
+    initialData: false,
+  })
   const socketRef = useRef<Socket | null>(null)
   const [status, setStatus] = useState<GameConnectionStatus>('connecting')
   const [state, setState] = useState<GameState | null>(null)
@@ -81,9 +115,25 @@ export function useGame(gameId: string) {
           resolve(data)
         }
 
+        const handleCommandRejected = (data: GameCommandRejectedEvent) => {
+          if (data.gameId !== gameId) {
+            return
+          }
+
+          cleanup()
+          reject(new Error(getGameSocketErrorMessage(data.message)))
+        }
+
+        const handleSocketError = (data: GameSocketErrorEvent) => {
+          cleanup()
+          reject(new Error(getGameSocketErrorMessage(data.message)))
+        }
+
         const cleanup = () => {
           window.clearTimeout(timeoutId)
           socket.off(expectedEvent, handleEvent)
+          socket.off(GAME_SOCKET_EVENTS.commandRejected, handleCommandRejected)
+          socket.off(GAME_SOCKET_EVENTS.error, handleSocketError)
         }
 
         timeoutId = window.setTimeout(() => {
@@ -92,6 +142,8 @@ export function useGame(gameId: string) {
         }, GAME_SOCKET_ACK_TIMEOUT_MS)
 
         socket.on(expectedEvent, handleEvent)
+        socket.on(GAME_SOCKET_EVENTS.commandRejected, handleCommandRejected)
+        socket.on(GAME_SOCKET_EVENTS.error, handleSocketError)
         socket.emit(event, payload, (response?: SocketAck<TResponse>) => {
           if (response?.data) {
             handleEvent(response.data)
@@ -104,6 +156,12 @@ export function useGame(gameId: string) {
 
   useEffect(() => {
     const token = getAccessToken()
+
+    if (!token && !authHydration.data) {
+      setStatus('connecting')
+      setErrorMessage(null)
+      return
+    }
 
     if (!token) {
       setStatus('error')
@@ -155,7 +213,9 @@ export function useGame(gameId: string) {
       } catch (error) {
         setStatus('error')
         setErrorMessage(
-          error instanceof Error ? error.message : 'Could not join game.',
+          error instanceof Error
+            ? getGameSocketErrorMessage(error.message)
+            : 'Could not join game.',
         )
       }
     }
@@ -171,7 +231,7 @@ export function useGame(gameId: string) {
 
     socket.on('connect_error', (error) => {
       setStatus('error')
-      setErrorMessage(error.message)
+      setErrorMessage(getGameSocketErrorMessage(error.message))
     })
 
     socket.on(GAME_SOCKET_EVENTS.state, (payload: GameStateEvent) => {
@@ -206,13 +266,13 @@ export function useGame(gameId: string) {
       GAME_SOCKET_EVENTS.commandRejected,
       (payload: GameCommandRejectedEvent) => {
         if (payload.gameId === gameId) {
-          setErrorMessage(payload.message)
+          setErrorMessage(getGameSocketErrorMessage(payload.message))
         }
       },
     )
 
     socket.on(GAME_SOCKET_EVENTS.error, (payload: GameSocketErrorEvent) => {
-      setErrorMessage(payload.message)
+      setErrorMessage(getGameSocketErrorMessage(payload.message))
     })
 
     const heartbeatId = window.setInterval(() => {
@@ -234,7 +294,7 @@ export function useGame(gameId: string) {
       socket.disconnect()
       socketRef.current = null
     }
-  }, [requestGameEvent, gameId])
+  }, [authHydration.data, requestGameEvent, gameId])
 
   const runCommand = useCallback(
     async (event: string) => {
@@ -263,7 +323,9 @@ export function useGame(gameId: string) {
         }
       } catch (error) {
         setErrorMessage(
-          error instanceof Error ? error.message : 'Game command failed.',
+          error instanceof Error
+            ? getGameSocketErrorMessage(error.message)
+            : 'Game command failed.',
         )
       } finally {
         setCommandPending(false)

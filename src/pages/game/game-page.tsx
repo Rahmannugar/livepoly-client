@@ -110,6 +110,8 @@ export function GamePage({ gameId }: GamePageProps) {
     access: game.access,
     isCurrentTurn: game.isCurrentTurn,
     phase: state?.phase,
+    status: game.status,
+    hasState: Boolean(state),
   })
   const isRollingDice =
     game.commandPending && primaryAction.command === 'roll'
@@ -229,7 +231,11 @@ export function GamePage({ gameId }: GamePageProps) {
               <button
                 type="button"
                 disabled={!primaryAction.enabled || game.commandPending}
-                className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+                className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 text-sm font-bold shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed ${
+                  primaryAction.enabled
+                    ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                    : 'border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)]'
+                } ${
                   game.commandPending ? 'game-command-button--active' : ''
                 }`}
                 onClick={() => {
@@ -354,13 +360,17 @@ function GameTileCell({
         />
       ) : null}
 
-      <div className="mt-1 flex min-h-0 flex-col gap-1">
+      <div className="game-tile__body mt-1 min-h-0">
         {TileIcon ? (
           <span className="game-tile__icon">
-            <TileIcon weight="duotone" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <TileIcon weight="duotone" className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" />
           </span>
         ) : null}
-        <span className="line-clamp-3 text-[0.52rem] font-black leading-tight sm:text-[0.62rem] xl:text-[0.7rem] 2xl:text-[0.78rem]">
+        <span
+          className={`game-tile__label line-clamp-3 text-[0.52rem] font-black leading-tight sm:text-[0.62rem] xl:text-[0.7rem] 2xl:text-[0.78rem] ${
+            TileIcon ? 'game-tile__label--special' : ''
+          }`}
+        >
           {getTileLabel(tile)}
         </span>
       </div>
@@ -678,11 +688,42 @@ function getPrimaryAction({
   access,
   isCurrentTurn,
   phase,
+  status,
+  hasState,
 }: {
   access: string | null
   isCurrentTurn: boolean
   phase?: string
+  status: string
+  hasState: boolean
 }) {
+  if (!hasState && (status === 'connecting' || status === 'connected')) {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Joining game',
+      copy: 'Opening the live game connection.',
+    } as const
+  }
+
+  if (status === 'disconnected') {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Reconnecting',
+      copy: 'Trying to restore the live game connection.',
+    } as const
+  }
+
+  if (!hasState && status === 'error') {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Unavailable',
+      copy: 'Could not open this game right now.',
+    } as const
+  }
+
   if (access === 'spectator') {
     return {
       command: null,

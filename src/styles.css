@@ -309,16 +309,39 @@ button:disabled,
     var(--bg-base);
 }
 
+.game-tile__body {
+  position: relative;
+  z-index: 1;
+}
+
 .game-tile__icon {
+  position: absolute;
+  top: -0.15rem;
+  left: -0.05rem;
   display: grid;
-  width: 1.45rem;
-  height: 1.45rem;
+  width: 1.7rem;
+  height: 1.7rem;
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--sea-ink);
-  background: var(--surface);
+  background: color-mix(in oklab, var(--surface-strong) 84%, transparent);
   box-shadow: 0 8px 18px rgba(4, 12, 15, 0.1);
+}
+
+.game-tile__label {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.game-tile__label--special {
+  padding-top: 1.85rem;
+}
+
+@media (min-width: 1536px) {
+  .game-tile__label--special {
+    padding-top: 2rem;
+  }
 }
 
 .dice-display {
