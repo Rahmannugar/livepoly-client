@@ -12,6 +12,10 @@ export type CreateRoomRequest = {
   durationMinutes?: RoomDurationMinutes
 }
 
+export type InviteRoomRequest = {
+  username: string
+}
+
 export type RoomPlayer = {
   id: string
   roomId: string
@@ -43,6 +47,11 @@ export type Room = {
 
 export type RoomMessageResponse = {
   message: string
+}
+
+export type RoomInviteResponse = {
+  message: string
+  roomCode: string
 }
 
 export type Game = {

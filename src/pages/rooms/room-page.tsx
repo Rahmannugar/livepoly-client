@@ -3,17 +3,21 @@ import {
   ClockIcon,
   CopyIcon,
   CrownIcon,
+  PaperPlaneTiltIcon,
   PlayIcon,
   SignOutIcon,
   UserIcon,
   UsersIcon,
 } from '@phosphor-icons/react'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { RoomInviteDialog } from '#/components/rooms/room-invite-dialog'
 import { APP_NAME } from '#/config/app.constants'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useToast } from '#/components/common/toast'
 import { useAuth } from '#/lib/auth/useAuth'
 import { useRoom, useRooms } from '#/lib/rooms/useRooms'
+import { useUserSearch } from '#/lib/users/useUsers'
 import type { RoomPlayer } from '#/lib/rooms/rooms.types'
 
 type RoomPageProps = {
@@ -26,10 +30,27 @@ export function RoomPage({ code }: RoomPageProps) {
   const roomQuery = useRoom(code)
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const [inviteQuery, setInviteQuery] = useState('')
+  const [selectedInviteUsername, setSelectedInviteUsername] = useState('')
   const user = auth.currentUser.data
   const room = roomQuery.data
   const isHost = Boolean(room && user?.id === room.hostUserId)
   const playersAtTable = room ? joinedPlayers(room.players) : []
+  const canInvite = Boolean(
+    room &&
+      user &&
+      room.status === 'waiting' &&
+      playersAtTable.some((player) => player.userId === user.id),
+  )
+  const userSearch = useUserSearch(inviteQuery, isInviteOpen)
+  const inviteResults = room
+    ? filterInviteResults({
+        currentUsername: user?.username,
+        players: playersAtTable,
+        results: userSearch.data?.items ?? [],
+      })
+    : []
   const canStartRoom = Boolean(
     room && isHost && room.status === 'waiting' && playersAtTable.length > 0,
   )
@@ -94,6 +115,43 @@ export function RoomPage({ code }: RoomPageProps) {
         })
       },
     })
+  }
+
+  function closeInviteDialog() {
+    setIsInviteOpen(false)
+    setInviteQuery('')
+    setSelectedInviteUsername('')
+  }
+
+  function updateInviteQuery(query: string) {
+    setInviteQuery(query)
+    setSelectedInviteUsername('')
+  }
+
+  function inviteFriend() {
+    if (!room?.code || !selectedInviteUsername) {
+      return
+    }
+
+    rooms.inviteToRoom.mutate(
+      { code: room.code, username: selectedInviteUsername },
+      {
+        onSuccess: (response) => {
+          showToast({
+            kind: 'success',
+            message: response.message ?? 'Invite sent.',
+          })
+          closeInviteDialog()
+        },
+        onError: (error) => {
+          showToast({
+            kind: 'error',
+            message:
+              error instanceof Error ? error.message : 'Could not send invite.',
+          })
+        },
+      },
+    )
   }
 
   return (
@@ -239,6 +297,20 @@ export function RoomPage({ code }: RoomPageProps) {
                     </button>
                   ) : null}
 
+                  {canInvite ? (
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.1)] transition hover:translate-y-[-1px]"
+                      onClick={() => setIsInviteOpen(true)}
+                    >
+                      <PaperPlaneTiltIcon
+                        weight="bold"
+                        className="h-4.5 w-4.5"
+                      />
+                      Invite friend
+                    </button>
+                  ) : null}
+
                   <button
                     type="button"
                     disabled={rooms.leaveRoom.isPending}
@@ -252,6 +324,19 @@ export function RoomPage({ code }: RoomPageProps) {
                   </button>
                 </aside>
               </section>
+
+              <RoomInviteDialog
+                isOpen={isInviteOpen}
+                query={inviteQuery}
+                selectedUsername={selectedInviteUsername}
+                results={inviteResults}
+                isSearching={userSearch.isFetching}
+                isSending={rooms.inviteToRoom.isPending}
+                onClose={closeInviteDialog}
+                onQueryChange={updateInviteQuery}
+                onSelectUser={setSelectedInviteUsername}
+                onInvite={inviteFriend}
+              />
             </>
           ) : null}
         </div>
@@ -270,7 +355,7 @@ function getRoomStatusCopy({
   playersAtTable: number
 }) {
   if (status === 'active') {
-    return 'The room has started. Game screen wiring comes next.'
+    return 'The room has started.'
   }
 
   if (status !== 'waiting') {
@@ -284,6 +369,31 @@ function getRoomStatusCopy({
   }
 
   return 'Waiting for the host to start the room.'
+}
+
+function filterInviteResults({
+  currentUsername,
+  players,
+  results,
+}: {
+  currentUsername?: string
+  players: RoomPlayer[]
+  results: Array<{ id: string; username: string; avatarUrl: string | null }>
+}) {
+  const unavailableUsernames = new Set(
+    players
+      .map((player) => player.username)
+      .filter((username): username is string => Boolean(username))
+      .map((username) => username.toLowerCase()),
+  )
+
+  if (currentUsername) {
+    unavailableUsernames.add(currentUsername.toLowerCase())
+  }
+
+  return results.filter(
+    (user) => !unavailableUsernames.has(user.username.toLowerCase()),
+  )
 }
 
 function joinedPlayers(players: RoomPlayer[]) {

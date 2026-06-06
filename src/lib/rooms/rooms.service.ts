@@ -1,7 +1,9 @@
 import { apiClient } from '#/lib/client/apiClient'
 import type {
   CreateRoomRequest,
+  InviteRoomRequest,
   Room,
+  RoomInviteResponse,
   RoomMessageResponse,
   StartRoomResponse,
 } from './rooms.types'
@@ -36,4 +38,14 @@ export function startRoom(code: string) {
   return apiClient<StartRoomResponse>(`/rooms/${encodeURIComponent(code)}/start`, {
     method: 'POST',
   })
+}
+
+export function inviteToRoom(code: string, input: InviteRoomRequest) {
+  return apiClient<RoomInviteResponse>(
+    `/rooms/${encodeURIComponent(code)}/invites`,
+    {
+      method: 'POST',
+      body: input,
+    },
+  )
 }

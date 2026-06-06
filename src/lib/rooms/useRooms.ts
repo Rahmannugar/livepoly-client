@@ -47,10 +47,21 @@ export function useRooms() {
     },
   })
 
+  const inviteToRoom = useMutation({
+    mutationFn: ({
+      code,
+      username,
+    }: {
+      code: string
+      username: string
+    }) => roomsService.inviteToRoom(code, { username }),
+  })
+
   return {
     createRoom,
     joinRoom,
     leaveRoom,
     startRoom,
+    inviteToRoom,
   }
 }

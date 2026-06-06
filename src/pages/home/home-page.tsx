@@ -186,8 +186,7 @@ export function HomePage() {
               Welcome back, {displayName}.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--sea-ink-soft)]">
-              Create a room, join a table, or check how your last games played
-              out.
+              Create a room, join a game, or check your stats and leaderboard.
             </p>
           </div>
 
