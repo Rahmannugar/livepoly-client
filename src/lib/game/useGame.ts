@@ -346,6 +346,9 @@ export function useGame(gameId: string) {
     errorMessage,
     commandPending,
     rollAndMove: () => runCommand(GAME_SOCKET_EVENTS.rollAndMove),
+    buyProperty: () => runCommand(GAME_SOCKET_EVENTS.buyProperty),
+    declinePropertyPurchase: () =>
+      runCommand(GAME_SOCKET_EVENTS.declinePropertyPurchase),
     endTurn: () => runCommand(GAME_SOCKET_EVENTS.endTurn),
   }
 }

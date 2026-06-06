@@ -106,12 +106,16 @@ export function GamePage({ gameId }: GamePageProps) {
     ? state.properties.filter((property) => property.ownerRoomPlayerId)
     : []
   const recentEvents = game.events.slice(0, 5)
+  const pendingTile = state?.pendingTileKey
+    ? gameTiles.find((tile) => tile.key === state.pendingTileKey)
+    : null
   const primaryAction = getPrimaryAction({
     access: game.access,
     isCurrentTurn: game.isCurrentTurn,
     phase: state?.phase,
     status: game.status,
     hasState: Boolean(state),
+    pendingTileName: pendingTile?.name,
   })
   const isRollingDice =
     game.commandPending && primaryAction.command === 'roll'
@@ -176,8 +180,7 @@ export function GamePage({ gameId }: GamePageProps) {
           <section className="order-1 rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-5 xl:order-2">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="app-kicker">Game</p>
-                <h1 className="display-title mt-2 text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
+                <h1 className="display-title text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
                   {currentTurnPlayer
                     ? `${getPlayerName(currentTurnPlayer)} is up.`
                     : 'Opening the game.'}
@@ -228,32 +231,58 @@ export function GamePage({ gameId }: GamePageProps) {
 
           <aside className="order-3 grid gap-3 md:grid-cols-2 xl:order-3 xl:grid-cols-1 xl:content-start">
             <GamePanel title="Actions" icon={DiceFiveIcon}>
-              <button
-                type="button"
-                disabled={!primaryAction.enabled || game.commandPending}
-                className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 text-sm font-bold shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed ${
-                  primaryAction.enabled
-                    ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
-                    : 'border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)]'
-                } ${
-                  game.commandPending ? 'game-command-button--active' : ''
-                }`}
-                onClick={() => {
-                  if (primaryAction.command === 'roll') {
-                    void game.rollAndMove()
-                    return
-                  }
+              {primaryAction.command === 'propertyDecision' ? (
+                <div className="grid gap-2">
+                  <button
+                    type="button"
+                    disabled={game.commandPending}
+                    className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+                      game.commandPending ? 'game-command-button--active' : ''
+                    }`}
+                    onClick={() => void game.buyProperty()}
+                  >
+                    {game.commandPending ? (
+                      <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
+                    ) : null}
+                    Buy property
+                  </button>
+                  <button
+                    type="button"
+                    disabled={game.commandPending}
+                    className="inline-flex h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+                    onClick={() => void game.declinePropertyPurchase()}
+                  >
+                    Start auction
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={!primaryAction.enabled || game.commandPending}
+                  className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 text-sm font-bold shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed ${
+                    primaryAction.enabled
+                      ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                      : 'border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)]'
+                  } ${
+                    game.commandPending ? 'game-command-button--active' : ''
+                  }`}
+                  onClick={() => {
+                    if (primaryAction.command === 'roll') {
+                      void game.rollAndMove()
+                      return
+                    }
 
-                  if (primaryAction.command === 'endTurn') {
-                    void game.endTurn()
-                  }
-                }}
-              >
-                {game.commandPending ? (
-                  <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
-                ) : null}
-                {game.commandPending ? 'Sending...' : primaryAction.label}
-              </button>
+                    if (primaryAction.command === 'endTurn') {
+                      void game.endTurn()
+                    }
+                  }}
+                >
+                  {game.commandPending ? (
+                    <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
+                  ) : null}
+                  {game.commandPending ? 'Sending...' : primaryAction.label}
+                </button>
+              )}
               <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
                 <p>{primaryAction.copy}</p>
                 {game.errorMessage ? (
@@ -690,12 +719,14 @@ function getPrimaryAction({
   phase,
   status,
   hasState,
+  pendingTileName,
 }: {
   access: string | null
   isCurrentTurn: boolean
   phase?: string
   status: string
   hasState: boolean
+  pendingTileName?: string
 }) {
   if (!hasState && (status === 'connecting' || status === 'connected')) {
     return {
@@ -762,10 +793,12 @@ function getPrimaryAction({
 
   if (phase === 'awaiting_property_decision') {
     return {
-      command: null,
-      enabled: false,
+      command: 'propertyDecision',
+      enabled: true,
       label: 'Property decision',
-      copy: 'Buying and auction choices come next.',
+      copy: pendingTileName
+        ? `Choose whether to buy ${pendingTileName} or send it to auction.`
+        : 'Choose whether to buy this property or send it to auction.',
     } as const
   }
 
