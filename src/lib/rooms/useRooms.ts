@@ -10,6 +10,14 @@ export function useRoom(code: string) {
   })
 }
 
+export function useLiveRooms(enabled = true) {
+  return useQuery({
+    queryKey: ROOMS_QUERY_KEYS.liveRooms,
+    queryFn: roomsService.listLiveRooms,
+    enabled,
+  })
+}
+
 export function useRooms() {
   const queryClient = useQueryClient()
 
@@ -34,6 +42,10 @@ export function useRooms() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
     },
+  })
+
+  const spectateRoom = useMutation({
+    mutationFn: roomsService.spectateRoom,
   })
 
   const startRoom = useMutation({
@@ -61,6 +73,7 @@ export function useRooms() {
     createRoom,
     joinRoom,
     leaveRoom,
+    spectateRoom,
     startRoom,
     inviteToRoom,
   }

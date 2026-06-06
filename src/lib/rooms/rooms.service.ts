@@ -5,6 +5,7 @@ import type {
   Room,
   RoomInviteResponse,
   RoomMessageResponse,
+  RoomSpectatorResponse,
   StartRoomResponse,
 } from './rooms.types'
 
@@ -19,10 +20,23 @@ export function getRoomByCode(code: string) {
   return apiClient<Room>(`/rooms/${encodeURIComponent(code)}`)
 }
 
+export function listLiveRooms() {
+  return apiClient<Room[]>('/rooms')
+}
+
 export function joinRoom(code: string) {
   return apiClient<Room>(`/rooms/${encodeURIComponent(code)}/join`, {
     method: 'POST',
   })
+}
+
+export function spectateRoom(code: string) {
+  return apiClient<RoomSpectatorResponse>(
+    `/rooms/${encodeURIComponent(code)}/spectate`,
+    {
+      method: 'POST',
+    },
+  )
 }
 
 export function leaveRoom(code: string) {

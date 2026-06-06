@@ -49,6 +49,19 @@ export type RoomMessageResponse = {
   message: string
 }
 
+export type RoomSpectator = {
+  id: string
+  roomId: string
+  userId: string
+  joinedAt: string
+  leftAt: string | null
+}
+
+export type RoomSpectatorResponse = {
+  message: string
+  spectator: RoomSpectator
+}
+
 export type RoomInviteResponse = {
   message: string
   roomCode: string

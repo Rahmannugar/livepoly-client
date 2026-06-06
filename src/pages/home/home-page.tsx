@@ -2,6 +2,7 @@ import {
   ChartLineUpIcon,
   ClockCounterClockwiseIcon,
   DoorOpenIcon,
+  EyeIcon,
   MedalIcon,
   PlusIcon,
   SignOutIcon,
@@ -14,20 +15,22 @@ import {
   getInitialRoomDuration,
   RoomActionDialog,
 } from '#/components/rooms/room-action-dialog'
+import { LiveRoomsDialog } from '#/components/rooms/live-rooms-dialog'
 import { APP_NAME } from '#/config/app.constants'
 import { useToast } from '#/components/common/toast'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useAuth } from '#/lib/auth/useAuth'
-import { useRooms } from '#/lib/rooms/useRooms'
+import { useLiveRooms, useRooms } from '#/lib/rooms/useRooms'
 import type { RoomDurationMinutes } from '#/lib/rooms/rooms.types'
 
 type RoomActionMode = 'create' | 'join'
+type HomeDialogMode = RoomActionMode | 'liveRooms'
 
 type HomeAction = {
   title: string
   description: string
   icon: ComponentType<{ weight?: 'bold'; className?: string }>
-  roomAction?: RoomActionMode
+  dialog?: HomeDialogMode
 }
 
 const homeActions: HomeAction[] = [
@@ -35,13 +38,19 @@ const homeActions: HomeAction[] = [
     title: 'Create room',
     description: 'Start a table and invite friends to play.',
     icon: PlusIcon,
-    roomAction: 'create',
+    dialog: 'create',
   },
   {
     title: 'Join room',
     description: 'Enter a room code and jump into a match.',
     icon: DoorOpenIcon,
-    roomAction: 'join',
+    dialog: 'join',
+  },
+  {
+    title: 'Live rooms',
+    description: 'Browse open tables and matches in progress.',
+    icon: EyeIcon,
+    dialog: 'liveRooms',
   },
   {
     title: 'Friends',
@@ -72,11 +81,13 @@ export function HomePage() {
   const { showToast } = useToast()
   const user = auth.currentUser.data
   const displayName = user?.username ?? 'player'
-  const [activeRoomAction, setActiveRoomAction] =
-    useState<RoomActionMode | null>(null)
+  const [activeDialog, setActiveDialog] = useState<HomeDialogMode | null>(null)
   const [durationMinutes, setDurationMinutes] =
     useState<RoomDurationMinutes>(getInitialRoomDuration)
   const [roomCode, setRoomCode] = useState('')
+  const liveRooms = useLiveRooms(activeDialog === 'liveRooms')
+  const activeRoomAction =
+    activeDialog === 'create' || activeDialog === 'join' ? activeDialog : null
 
   function handleLogout() {
     auth.logout.mutate(undefined, {
@@ -100,7 +111,7 @@ export function HomePage() {
       {
         onSuccess: (room) => {
           showToast({ kind: 'success', message: `Room ${room.code} created.` })
-          setActiveRoomAction(null)
+          setActiveDialog(null)
           navigate({ to: '/rooms/$code', params: { code: room.code } })
         },
         onError: (error) => {
@@ -125,7 +136,7 @@ export function HomePage() {
     rooms.joinRoom.mutate(normalizedCode, {
       onSuccess: (room) => {
         showToast({ kind: 'success', message: `Joined room ${room.code}.` })
-        setActiveRoomAction(null)
+        setActiveDialog(null)
         navigate({ to: '/rooms/$code', params: { code: room.code } })
       },
       onError: (error) => {
@@ -136,6 +147,28 @@ export function HomePage() {
         })
       },
     })
+  }
+
+  function handleSpectateRoom(code: string) {
+    rooms.spectateRoom.mutate(code, {
+      onSuccess: () => {
+        showToast({ kind: 'success', message: `Spectating room ${code}.` })
+        setActiveDialog(null)
+        navigate({ to: '/rooms/$code', params: { code } })
+      },
+      onError: (error) => {
+        showToast({
+          kind: 'error',
+          message:
+            error instanceof Error ? error.message : 'Could not spectate room.',
+        })
+      },
+    })
+  }
+
+  function openRoom(code: string) {
+    setActiveDialog(null)
+    navigate({ to: '/rooms/$code', params: { code } })
   }
 
   return (
@@ -197,8 +230,8 @@ export function HomePage() {
                 type="button"
                 className="group min-h-32 rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 text-left shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl transition hover:translate-y-[-2px] hover:border-[var(--primary)]"
                 onClick={() => {
-                  if (action.roomAction) {
-                    setActiveRoomAction(action.roomAction)
+                  if (action.dialog) {
+                    setActiveDialog(action.dialog)
                     return
                   }
 
@@ -229,11 +262,43 @@ export function HomePage() {
         roomCode={roomCode}
         isCreating={rooms.createRoom.isPending}
         isJoining={rooms.joinRoom.isPending}
-        onClose={() => setActiveRoomAction(null)}
+        onClose={() => setActiveDialog(null)}
         onCreate={handleCreateRoom}
         onJoin={handleJoinRoom}
         onDurationChange={setDurationMinutes}
         onRoomCodeChange={setRoomCode}
+      />
+
+      <LiveRoomsDialog
+        isOpen={activeDialog === 'liveRooms'}
+        rooms={liveRooms.data ?? []}
+        isLoading={liveRooms.isLoading || liveRooms.isFetching}
+        isJoining={rooms.joinRoom.isPending}
+        isSpectating={rooms.spectateRoom.isPending}
+        onClose={() => setActiveDialog(null)}
+        onJoin={(code) => {
+          rooms.joinRoom.mutate(code, {
+            onSuccess: (room) => {
+              showToast({
+                kind: 'success',
+                message: `Joined room ${room.code}.`,
+              })
+              setActiveDialog(null)
+              navigate({ to: '/rooms/$code', params: { code: room.code } })
+            },
+            onError: (error) => {
+              showToast({
+                kind: 'error',
+                message:
+                  error instanceof Error
+                    ? error.message
+                    : 'Could not join room.',
+              })
+            },
+          })
+        }}
+        onSpectate={handleSpectateRoom}
+        onOpenRoom={openRoom}
       />
     </main>
   )
