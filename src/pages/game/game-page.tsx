@@ -2,47 +2,100 @@ import {
   ArrowLeftIcon,
   BuildingsIcon,
   DiceFiveIcon,
-  HourglassMediumIcon,
   ListChecksIcon,
   ShieldCheckIcon,
+  SpinnerGapIcon,
   UsersIcon,
 } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
-import type { ReactNode } from 'react'
+import { useGame } from '#/lib/game/useGame'
+import type {
+  GameEventLogItem,
+  GamePlayer,
+  GameProperty,
+  GameState,
+} from '#/lib/game/game.types'
+import type { CSSProperties, ReactNode } from 'react'
 
 type GamePageProps = {
   gameId: string
 }
 
-const boardTiles = [
-  'Start',
-  'Lekki',
-  'Chance',
-  'Abuja',
-  'Tax',
-  'Rail',
-  'Ibadan',
-  'Card',
-  'Kano',
-  'Jail',
-  'Enugu',
-  'Utility',
-  'PH',
-  'Chance',
-  'Asaba',
-  'Park',
+type GameTile = {
+  index: number
+  key: string
+  name: string
+  kind: string
+  setKey?: string
+}
+
+const gameTiles: GameTile[] = [
+  { index: 0, key: 'go', name: 'Go', kind: 'go' },
+  { index: 1, key: 'nigeria', name: 'Nigeria', kind: 'property', setKey: 'brown' },
+  { index: 2, key: 'world_fund_1', name: 'World Fund', kind: 'world_fund' },
+  { index: 3, key: 'ghana', name: 'Ghana', kind: 'property', setKey: 'brown' },
+  { index: 4, key: 'income_tax', name: 'Income Tax', kind: 'tax' },
+  { index: 5, key: 'lagos_airport', name: 'Lagos Airport', kind: 'airport' },
+  { index: 6, key: 'south_africa', name: 'South Africa', kind: 'property', setKey: 'light_blue' },
+  { index: 7, key: 'chance_1', name: 'Chance', kind: 'chance' },
+  { index: 8, key: 'egypt', name: 'Egypt', kind: 'property', setKey: 'light_blue' },
+  { index: 9, key: 'morocco', name: 'Morocco', kind: 'property', setKey: 'light_blue' },
+  { index: 10, key: 'jail', name: 'Jail', kind: 'jail' },
+  { index: 11, key: 'brazil', name: 'Brazil', kind: 'property', setKey: 'pink' },
+  { index: 12, key: 'electric_company', name: 'Electric Co.', kind: 'utility' },
+  { index: 13, key: 'argentina', name: 'Argentina', kind: 'property', setKey: 'pink' },
+  { index: 14, key: 'mexico', name: 'Mexico', kind: 'property', setKey: 'pink' },
+  { index: 15, key: 'new_york_airport', name: 'New York Airport', kind: 'airport' },
+  { index: 16, key: 'usa', name: 'USA', kind: 'property', setKey: 'orange' },
+  { index: 17, key: 'world_fund_2', name: 'World Fund', kind: 'world_fund' },
+  { index: 18, key: 'canada', name: 'Canada', kind: 'property', setKey: 'orange' },
+  { index: 19, key: 'jamaica', name: 'Jamaica', kind: 'property', setKey: 'orange' },
+  { index: 20, key: 'free_parking', name: 'Free Parking', kind: 'free_parking' },
+  { index: 21, key: 'uk', name: 'United Kingdom', kind: 'property', setKey: 'red' },
+  { index: 22, key: 'chance_2', name: 'Chance', kind: 'chance' },
+  { index: 23, key: 'france', name: 'France', kind: 'property', setKey: 'red' },
+  { index: 24, key: 'spain', name: 'Spain', kind: 'property', setKey: 'red' },
+  { index: 25, key: 'london_airport', name: 'London Airport', kind: 'airport' },
+  { index: 26, key: 'germany', name: 'Germany', kind: 'property', setKey: 'yellow' },
+  { index: 27, key: 'italy', name: 'Italy', kind: 'property', setKey: 'yellow' },
+  { index: 28, key: 'water_works', name: 'Water Works', kind: 'utility' },
+  { index: 29, key: 'netherlands', name: 'Netherlands', kind: 'property', setKey: 'yellow' },
+  { index: 30, key: 'go_to_jail', name: 'Go To Jail', kind: 'go_to_jail' },
+  { index: 31, key: 'india', name: 'India', kind: 'property', setKey: 'green' },
+  { index: 32, key: 'china', name: 'China', kind: 'property', setKey: 'green' },
+  { index: 33, key: 'world_fund_3', name: 'World Fund', kind: 'world_fund' },
+  { index: 34, key: 'japan', name: 'Japan', kind: 'property', setKey: 'green' },
+  { index: 35, key: 'tokyo_airport', name: 'Tokyo Airport', kind: 'airport' },
+  { index: 36, key: 'chance_3', name: 'Chance', kind: 'chance' },
+  { index: 37, key: 'south_korea', name: 'South Korea', kind: 'property', setKey: 'dark_blue' },
+  { index: 38, key: 'luxury_tax', name: 'Luxury Tax', kind: 'tax' },
+  { index: 39, key: 'australia', name: 'Australia', kind: 'property', setKey: 'dark_blue' },
 ]
 
-const tablePlayers = [
-  { name: 'You', status: 'Ready', money: '₦1,500' },
-  { name: 'Nova', status: 'Thinking', money: '₦1,420' },
-  { name: 'Midas', status: 'Waiting', money: '₦1,310' },
-  { name: 'Echo', status: 'Waiting', money: '₦1,270' },
-]
+const propertySetColors: Record<string, string> = {
+  brown: '#8f5b38',
+  light_blue: '#78c7df',
+  pink: '#d05da8',
+  orange: '#f39a3d',
+  red: '#d94b4b',
+  yellow: '#efcf4f',
+  green: '#2d9b68',
+  dark_blue: '#3154a3',
+}
 
 export function GamePage({ gameId }: GamePageProps) {
+  const game = useGame(gameId)
+  const state = game.state
+  const currentTurnPlayer = state
+    ? findPlayer(state.players, state.currentTurnRoomPlayerId)
+    : null
+  const ownedProperties = state
+    ? state.properties.filter((property) => property.ownerRoomPlayerId)
+    : []
+  const recentEvents = game.events.slice(0, 5)
+
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
       <section className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-7xl flex-col gap-5">
@@ -60,7 +113,7 @@ export function GamePage({ gameId }: GamePageProps) {
                 {APP_NAME}
               </p>
               <p className="mt-1 truncate text-xs font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
-                Game {gameId.slice(0, 8)}
+                Game {state?.roomCode ?? gameId.slice(0, 8)}
               </p>
             </div>
           </div>
@@ -68,67 +121,87 @@ export function GamePage({ gameId }: GamePageProps) {
           <ThemeToggle />
         </header>
 
-        <div className="grid flex-1 gap-4 lg:grid-cols-[18rem_minmax(0,1fr)_20rem]">
-          <aside className="grid gap-3 lg:content-start">
+        <div className="grid flex-1 gap-4 xl:grid-cols-[18rem_minmax(0,1fr)_20rem]">
+          <aside className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 xl:content-start">
             <GamePanel title="Players" icon={UsersIcon}>
               <div className="grid gap-2">
-                {tablePlayers.map((player) => (
-                  <div
-                    key={player.name}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-black text-[var(--sea-ink)]">
-                        {player.name}
-                      </p>
-                      <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
-                        {player.status}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-xs font-black text-[var(--sea-ink)]">
-                      {player.money}
-                    </span>
-                  </div>
+                {(state?.players ?? []).map((player) => (
+                  <PlayerRow
+                    key={player.roomPlayerId}
+                    player={player}
+                    isCurrentTurn={
+                      state?.currentTurnRoomPlayerId === player.roomPlayerId
+                    }
+                    isYou={game.roomPlayerId === player.roomPlayerId}
+                  />
                 ))}
+
+                {!state ? <LoadingBlock label="Joining game" /> : null}
               </div>
             </GamePanel>
 
-            <GamePanel title="Table state" icon={ShieldCheckIcon}>
-              <div className="grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
-                <p>Turn 1</p>
-                <p>Classic board</p>
-                <p>Waiting for synced state</p>
+            <GamePanel title="Game state" icon={ShieldCheckIcon}>
+              <div className="grid grid-cols-2 gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
+                <StatePill label="Turn" value={state ? String(state.turnNumber) : '...'} />
+                <StatePill label="Mode" value={state?.mode ?? '...'} />
+                <StatePill label="Phase" value={formatPhase(state?.phase)} />
+                <StatePill
+                  label="Online"
+                  value={`${game.presence?.playersOnline ?? 0} players`}
+                />
               </div>
             </GamePanel>
           </aside>
 
-          <section className="rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-4 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-5">
+          <section className="rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-5">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="app-kicker">Board</p>
+                <p className="app-kicker">Game</p>
                 <h1 className="display-title mt-2 text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
-                  The table is loading.
+                  {currentTurnPlayer
+                    ? `${getPlayerName(currentTurnPlayer)} is up.`
+                    : 'Opening the game.'}
                 </h1>
               </div>
-              <span className="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-xs font-black text-[var(--sea-ink)]">
-                <HourglassMediumIcon weight="bold" className="h-4 w-4" />
-                Syncing
+              <span className="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-xs font-black capitalize text-[var(--sea-ink)]">
+                {game.status === 'connecting' ? (
+                  <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
+                ) : null}
+                {game.status}
               </span>
             </div>
 
-            <div className="grid aspect-square max-h-[min(62vh,48rem)] w-full grid-cols-4 gap-2 rounded-[28px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:gap-3 sm:p-4">
-              {boardTiles.map((tile, index) => (
-                <div
-                  key={`${tile}-${index}`}
-                  className="grid min-h-0 place-items-center rounded-2xl border border-[var(--line)] bg-[var(--bg-base)] p-2 text-center text-[clamp(0.64rem,2.5vw,0.95rem)] font-black text-[var(--sea-ink)]"
-                >
-                  {tile}
+            <div className="overflow-x-auto pb-1">
+              <div className="grid aspect-square min-w-[38rem] grid-cols-11 grid-rows-11 gap-1 rounded-[28px] border border-[var(--line)] bg-[var(--surface)] p-2 sm:min-w-0 sm:gap-1.5 sm:p-3">
+                <div className="col-start-2 col-end-11 row-start-2 row-end-11 grid place-items-center rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_82%,transparent)] p-5 text-center">
+                  <div>
+                    <p className="app-kicker">Room {state?.roomCode ?? '...'}</p>
+                    <p className="display-title mt-3 text-4xl font-semibold text-[var(--sea-ink)]">
+                      {formatDice(state?.lastDiceRoll)}
+                    </p>
+                    <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+                      {game.access === 'spectator'
+                        ? 'Watching this game live.'
+                        : game.isCurrentTurn
+                          ? 'Your move.'
+                          : 'Waiting for the next move.'}
+                    </p>
+                  </div>
                 </div>
-              ))}
+
+                {gameTiles.map((tile) => (
+                  <GameTileCell
+                    key={tile.key}
+                    tile={tile}
+                    players={getPlayersOnTile(state, tile.index)}
+                    owner={getTileOwner(state, tile.key)}
+                  />
+                ))}
+              </div>
             </div>
           </section>
 
-          <aside className="grid gap-3 lg:content-start">
+          <aside className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 xl:content-start">
             <GamePanel title="Actions" icon={DiceFiveIcon}>
               <button
                 type="button"
@@ -137,22 +210,23 @@ export function GamePage({ gameId }: GamePageProps) {
               >
                 Roll dice
               </button>
-              <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-                Gameplay controls will unlock when realtime state is connected.
-              </p>
+              <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
+                <p>{getActionCopy(game.access, game.isCurrentTurn)}</p>
+                {game.errorMessage ? (
+                  <p className="text-red-500">{game.errorMessage}</p>
+                ) : null}
+              </div>
             </GamePanel>
 
             <GamePanel title="Properties" icon={BuildingsIcon}>
-              <p className="text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-                Owned streets, buildings, and rent details will appear here.
-              </p>
+              <PropertyList
+                properties={ownedProperties}
+                players={state?.players ?? []}
+              />
             </GamePanel>
 
             <GamePanel title="Events" icon={ListChecksIcon}>
-              <div className="grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
-                <p>Connected to game shell.</p>
-                <p>Waiting for recovered events.</p>
-              </div>
+              <EventList events={recentEvents} />
             </GamePanel>
           </aside>
         </div>
@@ -183,4 +257,270 @@ function GamePanel({
       {children}
     </section>
   )
+}
+
+function PlayerRow({
+  player,
+  isCurrentTurn,
+  isYou,
+}: {
+  player: GamePlayer
+  isCurrentTurn: boolean
+  isYou: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <PlayerToken player={player} />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-black text-[var(--sea-ink)]">
+            {getPlayerName(player)}
+            {isYou ? ' (you)' : ''}
+          </p>
+          <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
+            {isCurrentTurn ? 'Taking turn' : `Tile ${player.position}`}
+          </p>
+        </div>
+      </div>
+      <span className="shrink-0 text-xs font-black text-[var(--sea-ink)]">
+        ${formatMoney(player.cash)}
+      </span>
+    </div>
+  )
+}
+
+function GameTileCell({
+  tile,
+  players,
+  owner,
+}: {
+  tile: GameTile
+  players: GamePlayer[]
+  owner: GamePlayer | null
+}) {
+  return (
+    <div
+      className="relative flex min-h-0 flex-col justify-between overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--bg-base)] p-1.5 text-[var(--sea-ink)]"
+      style={getTileGridStyle(tile.index)}
+    >
+      {tile.setKey ? (
+        <span
+          className="absolute inset-x-0 top-0 h-1.5"
+          style={{ backgroundColor: propertySetColors[tile.setKey] }}
+        />
+      ) : null}
+
+      <span className="mt-1 line-clamp-2 text-[0.6rem] font-black leading-tight sm:text-[0.68rem]">
+        {tile.name}
+      </span>
+
+      <div className="flex min-h-5 flex-wrap items-end gap-1">
+        {owner ? (
+          <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[0.55rem] font-black">
+            {owner.seatNumber}
+          </span>
+        ) : null}
+        {players.map((player) => (
+          <PlayerToken key={player.roomPlayerId} player={player} compact />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PlayerToken({
+  player,
+  compact = false,
+}: {
+  player: GamePlayer
+  compact?: boolean
+}) {
+  return (
+    <span
+      className={
+        compact
+          ? 'grid h-5 w-5 place-items-center rounded-full text-[0.62rem] font-black text-white shadow-sm'
+          : 'grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-black text-white shadow-sm'
+      }
+      style={{ backgroundColor: getPlayerColor(player.seatNumber) }}
+    >
+      {player.seatNumber}
+    </span>
+  )
+}
+
+function StatePill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+      <p className="text-[0.65rem] font-black uppercase tracking-[0.14em]">
+        {label}
+      </p>
+      <p className="mt-1 truncate text-sm font-black capitalize text-[var(--sea-ink)]">
+        {value}
+      </p>
+    </div>
+  )
+}
+
+function LoadingBlock({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 text-sm font-bold text-[var(--sea-ink-soft)]">
+      <SpinnerGapIcon weight="bold" className="h-5 w-5 animate-spin" />
+      {label}
+    </div>
+  )
+}
+
+function PropertyList({
+  properties,
+  players,
+}: {
+  properties: GameProperty[]
+  players: GamePlayer[]
+}) {
+  if (properties.length === 0) {
+    return (
+      <p className="text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+        No properties have been claimed yet.
+      </p>
+    )
+  }
+
+  return (
+    <div className="grid max-h-52 gap-2 overflow-y-auto pr-1">
+      {properties.slice(0, 8).map((property) => {
+        const tile = gameTiles.find((item) => item.key === property.tileKey)
+        const owner = findPlayer(players, property.ownerRoomPlayerId)
+
+        return (
+          <div
+            key={property.tileKey}
+            className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3"
+          >
+            <div className="min-w-0">
+              <p className="truncate text-sm font-black text-[var(--sea-ink)]">
+                {tile?.name ?? property.tileKey}
+              </p>
+              <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
+                {owner ? getPlayerName(owner) : 'Unowned'}
+              </p>
+            </div>
+            <span className="text-xs font-black text-[var(--sea-ink)]">
+              {property.hasHotel ? 'Hotel' : `${property.houseCount} houses`}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function EventList({ events }: { events: GameEventLogItem[] }) {
+  if (events.length === 0) {
+    return (
+      <p className="text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+        Game events will appear as players move.
+      </p>
+    )
+  }
+
+  return (
+    <div className="grid max-h-52 gap-2 overflow-y-auto pr-1">
+      {events.map((event, index) => (
+        <div
+          key={`${event.type}-${event.sequence ?? index}`}
+          className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3"
+        >
+          <p className="text-sm font-black text-[var(--sea-ink)]">
+            {formatEventType(event.type)}
+          </p>
+          <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
+            {new Date(event.createdAt).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function getTileGridStyle(index: number): CSSProperties {
+  if (index <= 10) {
+    return { gridRow: 11, gridColumn: 11 - index }
+  }
+
+  if (index <= 20) {
+    return { gridRow: 21 - index, gridColumn: 1 }
+  }
+
+  if (index <= 30) {
+    return { gridRow: 1, gridColumn: index - 19 }
+  }
+
+  return { gridRow: index - 29, gridColumn: 11 }
+}
+
+function getPlayersOnTile(state: GameState | null, position: number) {
+  return state?.players.filter((player) => player.position === position) ?? []
+}
+
+function getTileOwner(state: GameState | null, tileKey: string) {
+  if (!state) {
+    return null
+  }
+
+  const property = state.properties.find((item) => item.tileKey === tileKey)
+
+  return findPlayer(state.players, property?.ownerRoomPlayerId)
+}
+
+function findPlayer(players: GamePlayer[], roomPlayerId?: string | null) {
+  if (!roomPlayerId) {
+    return null
+  }
+
+  return players.find((player) => player.roomPlayerId === roomPlayerId) ?? null
+}
+
+function getPlayerName(player: GamePlayer) {
+  return player.username ?? player.botName ?? `Seat ${player.seatNumber}`
+}
+
+function getPlayerColor(seatNumber: number) {
+  const colors = ['#0f766e', '#b45309', '#6d5bd0', '#be123c']
+  return colors[(seatNumber - 1) % colors.length]
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat('en-US').format(value)
+}
+
+function formatPhase(phase?: string) {
+  return phase ? phase.replaceAll('_', ' ') : '...'
+}
+
+function formatEventType(type: string) {
+  return type.replaceAll('_', ' ')
+}
+
+function formatDice(dice?: readonly [number, number] | null) {
+  if (!dice) {
+    return 'Dice ready'
+  }
+
+  return `${dice[0]} + ${dice[1]}`
+}
+
+function getActionCopy(access: string | null, isCurrentTurn: boolean) {
+  if (access === 'spectator') {
+    return 'Spectators can watch the game but cannot make moves.'
+  }
+
+  if (isCurrentTurn) {
+    return 'Your move is coming online in the next command slice.'
+  }
+
+  return 'Waiting for the active player.'
 }
