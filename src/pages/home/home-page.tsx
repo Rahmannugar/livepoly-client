@@ -10,24 +10,24 @@ import {
 } from '@phosphor-icons/react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState, type ComponentType } from 'react'
+import {
+  getInitialRoomDuration,
+  RoomActionDialog,
+} from '#/components/rooms/room-action-dialog'
 import { APP_NAME } from '#/config/app.constants'
 import { useToast } from '#/components/common/toast'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useAuth } from '#/lib/auth/useAuth'
-import {
-  DEFAULT_ROOM_DURATION_MINUTES,
-  ROOM_DURATIONS,
-} from '#/lib/rooms/rooms.constants'
 import { useRooms } from '#/lib/rooms/useRooms'
 import type { RoomDurationMinutes } from '#/lib/rooms/rooms.types'
 
-type HomePanel = 'create' | 'join'
+type RoomActionMode = 'create' | 'join'
 
 type HomeAction = {
   title: string
   description: string
   icon: ComponentType<{ weight?: 'bold'; className?: string }>
-  panel?: HomePanel
+  roomAction?: RoomActionMode
 }
 
 const homeActions: HomeAction[] = [
@@ -35,13 +35,13 @@ const homeActions: HomeAction[] = [
     title: 'Create room',
     description: 'Start a table and invite friends to play.',
     icon: PlusIcon,
-    panel: 'create',
+    roomAction: 'create',
   },
   {
     title: 'Join room',
     description: 'Enter a room code and jump into a match.',
     icon: DoorOpenIcon,
-    panel: 'join',
+    roomAction: 'join',
   },
   {
     title: 'Friends',
@@ -72,9 +72,10 @@ export function HomePage() {
   const { showToast } = useToast()
   const user = auth.currentUser.data
   const displayName = user?.username ?? 'player'
-  const [activePanel, setActivePanel] = useState<HomePanel>('create')
+  const [activeRoomAction, setActiveRoomAction] =
+    useState<RoomActionMode | null>(null)
   const [durationMinutes, setDurationMinutes] =
-    useState<RoomDurationMinutes>(DEFAULT_ROOM_DURATION_MINUTES)
+    useState<RoomDurationMinutes>(getInitialRoomDuration)
   const [roomCode, setRoomCode] = useState('')
 
   function handleLogout() {
@@ -99,6 +100,7 @@ export function HomePage() {
       {
         onSuccess: (room) => {
           showToast({ kind: 'success', message: `Room ${room.code} created.` })
+          setActiveRoomAction(null)
           navigate({ to: '/rooms/$code', params: { code: room.code } })
         },
         onError: (error) => {
@@ -123,6 +125,7 @@ export function HomePage() {
     rooms.joinRoom.mutate(normalizedCode, {
       onSuccess: (room) => {
         showToast({ kind: 'success', message: `Joined room ${room.code}.` })
+        setActiveRoomAction(null)
         navigate({ to: '/rooms/$code', params: { code: room.code } })
       },
       onError: (error) => {
@@ -188,21 +191,15 @@ export function HomePage() {
             </p>
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-[1fr_1.15fr]">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {homeActions.map((action) => (
               <button
                 key={action.title}
                 type="button"
-                className={[
-                  'group min-h-32 rounded-[26px] border bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 text-left shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl transition hover:translate-y-[-2px] hover:border-[var(--primary)]',
-                  action.panel === activePanel
-                    ? 'border-[var(--primary)]'
-                    : 'border-[var(--line)]',
-                ].join(' ')}
+                className="group min-h-32 rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 text-left shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl transition hover:translate-y-[-2px] hover:border-[var(--primary)]"
                 onClick={() => {
-                  if (action.panel) {
-                    setActivePanel(action.panel)
+                  if (action.roomAction) {
+                    setActiveRoomAction(action.roomAction)
                     return
                   }
 
@@ -223,87 +220,22 @@ export function HomePage() {
                 </span>
               </button>
             ))}
-            </div>
-
-            <section className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-5 shadow-[0_24px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-6">
-              {activePanel === 'create' ? (
-                <div>
-                  <p className="app-kicker">New table</p>
-                  <h2 className="display-title mt-3 text-3xl font-semibold text-[var(--sea-ink)]">
-                    Create a room.
-                  </h2>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-                    Pick a match length, then share the room code with friends.
-                  </p>
-
-                  <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {ROOM_DURATIONS.map((duration) => (
-                      <button
-                        key={duration}
-                        type="button"
-                        className={[
-                          'h-11 rounded-2xl border text-sm font-black transition hover:translate-y-[-1px]',
-                          durationMinutes === duration
-                            ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
-                            : 'border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)]',
-                        ].join(' ')}
-                        onClick={() => setDurationMinutes(duration)}
-                      >
-                        {duration}m
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={rooms.createRoom.isPending}
-                    className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
-                    onClick={handleCreateRoom}
-                  >
-                    {rooms.createRoom.isPending ? 'Creating room...' : 'Create room'}
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <p className="app-kicker">Room code</p>
-                  <h2 className="display-title mt-3 text-3xl font-semibold text-[var(--sea-ink)]">
-                    Join a room.
-                  </h2>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-                    Enter the code from your host and take a seat at the table.
-                  </p>
-
-                  <label className="mt-5 grid gap-2">
-                    <span className="text-sm font-bold text-[var(--sea-ink)]">
-                      Room code
-                    </span>
-                    <input
-                      type="text"
-                      value={roomCode}
-                      autoCapitalize="characters"
-                      autoComplete="off"
-                      spellCheck={false}
-                      className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--bg-base)] px-4 text-center text-lg font-black tracking-[0.18em] text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
-                      onChange={(event) =>
-                        setRoomCode(event.target.value.trim())
-                      }
-                    />
-                  </label>
-
-                  <button
-                    type="button"
-                    disabled={rooms.joinRoom.isPending}
-                    className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
-                    onClick={handleJoinRoom}
-                  >
-                    {rooms.joinRoom.isPending ? 'Joining room...' : 'Join room'}
-                  </button>
-                </div>
-              )}
-            </section>
           </div>
         </div>
       </section>
+
+      <RoomActionDialog
+        mode={activeRoomAction}
+        durationMinutes={durationMinutes}
+        roomCode={roomCode}
+        isCreating={rooms.createRoom.isPending}
+        isJoining={rooms.joinRoom.isPending}
+        onClose={() => setActiveRoomAction(null)}
+        onCreate={handleCreateRoom}
+        onJoin={handleJoinRoom}
+        onDurationChange={setDurationMinutes}
+        onRoomCodeChange={setRoomCode}
+      />
     </main>
   )
 }
