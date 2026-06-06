@@ -1,5 +1,10 @@
 import { apiClient } from '#/lib/client/apiClient'
-import type { CreateRoomRequest, Room, RoomMessageResponse } from './rooms.types'
+import type {
+  CreateRoomRequest,
+  Room,
+  RoomMessageResponse,
+  StartRoomResponse,
+} from './rooms.types'
 
 export function createRoom(input: CreateRoomRequest) {
   return apiClient<Room>('/rooms', {
@@ -28,7 +33,7 @@ export function leaveRoom(code: string) {
 }
 
 export function startRoom(code: string) {
-  return apiClient<unknown>(`/rooms/${encodeURIComponent(code)}/start`, {
+  return apiClient<StartRoomResponse>(`/rooms/${encodeURIComponent(code)}/start`, {
     method: 'POST',
   })
 }

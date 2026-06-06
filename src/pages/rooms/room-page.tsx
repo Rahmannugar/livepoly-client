@@ -3,6 +3,7 @@ import {
   ClockIcon,
   CopyIcon,
   CrownIcon,
+  PlayIcon,
   SignOutIcon,
   UserIcon,
   UsersIcon,
@@ -28,6 +29,14 @@ export function RoomPage({ code }: RoomPageProps) {
   const user = auth.currentUser.data
   const room = roomQuery.data
   const isHost = Boolean(room && user?.id === room.hostUserId)
+  const playersAtTable = room ? joinedPlayers(room.players) : []
+  const canStartRoom = Boolean(
+    room && isHost && room.status === 'waiting' && playersAtTable.length > 0,
+  )
+  const leaveActionLabel =
+    isHost && room?.status === 'waiting' ? 'Cancel room' : 'Leave room'
+  const leavePendingLabel =
+    isHost && room?.status === 'waiting' ? 'Cancelling...' : 'Leaving...'
 
   function copyRoomCode() {
     if (!room?.code) {
@@ -60,6 +69,28 @@ export function RoomPage({ code }: RoomPageProps) {
           kind: 'error',
           message:
             error instanceof Error ? error.message : 'Could not leave room.',
+        })
+      },
+    })
+  }
+
+  function startRoom() {
+    if (!room?.code) {
+      return
+    }
+
+    rooms.startRoom.mutate(room.code, {
+      onSuccess: () => {
+        showToast({
+          kind: 'success',
+          message: 'Room started.',
+        })
+      },
+      onError: (error) => {
+        showToast({
+          kind: 'error',
+          message:
+            error instanceof Error ? error.message : 'Could not start room.',
         })
       },
     })
@@ -144,7 +175,7 @@ export function RoomPage({ code }: RoomPageProps) {
                   <RoomStat
                     icon={UsersIcon}
                     label="Seats"
-                    value={`${joinedPlayers(room.players).length}/${room.maxPlayers}`}
+                    value={`${playersAtTable.length}/${room.maxPlayers}`}
                   />
                   <RoomStat
                     icon={ClockIcon}
@@ -189,18 +220,35 @@ export function RoomPage({ code }: RoomPageProps) {
                     {room.status}
                   </h2>
                   <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-                    Gameplay wiring comes next. For now, this lobby confirms
-                    room creation, joining, seats, and leaving.
+                    {getRoomStatusCopy({
+                      isHost,
+                      status: room.status,
+                      playersAtTable: playersAtTable.length,
+                    })}
                   </p>
+
+                  {isHost && room.status === 'waiting' ? (
+                    <button
+                      type="button"
+                      disabled={!canStartRoom || rooms.startRoom.isPending}
+                      className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={startRoom}
+                    >
+                      <PlayIcon weight="bold" className="h-4.5 w-4.5" />
+                      {rooms.startRoom.isPending ? 'Starting...' : 'Start room'}
+                    </button>
+                  ) : null}
 
                   <button
                     type="button"
                     disabled={rooms.leaveRoom.isPending}
-                    className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.1)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.1)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={leaveRoom}
                   >
                     <SignOutIcon weight="bold" className="h-4.5 w-4.5" />
-                    {rooms.leaveRoom.isPending ? 'Leaving...' : 'Leave room'}
+                    {rooms.leaveRoom.isPending
+                      ? leavePendingLabel
+                      : leaveActionLabel}
                   </button>
                 </aside>
               </section>
@@ -210,6 +258,32 @@ export function RoomPage({ code }: RoomPageProps) {
       </section>
     </main>
   )
+}
+
+function getRoomStatusCopy({
+  isHost,
+  status,
+  playersAtTable,
+}: {
+  isHost: boolean
+  status: string
+  playersAtTable: number
+}) {
+  if (status === 'active') {
+    return 'The room has started. Game screen wiring comes next.'
+  }
+
+  if (status !== 'waiting') {
+    return 'This room is no longer waiting for players.'
+  }
+
+  if (isHost) {
+    return playersAtTable > 0
+      ? 'Start when the table is ready. Empty seats can be filled by bots.'
+      : 'Waiting for at least one player to take a seat.'
+  }
+
+  return 'Waiting for the host to start the room.'
 }
 
 function joinedPlayers(players: RoomPlayer[]) {

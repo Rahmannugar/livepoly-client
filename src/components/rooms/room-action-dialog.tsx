@@ -48,11 +48,11 @@ export function RoomActionDialog({
       <button
         type="button"
         aria-label="Close room action"
-        className="absolute inset-0 cursor-default bg-[rgba(4,12,15,0.62)] backdrop-blur-md"
+        className="dialog-backdrop-enter absolute inset-0 cursor-default bg-[rgba(4,12,15,0.62)] backdrop-blur-md"
         onClick={onClose}
       />
 
-      <section className="relative w-full max-w-md rounded-[30px] border border-[var(--line)] bg-[var(--bg-base)] p-5 shadow-[0_28px_90px_rgba(4,12,15,0.32)] sm:p-6">
+      <section className="dialog-panel-enter relative w-full max-w-md rounded-[30px] border border-[var(--line)] bg-[var(--bg-base)] p-5 shadow-[0_28px_90px_rgba(4,12,15,0.32)] sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="app-kicker">

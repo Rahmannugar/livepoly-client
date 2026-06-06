@@ -38,6 +38,13 @@ export function useRooms() {
 
   const startRoom = useMutation({
     mutationFn: roomsService.startRoom,
+    onSuccess: (response) => {
+      queryClient.setQueryData(
+        ROOMS_QUERY_KEYS.room(response.room.code),
+        response.room,
+      )
+      queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
+    },
   })
 
   return {

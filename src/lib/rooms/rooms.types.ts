@@ -44,3 +44,22 @@ export type Room = {
 export type RoomMessageResponse = {
   message: string
 }
+
+export type Game = {
+  id: string
+  roomId: string
+  mode: string
+  status: string
+  currentTurnRoomPlayerId: string
+  turnNumber: number
+  state: Record<string, unknown>
+  startedAt: string
+  finishedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type StartRoomResponse = {
+  room: Room
+  game: Game
+}
