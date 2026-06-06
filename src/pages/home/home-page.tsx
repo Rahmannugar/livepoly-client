@@ -3,6 +3,7 @@ import {
   ClockCounterClockwiseIcon,
   DoorOpenIcon,
   EyeIcon,
+  GameControllerIcon,
   MedalIcon,
   PlusIcon,
   SignOutIcon,
@@ -20,7 +21,7 @@ import { APP_NAME } from '#/config/app.constants'
 import { useToast } from '#/components/common/toast'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useAuth } from '#/lib/auth/useAuth'
-import { useLiveRooms, useRooms } from '#/lib/rooms/useRooms'
+import { useCurrentRoom, useLiveRooms, useRooms } from '#/lib/rooms/useRooms'
 import type { RoomDurationMinutes } from '#/lib/rooms/rooms.types'
 
 type RoomActionMode = 'create' | 'join'
@@ -85,6 +86,7 @@ export function HomePage() {
   const [durationMinutes, setDurationMinutes] =
     useState<RoomDurationMinutes>(getInitialRoomDuration)
   const [roomCode, setRoomCode] = useState('')
+  const currentRoom = useCurrentRoom(Boolean(user))
   const liveRooms = useLiveRooms(activeDialog === 'liveRooms')
   const activeRoomAction =
     activeDialog === 'create' || activeDialog === 'join' ? activeDialog : null
@@ -171,6 +173,21 @@ export function HomePage() {
     navigate({ to: '/rooms/$code', params: { code } })
   }
 
+  function resumeCurrentRoom() {
+    const room = currentRoom.data
+
+    if (!room) {
+      return
+    }
+
+    if (room.activeGameId) {
+      navigate({ to: '/games/$gameId', params: { gameId: room.activeGameId } })
+      return
+    }
+
+    navigate({ to: '/rooms/$code', params: { code: room.code } })
+  }
+
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
@@ -222,6 +239,37 @@ export function HomePage() {
               Create a room, join a game, or check your stats and leaderboard.
             </p>
           </div>
+
+          {currentRoom.data ? (
+            <article className="flex flex-col gap-4 rounded-[28px] border border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary)_12%,var(--bg-base))] p-5 shadow-[0_22px_60px_rgba(8,28,32,0.14)] sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
+                  <GameControllerIcon weight="bold" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="app-kicker">
+                    {currentRoom.data.status === 'waiting'
+                      ? 'Room waiting'
+                      : 'Game in progress'}
+                  </p>
+                  <h2 className="display-title mt-1 truncate text-3xl font-semibold text-[var(--sea-ink)]">
+                    Room {currentRoom.data.code}
+                  </h2>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+                    Rejoin your room and continue from where you stopped.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px]"
+                onClick={resumeCurrentRoom}
+              >
+                {currentRoom.data.activeGameId ? 'Rejoin game' : 'Open room'}
+              </button>
+            </article>
+          ) : null}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {homeActions.map((action) => (

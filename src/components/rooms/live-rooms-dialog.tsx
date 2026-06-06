@@ -98,9 +98,23 @@ export function LiveRoomsDialog({
                 (player) => player.status === 'joined',
               )
               const isWaiting = room.status === 'waiting'
-              const actionLabel = isWaiting ? 'Join room' : 'Spectate'
-              const ActionIcon = isWaiting ? DoorOpenIcon : EyeIcon
-              const isBusy = isWaiting ? isJoining : isSpectating
+              const isCurrentPlayer = room.currentUserAccess === 'player'
+              const isCurrentSpectator = room.currentUserAccess === 'spectator'
+              const shouldOpenRoom = isCurrentPlayer || isCurrentSpectator
+              const actionLabel = isCurrentPlayer
+                ? 'Join room'
+                : isCurrentSpectator
+                  ? 'Open room'
+                  : isWaiting
+                    ? 'Join room'
+                    : 'Spectate'
+              const ActionIcon =
+                isCurrentPlayer || isWaiting ? DoorOpenIcon : EyeIcon
+              const isBusy = shouldOpenRoom
+                ? false
+                : isWaiting
+                  ? isJoining
+                  : isSpectating
 
               return (
                 <article
@@ -136,7 +150,11 @@ export function LiveRoomsDialog({
                       disabled={isBusy}
                       className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() =>
-                        isWaiting ? onJoin(room.code) : onSpectate(room.code)
+                        shouldOpenRoom
+                          ? onOpenRoom(room.code)
+                          : isWaiting
+                            ? onJoin(room.code)
+                            : onSpectate(room.code)
                       }
                     >
                       <ActionIcon weight="bold" className="h-4.5 w-4.5" />

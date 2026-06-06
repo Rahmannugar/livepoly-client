@@ -13,11 +13,7 @@ function getSystemTheme(): Theme {
     : 'light'
 }
 
-function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') {
-    return 'light'
-  }
-
+function getPreferredTheme(): Theme {
   const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
 
   if (savedTheme === 'light' || savedTheme === 'dark') {
@@ -32,13 +28,26 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme)
+  const [theme, setTheme] = useState<Theme>('light')
+  const [hasResolvedTheme, setHasResolvedTheme] = useState(false)
   const isDark = theme === 'dark'
 
   useEffect(() => {
+    const preferredTheme = getPreferredTheme()
+
+    setTheme(preferredTheme)
+    setHasResolvedTheme(true)
+    applyTheme(preferredTheme)
+  }, [])
+
+  useEffect(() => {
+    if (!hasResolvedTheme) {
+      return
+    }
+
     applyTheme(theme)
     window.localStorage.setItem(THEME_STORAGE_KEY, theme)
-  }, [theme])
+  }, [hasResolvedTheme, theme])
 
   const value = useMemo(
     () => ({

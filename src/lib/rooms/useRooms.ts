@@ -18,6 +18,14 @@ export function useLiveRooms(enabled = true) {
   })
 }
 
+export function useCurrentRoom(enabled = true) {
+  return useQuery({
+    queryKey: ROOMS_QUERY_KEYS.currentRoom,
+    queryFn: roomsService.getCurrentRoom,
+    enabled,
+  })
+}
+
 export function useRooms() {
   const queryClient = useQueryClient()
 
@@ -25,6 +33,7 @@ export function useRooms() {
     mutationFn: roomsService.createRoom,
     onSuccess: (room) => {
       queryClient.setQueryData(ROOMS_QUERY_KEYS.room(room.code), room)
+      queryClient.setQueryData(ROOMS_QUERY_KEYS.currentRoom, room)
       queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
     },
   })
@@ -33,6 +42,7 @@ export function useRooms() {
     mutationFn: roomsService.joinRoom,
     onSuccess: (room) => {
       queryClient.setQueryData(ROOMS_QUERY_KEYS.room(room.code), room)
+      queryClient.setQueryData(ROOMS_QUERY_KEYS.currentRoom, room)
       queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
     },
   })
@@ -40,6 +50,7 @@ export function useRooms() {
   const leaveRoom = useMutation({
     mutationFn: roomsService.leaveRoom,
     onSuccess: () => {
+      queryClient.setQueryData(ROOMS_QUERY_KEYS.currentRoom, null)
       queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
     },
   })
@@ -65,6 +76,7 @@ export function useRooms() {
         ROOMS_QUERY_KEYS.room(response.room.code),
         response.room,
       )
+      queryClient.setQueryData(ROOMS_QUERY_KEYS.currentRoom, response.room)
       queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
     },
   })

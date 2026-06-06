@@ -1,8 +1,17 @@
 import {
+  AirplaneTiltIcon,
   ArrowLeftIcon,
+  BankIcon,
   BuildingsIcon,
+  CarIcon,
+  CurrencyDollarIcon,
   DiceFiveIcon,
+  DropIcon,
+  LightningIcon,
   ListChecksIcon,
+  PoliceCarIcon,
+  QuestionIcon,
+  ReceiptIcon,
   ShieldCheckIcon,
   SpinnerGapIcon,
   UsersIcon,
@@ -17,6 +26,7 @@ import type {
   GameProperty,
   GameState,
 } from '#/lib/game/game.types'
+import type { Icon } from '@phosphor-icons/react'
 import type { CSSProperties, ReactNode } from 'react'
 
 type GamePageProps = {
@@ -27,6 +37,7 @@ type GameTile = {
   index: number
   key: string
   name: string
+  shortName?: string
   kind: string
   setKey?: string
 }
@@ -38,13 +49,13 @@ const gameTiles: GameTile[] = [
   { index: 3, key: 'ghana', name: 'Ghana', kind: 'property', setKey: 'brown' },
   { index: 4, key: 'income_tax', name: 'Income Tax', kind: 'tax' },
   { index: 5, key: 'lagos_airport', name: 'Lagos Airport', kind: 'airport' },
-  { index: 6, key: 'south_africa', name: 'South Africa', kind: 'property', setKey: 'light_blue' },
+  { index: 6, key: 'south_africa', name: 'South Africa', shortName: 'S. Africa', kind: 'property', setKey: 'light_blue' },
   { index: 7, key: 'chance_1', name: 'Chance', kind: 'chance' },
   { index: 8, key: 'egypt', name: 'Egypt', kind: 'property', setKey: 'light_blue' },
   { index: 9, key: 'morocco', name: 'Morocco', kind: 'property', setKey: 'light_blue' },
   { index: 10, key: 'jail', name: 'Jail', kind: 'jail' },
   { index: 11, key: 'brazil', name: 'Brazil', kind: 'property', setKey: 'pink' },
-  { index: 12, key: 'electric_company', name: 'Electric Co.', kind: 'utility' },
+  { index: 12, key: 'electric_company', name: 'Electric Company', kind: 'utility' },
   { index: 13, key: 'argentina', name: 'Argentina', kind: 'property', setKey: 'pink' },
   { index: 14, key: 'mexico', name: 'Mexico', kind: 'property', setKey: 'pink' },
   { index: 15, key: 'new_york_airport', name: 'New York Airport', kind: 'airport' },
@@ -53,7 +64,7 @@ const gameTiles: GameTile[] = [
   { index: 18, key: 'canada', name: 'Canada', kind: 'property', setKey: 'orange' },
   { index: 19, key: 'jamaica', name: 'Jamaica', kind: 'property', setKey: 'orange' },
   { index: 20, key: 'free_parking', name: 'Free Parking', kind: 'free_parking' },
-  { index: 21, key: 'uk', name: 'United Kingdom', kind: 'property', setKey: 'red' },
+  { index: 21, key: 'uk', name: 'United Kingdom', shortName: 'UK', kind: 'property', setKey: 'red' },
   { index: 22, key: 'chance_2', name: 'Chance', kind: 'chance' },
   { index: 23, key: 'france', name: 'France', kind: 'property', setKey: 'red' },
   { index: 24, key: 'spain', name: 'Spain', kind: 'property', setKey: 'red' },
@@ -61,7 +72,7 @@ const gameTiles: GameTile[] = [
   { index: 26, key: 'germany', name: 'Germany', kind: 'property', setKey: 'yellow' },
   { index: 27, key: 'italy', name: 'Italy', kind: 'property', setKey: 'yellow' },
   { index: 28, key: 'water_works', name: 'Water Works', kind: 'utility' },
-  { index: 29, key: 'netherlands', name: 'Netherlands', kind: 'property', setKey: 'yellow' },
+  { index: 29, key: 'netherlands', name: 'Netherlands', shortName: 'Netherl.', kind: 'property', setKey: 'yellow' },
   { index: 30, key: 'go_to_jail', name: 'Go To Jail', kind: 'go_to_jail' },
   { index: 31, key: 'india', name: 'India', kind: 'property', setKey: 'green' },
   { index: 32, key: 'china', name: 'China', kind: 'property', setKey: 'green' },
@@ -69,7 +80,7 @@ const gameTiles: GameTile[] = [
   { index: 34, key: 'japan', name: 'Japan', kind: 'property', setKey: 'green' },
   { index: 35, key: 'tokyo_airport', name: 'Tokyo Airport', kind: 'airport' },
   { index: 36, key: 'chance_3', name: 'Chance', kind: 'chance' },
-  { index: 37, key: 'south_korea', name: 'South Korea', kind: 'property', setKey: 'dark_blue' },
+  { index: 37, key: 'south_korea', name: 'South Korea', shortName: 'Korea', kind: 'property', setKey: 'dark_blue' },
   { index: 38, key: 'luxury_tax', name: 'Luxury Tax', kind: 'tax' },
   { index: 39, key: 'australia', name: 'Australia', kind: 'property', setKey: 'dark_blue' },
 ]
@@ -100,10 +111,12 @@ export function GamePage({ gameId }: GamePageProps) {
     isCurrentTurn: game.isCurrentTurn,
     phase: state?.phase,
   })
+  const isRollingDice =
+    game.commandPending && primaryAction.command === 'roll'
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
-      <section className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-7xl flex-col gap-5">
+      <section className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[112rem] flex-col gap-5">
         <header className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <Link
@@ -126,8 +139,8 @@ export function GamePage({ gameId }: GamePageProps) {
           <ThemeToggle />
         </header>
 
-        <div className="grid flex-1 gap-4 xl:grid-cols-[18rem_minmax(0,1fr)_20rem]">
-          <aside className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 xl:content-start">
+        <div className="grid flex-1 gap-4 xl:grid-cols-[15rem_minmax(0,1fr)_17rem] 2xl:grid-cols-[16rem_minmax(58rem,1fr)_18rem]">
+          <aside className="order-2 grid gap-3 md:grid-cols-2 xl:order-1 xl:grid-cols-1 xl:content-start">
             <GamePanel title="Players" icon={UsersIcon}>
               <div className="grid gap-2">
                 {(state?.players ?? []).map((player) => (
@@ -158,7 +171,7 @@ export function GamePage({ gameId }: GamePageProps) {
             </GamePanel>
           </aside>
 
-          <section className="rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-5">
+          <section className="order-1 rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-5 xl:order-2">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="app-kicker">Game</p>
@@ -176,13 +189,17 @@ export function GamePage({ gameId }: GamePageProps) {
               </span>
             </div>
 
-            <div className="overflow-x-auto pb-1">
-              <div className="grid aspect-square min-w-[38rem] grid-cols-11 grid-rows-11 gap-1 rounded-[28px] border border-[var(--line)] bg-[var(--surface)] p-2 sm:min-w-0 sm:gap-1.5 sm:p-3">
+            <div className="mx-auto w-full overflow-x-auto pb-1">
+              <div className="grid aspect-square w-full min-w-[34rem] grid-cols-11 grid-rows-11 gap-1 rounded-[28px] border border-[var(--line)] bg-[var(--surface)] p-2 sm:min-w-[42rem] sm:gap-1.5 sm:p-3 lg:min-w-0 2xl:gap-2 2xl:p-4">
                 <div className="col-start-2 col-end-11 row-start-2 row-end-11 grid place-items-center rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_82%,transparent)] p-5 text-center">
                   <div>
                     <p className="app-kicker">Room {state?.roomCode ?? '...'}</p>
+                    <DiceRollDisplay
+                      dice={state?.lastDiceRoll}
+                      isRolling={isRollingDice}
+                    />
                     <p className="display-title mt-3 text-4xl font-semibold text-[var(--sea-ink)]">
-                      {formatDice(state?.lastDiceRoll)}
+                      {isRollingDice ? 'Rolling...' : formatDice(state?.lastDiceRoll)}
                     </p>
                     <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
                       {game.access === 'spectator'
@@ -200,18 +217,21 @@ export function GamePage({ gameId }: GamePageProps) {
                     tile={tile}
                     players={getPlayersOnTile(state, tile.index)}
                     owner={getTileOwner(state, tile.key)}
+                    currentTurnRoomPlayerId={state?.currentTurnRoomPlayerId ?? null}
                   />
                 ))}
               </div>
             </div>
           </section>
 
-          <aside className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 xl:content-start">
+          <aside className="order-3 grid gap-3 md:grid-cols-2 xl:order-3 xl:grid-cols-1 xl:content-start">
             <GamePanel title="Actions" icon={DiceFiveIcon}>
               <button
                 type="button"
                 disabled={!primaryAction.enabled || game.commandPending}
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+                  game.commandPending ? 'game-command-button--active' : ''
+                }`}
                 onClick={() => {
                   if (primaryAction.command === 'roll') {
                     void game.rollAndMove()
@@ -289,7 +309,7 @@ function PlayerRow({
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
       <div className="flex min-w-0 items-center gap-3">
-        <PlayerToken player={player} />
+        <PlayerToken player={player} isActive={isCurrentTurn} />
         <div className="min-w-0">
           <p className="truncate text-sm font-black text-[var(--sea-ink)]">
             {getPlayerName(player)}
@@ -311,14 +331,20 @@ function GameTileCell({
   tile,
   players,
   owner,
+  currentTurnRoomPlayerId,
 }: {
   tile: GameTile
   players: GamePlayer[]
   owner: GamePlayer | null
+  currentTurnRoomPlayerId: string | null
 }) {
+  const TileIcon = getTileIcon(tile)
+
   return (
     <div
-      className="relative flex min-h-0 flex-col justify-between overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--bg-base)] p-1.5 text-[var(--sea-ink)]"
+      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--bg-base)] p-1 text-[var(--sea-ink)] sm:rounded-xl sm:p-1.5 2xl:rounded-2xl 2xl:p-2 ${
+        TileIcon ? 'game-tile--special' : ''
+      }`}
       style={getTileGridStyle(tile.index)}
     >
       {tile.setKey ? (
@@ -328,9 +354,16 @@ function GameTileCell({
         />
       ) : null}
 
-      <span className="mt-1 line-clamp-2 text-[0.6rem] font-black leading-tight sm:text-[0.68rem]">
-        {tile.name}
-      </span>
+      <div className="mt-1 flex min-h-0 flex-col gap-1">
+        {TileIcon ? (
+          <span className="game-tile__icon">
+            <TileIcon weight="duotone" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          </span>
+        ) : null}
+        <span className="line-clamp-3 text-[0.52rem] font-black leading-tight sm:text-[0.62rem] xl:text-[0.7rem] 2xl:text-[0.78rem]">
+          {getTileLabel(tile)}
+        </span>
+      </div>
 
       <div className="flex min-h-5 flex-wrap items-end gap-1">
         {owner ? (
@@ -339,27 +372,93 @@ function GameTileCell({
           </span>
         ) : null}
         {players.map((player) => (
-          <PlayerToken key={player.roomPlayerId} player={player} compact />
+          <PlayerToken
+            key={player.roomPlayerId}
+            player={player}
+            compact
+            isActive={player.roomPlayerId === currentTurnRoomPlayerId}
+          />
         ))}
       </div>
     </div>
   )
 }
 
+function DiceRollDisplay({
+  dice,
+  isRolling,
+}: {
+  dice?: readonly [number, number] | null
+  isRolling: boolean
+}) {
+  const values = dice ?? ([1, 1] as const)
+
+  return (
+    <div
+      className="dice-display"
+      aria-live="polite"
+      aria-label={
+        isRolling
+          ? 'Rolling dice'
+          : dice
+            ? `Dice rolled ${dice[0]} and ${dice[1]}`
+            : 'Dice ready'
+      }
+    >
+      <DieFace value={isRolling ? null : values[0]} isRolling={isRolling} />
+      <DieFace value={isRolling ? null : values[1]} isRolling={isRolling} />
+    </div>
+  )
+}
+
+const diePipsByValue: Record<number, number[]> = {
+  1: [4],
+  2: [0, 8],
+  3: [0, 4, 8],
+  4: [0, 2, 6, 8],
+  5: [0, 2, 4, 6, 8],
+  6: [0, 2, 3, 5, 6, 8],
+}
+
+function DieFace({
+  value,
+  isRolling,
+}: {
+  value: number | null
+  isRolling: boolean
+}) {
+  const filledPips = value ? diePipsByValue[value] : []
+
+  return (
+    <span className={`dice-face ${isRolling ? 'dice-face--rolling' : ''}`}>
+      {Array.from({ length: 9 }).map((_, index) => (
+        <span
+          key={index}
+          className={`dice-pip ${
+            filledPips.includes(index) ? 'dice-pip--filled' : ''
+          }`}
+        />
+      ))}
+    </span>
+  )
+}
+
 function PlayerToken({
   player,
   compact = false,
+  isActive = false,
 }: {
   player: GamePlayer
   compact?: boolean
+  isActive?: boolean
 }) {
   return (
     <span
-      className={
+      className={`player-token ${isActive ? 'player-token--active' : ''} ${
         compact
           ? 'grid h-5 w-5 place-items-center rounded-full text-[0.62rem] font-black text-white shadow-sm'
           : 'grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-black text-white shadow-sm'
-      }
+      }`}
       style={{ backgroundColor: getPlayerColor(player.seatNumber) }}
     >
       {player.seatNumber}
@@ -447,7 +546,7 @@ function EventList({ events }: { events: GameEventLogItem[] }) {
       {events.map((event, index) => (
         <div
           key={`${event.type}-${event.sequence ?? index}`}
-          className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3"
+          className="game-event-card rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3"
         >
           <p className="text-sm font-black text-[var(--sea-ink)]">
             {formatEventType(event.type)}
@@ -478,6 +577,50 @@ function getTileGridStyle(index: number): CSSProperties {
   }
 
   return { gridRow: index - 29, gridColumn: 11 }
+}
+
+function getTileLabel(tile: GameTile) {
+  return tile.shortName ?? tile.name
+}
+
+function getTileIcon(tile: GameTile): Icon | null {
+  if (tile.kind === 'airport') {
+    return AirplaneTiltIcon
+  }
+
+  if (tile.kind === 'chance') {
+    return QuestionIcon
+  }
+
+  if (tile.kind === 'world_fund') {
+    return BankIcon
+  }
+
+  if (tile.kind === 'tax') {
+    return ReceiptIcon
+  }
+
+  if (tile.kind === 'free_parking') {
+    return CarIcon
+  }
+
+  if (tile.kind === 'go_to_jail') {
+    return PoliceCarIcon
+  }
+
+  if (tile.kind === 'go') {
+    return CurrencyDollarIcon
+  }
+
+  if (tile.key === 'water_works') {
+    return DropIcon
+  }
+
+  if (tile.key === 'electric_company') {
+    return LightningIcon
+  }
+
+  return null
 }
 
 function getPlayersOnTile(state: GameState | null, position: number) {

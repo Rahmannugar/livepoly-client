@@ -24,6 +24,10 @@ export function listLiveRooms() {
   return apiClient<Room[]>('/rooms')
 }
 
+export function getCurrentRoom() {
+  return apiClient<Room | null>('/rooms/current')
+}
+
 export function joinRoom(code: string) {
   return apiClient<Room>(`/rooms/${encodeURIComponent(code)}/join`, {
     method: 'POST',
