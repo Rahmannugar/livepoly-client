@@ -39,6 +39,7 @@ export type Room = {
   status: RoomStatus
   maxPlayers: number
   spectatorCount: number
+  activeGameId: string | null
   durationMinutes: RoomDurationMinutes
   boardKey: string
   createdAt: string

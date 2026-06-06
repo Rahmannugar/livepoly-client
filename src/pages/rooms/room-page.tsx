@@ -1,5 +1,6 @@
 import {
   ArrowLeftIcon,
+  ArrowRightIcon,
   ClockIcon,
   CopyIcon,
   CrownIcon,
@@ -145,10 +146,14 @@ export function RoomPage({ code }: RoomPageProps) {
     }
 
     rooms.startRoom.mutate(room.code, {
-      onSuccess: () => {
+      onSuccess: (response) => {
         showToast({
           kind: 'success',
           message: 'Room started.',
+        })
+        navigate({
+          to: '/games/$gameId',
+          params: { gameId: response.game.id },
         })
       },
       onError: (error) => {
@@ -158,6 +163,21 @@ export function RoomPage({ code }: RoomPageProps) {
             error instanceof Error ? error.message : 'Could not start room.',
         })
       },
+    })
+  }
+
+  function enterGame() {
+    if (!room?.activeGameId) {
+      showToast({
+        kind: 'error',
+        message: 'Game is not ready yet.',
+      })
+      return
+    }
+
+    navigate({
+      to: '/games/$gameId',
+      params: { gameId: room.activeGameId },
     })
   }
 
@@ -323,6 +343,7 @@ export function RoomPage({ code }: RoomPageProps) {
                   </h2>
                   <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
                     {getRoomStatusCopy({
+                      access: room.currentUserAccess,
                       isHost,
                       status: room.status,
                       playersAtTable: playersAtTable.length,
@@ -352,6 +373,19 @@ export function RoomPage({ code }: RoomPageProps) {
                         className="h-4.5 w-4.5"
                       />
                       Invite friend
+                    </button>
+                  ) : null}
+
+                  {room.status === 'active' && room.activeGameId ? (
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px]"
+                      onClick={enterGame}
+                    >
+                      <ArrowRightIcon weight="bold" className="h-4.5 w-4.5" />
+                      {room.currentUserAccess === 'spectator'
+                        ? 'Watch game'
+                        : 'Enter game'}
                     </button>
                   ) : null}
 
@@ -426,16 +460,20 @@ function getExitPendingLabel({
 }
 
 function getRoomStatusCopy({
+  access,
   isHost,
   status,
   playersAtTable,
 }: {
+  access?: string
   isHost: boolean
   status: string
   playersAtTable: number
 }) {
   if (status === 'active') {
-    return 'The room has started.'
+    return access === 'spectator'
+      ? 'You are watching this table.'
+      : 'Your table is live.'
   }
 
   if (status !== 'waiting') {
