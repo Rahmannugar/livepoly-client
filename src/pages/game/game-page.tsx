@@ -43,49 +43,50 @@ type GameTile = {
   kind: string
   setKey?: string
   mortgageValue?: number
+  houseCost?: number
 }
 
 const gameTiles: GameTile[] = [
   { index: 0, key: 'go', name: 'Go', kind: 'go' },
-  { index: 1, key: 'nigeria', name: 'Nigeria', kind: 'property', setKey: 'brown', mortgageValue: 30 },
+  { index: 1, key: 'nigeria', name: 'Nigeria', kind: 'property', setKey: 'brown', mortgageValue: 30, houseCost: 50 },
   { index: 2, key: 'world_fund_1', name: 'World Fund', kind: 'world_fund' },
-  { index: 3, key: 'ghana', name: 'Ghana', kind: 'property', setKey: 'brown', mortgageValue: 30 },
+  { index: 3, key: 'ghana', name: 'Ghana', kind: 'property', setKey: 'brown', mortgageValue: 30, houseCost: 50 },
   { index: 4, key: 'income_tax', name: 'Income Tax', kind: 'tax' },
   { index: 5, key: 'lagos_airport', name: 'Lagos Airport', kind: 'airport', mortgageValue: 100 },
-  { index: 6, key: 'south_africa', name: 'South Africa', shortName: 'S. Africa', kind: 'property', setKey: 'light_blue', mortgageValue: 50 },
+  { index: 6, key: 'south_africa', name: 'South Africa', shortName: 'S. Africa', kind: 'property', setKey: 'light_blue', mortgageValue: 50, houseCost: 50 },
   { index: 7, key: 'chance_1', name: 'Chance', kind: 'chance' },
-  { index: 8, key: 'egypt', name: 'Egypt', kind: 'property', setKey: 'light_blue', mortgageValue: 50 },
-  { index: 9, key: 'morocco', name: 'Morocco', kind: 'property', setKey: 'light_blue', mortgageValue: 60 },
+  { index: 8, key: 'egypt', name: 'Egypt', kind: 'property', setKey: 'light_blue', mortgageValue: 50, houseCost: 50 },
+  { index: 9, key: 'morocco', name: 'Morocco', kind: 'property', setKey: 'light_blue', mortgageValue: 60, houseCost: 50 },
   { index: 10, key: 'jail', name: 'Jail', kind: 'jail' },
-  { index: 11, key: 'brazil', name: 'Brazil', kind: 'property', setKey: 'pink', mortgageValue: 70 },
+  { index: 11, key: 'brazil', name: 'Brazil', kind: 'property', setKey: 'pink', mortgageValue: 70, houseCost: 100 },
   { index: 12, key: 'electric_company', name: 'Electric Company', kind: 'utility', mortgageValue: 75 },
-  { index: 13, key: 'argentina', name: 'Argentina', kind: 'property', setKey: 'pink', mortgageValue: 70 },
-  { index: 14, key: 'mexico', name: 'Mexico', kind: 'property', setKey: 'pink', mortgageValue: 80 },
+  { index: 13, key: 'argentina', name: 'Argentina', kind: 'property', setKey: 'pink', mortgageValue: 70, houseCost: 100 },
+  { index: 14, key: 'mexico', name: 'Mexico', kind: 'property', setKey: 'pink', mortgageValue: 80, houseCost: 100 },
   { index: 15, key: 'new_york_airport', name: 'New York Airport', kind: 'airport', mortgageValue: 100 },
-  { index: 16, key: 'usa', name: 'USA', kind: 'property', setKey: 'orange', mortgageValue: 90 },
+  { index: 16, key: 'usa', name: 'USA', kind: 'property', setKey: 'orange', mortgageValue: 90, houseCost: 100 },
   { index: 17, key: 'world_fund_2', name: 'World Fund', kind: 'world_fund' },
-  { index: 18, key: 'canada', name: 'Canada', kind: 'property', setKey: 'orange', mortgageValue: 90 },
-  { index: 19, key: 'jamaica', name: 'Jamaica', kind: 'property', setKey: 'orange', mortgageValue: 100 },
+  { index: 18, key: 'canada', name: 'Canada', kind: 'property', setKey: 'orange', mortgageValue: 90, houseCost: 100 },
+  { index: 19, key: 'jamaica', name: 'Jamaica', kind: 'property', setKey: 'orange', mortgageValue: 100, houseCost: 100 },
   { index: 20, key: 'free_parking', name: 'Free Parking', kind: 'free_parking' },
-  { index: 21, key: 'uk', name: 'United Kingdom', shortName: 'UK', kind: 'property', setKey: 'red', mortgageValue: 110 },
+  { index: 21, key: 'uk', name: 'United Kingdom', shortName: 'UK', kind: 'property', setKey: 'red', mortgageValue: 110, houseCost: 150 },
   { index: 22, key: 'chance_2', name: 'Chance', kind: 'chance' },
-  { index: 23, key: 'france', name: 'France', kind: 'property', setKey: 'red', mortgageValue: 110 },
-  { index: 24, key: 'spain', name: 'Spain', kind: 'property', setKey: 'red', mortgageValue: 120 },
+  { index: 23, key: 'france', name: 'France', kind: 'property', setKey: 'red', mortgageValue: 110, houseCost: 150 },
+  { index: 24, key: 'spain', name: 'Spain', kind: 'property', setKey: 'red', mortgageValue: 120, houseCost: 150 },
   { index: 25, key: 'london_airport', name: 'London Airport', kind: 'airport', mortgageValue: 100 },
-  { index: 26, key: 'germany', name: 'Germany', kind: 'property', setKey: 'yellow', mortgageValue: 130 },
-  { index: 27, key: 'italy', name: 'Italy', kind: 'property', setKey: 'yellow', mortgageValue: 130 },
+  { index: 26, key: 'germany', name: 'Germany', kind: 'property', setKey: 'yellow', mortgageValue: 130, houseCost: 150 },
+  { index: 27, key: 'italy', name: 'Italy', kind: 'property', setKey: 'yellow', mortgageValue: 130, houseCost: 150 },
   { index: 28, key: 'water_works', name: 'Water Works', kind: 'utility', mortgageValue: 75 },
-  { index: 29, key: 'netherlands', name: 'Netherlands', shortName: 'Netherl.', kind: 'property', setKey: 'yellow', mortgageValue: 140 },
+  { index: 29, key: 'netherlands', name: 'Netherlands', shortName: 'Netherl.', kind: 'property', setKey: 'yellow', mortgageValue: 140, houseCost: 150 },
   { index: 30, key: 'go_to_jail', name: 'Go To Jail', kind: 'go_to_jail' },
-  { index: 31, key: 'india', name: 'India', kind: 'property', setKey: 'green', mortgageValue: 150 },
-  { index: 32, key: 'china', name: 'China', kind: 'property', setKey: 'green', mortgageValue: 150 },
+  { index: 31, key: 'india', name: 'India', kind: 'property', setKey: 'green', mortgageValue: 150, houseCost: 200 },
+  { index: 32, key: 'china', name: 'China', kind: 'property', setKey: 'green', mortgageValue: 150, houseCost: 200 },
   { index: 33, key: 'world_fund_3', name: 'World Fund', kind: 'world_fund' },
-  { index: 34, key: 'japan', name: 'Japan', kind: 'property', setKey: 'green', mortgageValue: 160 },
+  { index: 34, key: 'japan', name: 'Japan', kind: 'property', setKey: 'green', mortgageValue: 160, houseCost: 200 },
   { index: 35, key: 'tokyo_airport', name: 'Tokyo Airport', kind: 'airport', mortgageValue: 100 },
   { index: 36, key: 'chance_3', name: 'Chance', kind: 'chance' },
-  { index: 37, key: 'south_korea', name: 'South Korea', shortName: 'Korea', kind: 'property', setKey: 'dark_blue', mortgageValue: 175 },
+  { index: 37, key: 'south_korea', name: 'South Korea', shortName: 'Korea', kind: 'property', setKey: 'dark_blue', mortgageValue: 175, houseCost: 200 },
   { index: 38, key: 'luxury_tax', name: 'Luxury Tax', kind: 'tax' },
-  { index: 39, key: 'australia', name: 'Australia', kind: 'property', setKey: 'dark_blue', mortgageValue: 200 },
+  { index: 39, key: 'australia', name: 'Australia', kind: 'property', setKey: 'dark_blue', mortgageValue: 200, houseCost: 200 },
 ]
 
 const propertySetColors: Record<string, string> = {
@@ -333,6 +334,8 @@ export function GamePage({ gameId }: GamePageProps) {
                 players={state?.players ?? []}
                 roomPlayerId={game.roomPlayerId}
                 commandPending={game.commandPending}
+                onBuild={(tileKey) => void game.buildProperty(tileKey)}
+                onSellBuilding={(tileKey) => void game.sellBuilding(tileKey)}
                 onMortgage={(tileKey) => void game.mortgageProperty(tileKey)}
                 onUnmortgage={(tileKey) => void game.unmortgageProperty(tileKey)}
               />
@@ -754,6 +757,8 @@ function PropertyList({
   players,
   roomPlayerId,
   commandPending,
+  onBuild,
+  onSellBuilding,
   onMortgage,
   onUnmortgage,
 }: {
@@ -761,6 +766,8 @@ function PropertyList({
   players: GamePlayer[]
   roomPlayerId: string | null
   commandPending: boolean
+  onBuild: (tileKey: string) => void
+  onSellBuilding: (tileKey: string) => void
   onMortgage: (tileKey: string) => void
   onUnmortgage: (tileKey: string) => void
 }) {
@@ -782,6 +789,14 @@ function PropertyList({
         )
         const mortgageValue = tile?.mortgageValue ?? 0
         const unmortgageCost = getUnmortgageCost(mortgageValue)
+        const canManageBuilding = Boolean(
+          isMine &&
+            tile?.kind === 'property' &&
+            !property.mortgaged &&
+            !property.hasHotel,
+        )
+        const hasBuilding = property.hasHotel || property.houseCount > 0
+        const buildingCost = tile?.houseCost ?? 0
 
         return (
           <div
@@ -807,23 +822,54 @@ function PropertyList({
             </div>
 
             {mortgageValue > 0 ? (
-              <button
-                type="button"
-                disabled={!isMine || commandPending}
-                className="inline-flex h-9 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
-                onClick={() => {
-                  if (property.mortgaged) {
-                    onUnmortgage(property.tileKey)
-                    return
-                  }
+              <div className="grid gap-2">
+                {tile?.kind === 'property' ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      disabled={
+                        !canManageBuilding ||
+                        commandPending ||
+                        buildingCost <= 0
+                      }
+                      className="inline-flex h-9 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={() => onBuild(property.tileKey)}
+                    >
+                      {property.hasHotel
+                        ? 'Built out'
+                        : property.houseCount === 4
+                        ? `Hotel $${formatMoney(buildingCost)}`
+                        : `Build $${formatMoney(buildingCost)}`}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!isMine || !hasBuilding || commandPending}
+                      className="inline-flex h-9 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={() => onSellBuilding(property.tileKey)}
+                    >
+                      Sell +${formatMoney(buildingCost / 2)}
+                    </button>
+                  </div>
+                ) : null}
 
-                  onMortgage(property.tileKey)
-                }}
-              >
-                {property.mortgaged
-                  ? `Unmortgage $${formatMoney(unmortgageCost)}`
-                  : `Mortgage +$${formatMoney(mortgageValue)}`}
-              </button>
+                <button
+                  type="button"
+                  disabled={!isMine || commandPending}
+                  className="inline-flex h-9 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => {
+                    if (property.mortgaged) {
+                      onUnmortgage(property.tileKey)
+                      return
+                    }
+
+                    onMortgage(property.tileKey)
+                  }}
+                >
+                  {property.mortgaged
+                    ? `Unmortgage $${formatMoney(unmortgageCost)}`
+                    : `Mortgage +$${formatMoney(mortgageValue)}`}
+                </button>
+              </div>
             ) : null}
           </div>
         )
