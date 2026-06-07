@@ -297,7 +297,7 @@ export function useGame(gameId: string) {
   }, [authHydration.data, requestGameEvent, gameId])
 
   const runCommand = useCallback(
-    async (event: string) => {
+    async (event: string, payload: Record<string, unknown> = {}) => {
       setCommandPending(true)
       setErrorMessage(null)
 
@@ -305,7 +305,7 @@ export function useGame(gameId: string) {
         const response = await requestGameEvent<GameCommandStateResponse>(
           event,
           GAME_SOCKET_EVENTS.state,
-          { gameId },
+          { gameId, ...payload },
         )
 
         setState(response.state)
@@ -349,6 +349,11 @@ export function useGame(gameId: string) {
     buyProperty: () => runCommand(GAME_SOCKET_EVENTS.buyProperty),
     declinePropertyPurchase: () =>
       runCommand(GAME_SOCKET_EVENTS.declinePropertyPurchase),
+    placeAuctionBid: (amount: number) =>
+      runCommand(GAME_SOCKET_EVENTS.placeAuctionBid, { amount }),
+    passAuctionBid: () => runCommand(GAME_SOCKET_EVENTS.passAuctionBid),
+    payDebt: () => runCommand(GAME_SOCKET_EVENTS.payDebt),
+    declareBankruptcy: () => runCommand(GAME_SOCKET_EVENTS.declareBankruptcy),
     endTurn: () => runCommand(GAME_SOCKET_EVENTS.endTurn),
   }
 }

@@ -38,6 +38,21 @@ export type GameProperty = {
   mortgaged: boolean
 }
 
+export type GameAuction = {
+  tileKey: string
+  currentBid: number
+  highestBidderRoomPlayerId: string | null
+  activeRoomPlayerIds: string[]
+  passedRoomPlayerIds: string[]
+}
+
+export type GameDebt = {
+  roomPlayerId: string
+  creditorRoomPlayerId: string | null
+  amount: number
+  reason: 'rent' | 'tax' | 'card' | 'jail_fine'
+}
+
 export type GameState = {
   version: 1
   roomId: string
@@ -54,8 +69,8 @@ export type GameState = {
   shouldCurrentPlayerPlayAgain: boolean
   lastDiceRoll?: DiceRoll | null
   pendingTileKey?: string | null
-  auction?: unknown | null
-  debt?: unknown | null
+  auction?: GameAuction | null
+  debt?: GameDebt | null
   decks: {
     chance: { drawPile: string[]; discardPile: string[] }
     worldFund: { drawPile: string[]; discardPile: string[] }

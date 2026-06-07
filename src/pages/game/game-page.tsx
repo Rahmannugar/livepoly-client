@@ -21,13 +21,15 @@ import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
 import { useGame } from '#/lib/game/useGame'
 import type {
+  GameAuction,
+  GameDebt,
   GameEventLogItem,
   GamePlayer,
   GameProperty,
   GameState,
 } from '#/lib/game/game.types'
 import type { Icon } from '@phosphor-icons/react'
-import type { CSSProperties, ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 
 type GamePageProps = {
   gameId: string
@@ -99,6 +101,7 @@ const propertySetColors: Record<string, string> = {
 export function GamePage({ gameId }: GamePageProps) {
   const game = useGame(gameId)
   const state = game.state
+  const [auctionBidAmount, setAuctionBidAmount] = useState(10)
   const currentTurnPlayer = state
     ? findPlayer(state.players, state.currentTurnRoomPlayerId)
     : null
@@ -108,6 +111,9 @@ export function GamePage({ gameId }: GamePageProps) {
   const recentEvents = game.events.slice(0, 5)
   const pendingTile = state?.pendingTileKey
     ? gameTiles.find((tile) => tile.key === state.pendingTileKey)
+    : null
+  const auctionTile = state?.auction
+    ? gameTiles.find((tile) => tile.key === state.auction?.tileKey)
     : null
   const primaryAction = getPrimaryAction({
     access: game.access,
@@ -119,6 +125,13 @@ export function GamePage({ gameId }: GamePageProps) {
   })
   const isRollingDice =
     game.commandPending && primaryAction.command === 'roll'
+  const minimumAuctionBid = getMinimumAuctionBid(state?.auction)
+
+  useEffect(() => {
+    if (state?.auction) {
+      setAuctionBidAmount(getMinimumAuctionBid(state.auction))
+    }
+  }, [state?.auction?.currentBid, state?.auction?.tileKey])
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
@@ -231,7 +244,29 @@ export function GamePage({ gameId }: GamePageProps) {
 
           <aside className="order-3 grid gap-3 md:grid-cols-2 xl:order-3 xl:grid-cols-1 xl:content-start">
             <GamePanel title="Actions" icon={DiceFiveIcon}>
-              {primaryAction.command === 'propertyDecision' ? (
+              {state?.phase === 'awaiting_debt_resolution' && state.debt ? (
+                <DebtActions
+                  debt={state.debt}
+                  players={state.players}
+                  roomPlayerId={game.roomPlayerId}
+                  commandPending={game.commandPending}
+                  onPayDebt={() => void game.payDebt()}
+                  onDeclareBankruptcy={() => void game.declareBankruptcy()}
+                />
+              ) : state?.phase === 'awaiting_auction_bid' && state.auction ? (
+                <AuctionActions
+                  auction={state.auction}
+                  players={state.players}
+                  roomPlayerId={game.roomPlayerId}
+                  tileName={auctionTile?.name ?? state.auction.tileKey}
+                  bidAmount={auctionBidAmount}
+                  minimumBid={minimumAuctionBid}
+                  commandPending={game.commandPending}
+                  onBidAmountChange={setAuctionBidAmount}
+                  onPlaceBid={() => void game.placeAuctionBid(auctionBidAmount)}
+                  onPass={() => void game.passAuctionBid()}
+                />
+              ) : primaryAction.command === 'propertyDecision' ? (
                 <div className="grid gap-2">
                   <button
                     type="button"
@@ -305,6 +340,188 @@ export function GamePage({ gameId }: GamePageProps) {
         </div>
       </section>
     </main>
+  )
+}
+
+function AuctionActions({
+  auction,
+  players,
+  roomPlayerId,
+  tileName,
+  bidAmount,
+  minimumBid,
+  commandPending,
+  onBidAmountChange,
+  onPlaceBid,
+  onPass,
+}: {
+  auction: GameAuction
+  players: GamePlayer[]
+  roomPlayerId: string | null
+  tileName: string
+  bidAmount: number
+  minimumBid: number
+  commandPending: boolean
+  onBidAmountChange: (amount: number) => void
+  onPlaceBid: () => void
+  onPass: () => void
+}) {
+  const highestBidder = findPlayer(players, auction.highestBidderRoomPlayerId)
+  const hasPassed = Boolean(
+    roomPlayerId && auction.passedRoomPlayerIds.includes(roomPlayerId),
+  )
+  const canBid = Boolean(
+    roomPlayerId &&
+      auction.activeRoomPlayerIds.includes(roomPlayerId) &&
+      !hasPassed,
+  )
+
+  return (
+    <div className="game-auction-panel grid gap-4">
+      <div>
+        <p className="app-kicker">Auction</p>
+        <h3 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)]">
+          {tileName}
+        </h3>
+        <p className="mt-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          Current bid is ${formatMoney(auction.currentBid)}.{' '}
+          {highestBidder
+            ? `${getPlayerName(highestBidder)} leads.`
+            : 'No one has bid yet.'}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <StatePill label="Minimum" value={`$${formatMoney(minimumBid)}`} />
+        <StatePill
+          label="Active"
+          value={`${auction.activeRoomPlayerIds.length - auction.passedRoomPlayerIds.length}`}
+        />
+      </div>
+
+      <label className="grid gap-2 text-sm font-black text-[var(--sea-ink)]">
+        Bid amount
+        <input
+          type="number"
+          min={minimumBid}
+          step={10}
+          disabled={!canBid || commandPending}
+          value={bidAmount}
+          onChange={(event) =>
+            onBidAmountChange(Number.parseInt(event.target.value, 10) || minimumBid)
+          }
+          className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
+        />
+      </label>
+
+      <div className="grid gap-2">
+        <button
+          type="button"
+          disabled={!canBid || commandPending || bidAmount < minimumBid}
+          className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+            commandPending ? 'game-command-button--active' : ''
+          }`}
+          onClick={onPlaceBid}
+        >
+          {commandPending ? (
+            <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
+          ) : null}
+          Place bid
+        </button>
+        <button
+          type="button"
+          disabled={!canBid || commandPending}
+          className="inline-flex h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+          onClick={onPass}
+        >
+          Pass
+        </button>
+      </div>
+
+      {!canBid ? (
+        <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          {hasPassed
+            ? 'You have passed in this auction.'
+            : 'Waiting for active bidders.'}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+function DebtActions({
+  debt,
+  players,
+  roomPlayerId,
+  commandPending,
+  onPayDebt,
+  onDeclareBankruptcy,
+}: {
+  debt: GameDebt
+  players: GamePlayer[]
+  roomPlayerId: string | null
+  commandPending: boolean
+  onPayDebt: () => void
+  onDeclareBankruptcy: () => void
+}) {
+  const debtor = findPlayer(players, debt.roomPlayerId)
+  const creditor = findPlayer(players, debt.creditorRoomPlayerId)
+  const isDebtor = roomPlayerId === debt.roomPlayerId
+  const canPay = Boolean(isDebtor && debtor && debtor.cash >= debt.amount)
+  const creditorName = creditor ? getPlayerName(creditor) : 'the bank'
+
+  return (
+    <div className="game-debt-panel grid gap-4">
+      <div>
+        <p className="app-kicker">Debt</p>
+        <h3 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)]">
+          ${formatMoney(debt.amount)} due
+        </h3>
+        <p className="mt-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          {debtor ? getPlayerName(debtor) : 'A player'} owes {creditorName} for{' '}
+          {formatDebtReason(debt.reason)}.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <StatePill label="Cash" value={debtor ? `$${formatMoney(debtor.cash)}` : '...'} />
+        <StatePill label="Owed to" value={creditorName} />
+      </div>
+
+      <div className="grid gap-2">
+        <button
+          type="button"
+          disabled={!canPay || commandPending}
+          className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+            commandPending ? 'game-command-button--active' : ''
+          }`}
+          onClick={onPayDebt}
+        >
+          {commandPending ? (
+            <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
+          ) : null}
+          Pay debt
+        </button>
+        <button
+          type="button"
+          disabled={!isDebtor || commandPending}
+          className="inline-flex h-11 w-full items-center justify-center rounded-full border border-red-500/45 bg-red-500/10 px-5 text-sm font-bold text-red-500 transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+          onClick={onDeclareBankruptcy}
+        >
+          Declare bankruptcy
+        </button>
+      </div>
+
+      {!isDebtor ? (
+        <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          Waiting for {debtor ? getPlayerName(debtor) : 'the indebted player'} to resolve this.
+        </p>
+      ) : !canPay ? (
+        <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          You need more cash before this can be paid.
+        </p>
+      ) : null}
+    </div>
   )
 }
 
@@ -705,12 +922,31 @@ function formatEventType(type: string) {
   return type.replaceAll('_', ' ')
 }
 
+function formatDebtReason(reason: GameDebt['reason']) {
+  const labels: Record<GameDebt['reason'], string> = {
+    rent: 'rent',
+    tax: 'tax',
+    card: 'a card',
+    jail_fine: 'a jail fine',
+  }
+
+  return labels[reason]
+}
+
 function formatDice(dice?: readonly [number, number] | null) {
   if (!dice) {
     return 'Dice ready'
   }
 
   return `${dice[0]} + ${dice[1]}`
+}
+
+function getMinimumAuctionBid(auction?: GameAuction | null) {
+  if (!auction || auction.currentBid <= 0) {
+    return 10
+  }
+
+  return auction.currentBid + 10
 }
 
 function getPrimaryAction({
