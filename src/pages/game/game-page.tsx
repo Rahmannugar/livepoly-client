@@ -373,7 +373,7 @@ export function GamePage({ gameId }: GamePageProps) {
             </GamePanel>
 
             <GamePanel title="Events" icon={ListChecksIcon}>
-              <EventList events={recentEvents} />
+              <EventList events={recentEvents} players={state?.players ?? []} />
             </GamePanel>
           </aside>
         </div>
@@ -979,7 +979,13 @@ function PropertyList({
   )
 }
 
-function EventList({ events }: { events: GameEventLogItem[] }) {
+function EventList({
+  events,
+  players,
+}: {
+  events: GameEventLogItem[]
+  players: GamePlayer[]
+}) {
   if (events.length === 0) {
     return (
       <p className="text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
@@ -996,7 +1002,7 @@ function EventList({ events }: { events: GameEventLogItem[] }) {
           className="game-event-card rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3"
         >
           <p className="text-sm font-black text-[var(--sea-ink)]">
-            {formatEventType(event.type)}
+            {formatEventSummary(event, players)}
           </p>
           <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
             {new Date(event.createdAt).toLocaleTimeString([], {
@@ -1113,6 +1119,203 @@ function formatEventType(type: string) {
   return type.replaceAll('_', ' ')
 }
 
+function formatEventSummary(event: GameEventLogItem, players: GamePlayer[]) {
+  const payload = event.payload
+  const player = getEventPlayerName(players, payload, 'roomPlayerId')
+  const payer = getEventPlayerName(players, payload, 'payerRoomPlayerId')
+  const owner = getEventPlayerName(players, payload, 'ownerRoomPlayerId')
+  const tile = getEventTileName(payload)
+  const amount = getEventNumber(payload, 'amount')
+  const dice = getEventDice(payload)
+
+  switch (event.type) {
+    case 'player_moved': {
+      const from = getEventNumber(payload, 'from')
+      const to = getEventNumber(payload, 'to')
+
+      if (from !== null && to !== null) {
+        return `${player} moved from ${from} to ${to}.`
+      }
+
+      return `${player} moved.`
+    }
+
+    case 'player_rolled_doubles':
+      return `${player} rolled doubles${dice ? ` (${formatDice(dice)})` : ''}.`
+
+    case 'player_rolled_third_doubles':
+      return `${player} rolled three doubles and went to Jail.`
+
+    case 'player_passed_go':
+      return amount === null
+        ? `${player} passed Go.`
+        : `${player} passed Go and collected $${formatMoney(amount)}.`
+
+    case 'player_landed_on_tile':
+      return `${player} landed on ${tile}.`
+
+    case 'card_drawn':
+      return `${player} drew a ${formatDeckName(payload)} card.`
+
+    case 'card_applied':
+      return `${player} resolved a ${formatDeckName(payload)} card.`
+
+    case 'player_sent_to_jail':
+      return `${player} was sent to Jail.`
+
+    case 'jail_escape_roll_succeeded':
+      return `${player} rolled doubles and left Jail.`
+
+    case 'jail_escape_roll_failed': {
+      const jailTurnCount = getEventNumber(payload, 'jailTurnCount')
+
+      return `${player} stayed in Jail${
+        jailTurnCount === null ? '.' : ` (${jailTurnCount}/3).`
+      }`
+    }
+
+    case 'jail_forced_fine_paid':
+      return `${player} paid the forced Jail fine.`
+
+    case 'jail_fine_paid':
+      return `${player} paid $${formatMoney(amount ?? 50)} to leave Jail.`
+
+    case 'player_released_from_jail':
+      return `${player} left Jail.`
+
+    case 'property_bought':
+      return `${player} bought ${tile}${
+        amount === null ? '.' : ` for $${formatMoney(amount)}.`
+      }`
+
+    case 'property_purchase_declined':
+      return `${player} sent ${tile} to auction.`
+
+    case 'auction_started':
+      return `${tile} went to auction.`
+
+    case 'auction_bid_placed':
+      return `${player} bid $${formatMoney(amount ?? 0)} on ${tile}.`
+
+    case 'auction_bid_passed':
+      return `${player} passed on ${tile}.`
+
+    case 'auction_won':
+      return `${player} won ${tile}${
+        amount === null ? '.' : ` for $${formatMoney(amount)}.`
+      }`
+
+    case 'rent_paid':
+      return `${payer} paid ${owner} $${formatMoney(amount ?? 0)} rent on ${tile}.`
+
+    case 'tax_paid':
+      return `${player} paid $${formatMoney(amount ?? 0)} tax.`
+
+    case 'payment_required':
+      return `${player} needs $${formatMoney(amount ?? 0)}.`
+
+    case 'debt_paid':
+      return `${player} cleared a $${formatMoney(amount ?? 0)} debt.`
+
+    case 'property_house_built': {
+      const houseCount = getEventNumber(payload, 'houseCount')
+
+      return `${player} built a house on ${tile}${
+        houseCount === null ? '.' : ` (${houseCount}).`
+      }`
+    }
+
+    case 'property_hotel_built':
+      return `${player} built a hotel on ${tile}.`
+
+    case 'property_house_sold':
+      return `${player} sold a house on ${tile}.`
+
+    case 'property_hotel_sold':
+      return `${player} sold a hotel on ${tile}.`
+
+    case 'property_mortgaged':
+      return `${player} mortgaged ${tile}.`
+
+    case 'property_unmortgaged':
+      return `${player} unmortgaged ${tile}.`
+
+    case 'player_bankrupt':
+      return `${player} went bankrupt.`
+
+    case 'game_finished_by_bankruptcy':
+      return 'The game ended by bankruptcy.'
+
+    case 'game_finished_by_time':
+      return 'The game ended on time.'
+
+    case 'turn_ended':
+      return `${player} ended the turn.`
+
+    default:
+      return formatEventType(event.type)
+  }
+}
+
+function getEventPlayerName(
+  players: GamePlayer[],
+  payload: GameEventLogItem['payload'],
+  key: string,
+) {
+  const roomPlayerId = getEventString(payload, key)
+  const player = findPlayer(players, roomPlayerId)
+
+  return player ? getPlayerName(player) : 'A player'
+}
+
+function getEventTileName(payload: GameEventLogItem['payload']) {
+  const tileKey = getEventString(payload, 'tileKey')
+  const tile = gameTiles.find((item) => item.key === tileKey)
+
+  return tile?.name ?? tileKey ?? 'a tile'
+}
+
+function getEventString(payload: GameEventLogItem['payload'], key: string) {
+  const value = payload[key]
+
+  return typeof value === 'string' ? value : null
+}
+
+function getEventNumber(payload: GameEventLogItem['payload'], key: string) {
+  const value = payload[key]
+
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function getEventDice(payload: GameEventLogItem['payload']) {
+  const value = payload.dice
+
+  if (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    typeof value[0] === 'number' &&
+    typeof value[1] === 'number'
+  ) {
+    return [value[0], value[1]] as const
+  }
+
+  return null
+}
+
+function formatDeckName(payload: GameEventLogItem['payload']) {
+  const deckKey = getEventString(payload, 'deckKey')
+
+  if (deckKey === 'world_fund') {
+    return 'World Fund'
+  }
+
+  if (deckKey === 'chance') {
+    return 'Chance'
+  }
+
+  return 'card'
+}
+
 function getRemainingMatchTimeMs(
   expiresAt: number | null | undefined,
   currentTimeMs: number,
@@ -1218,7 +1421,7 @@ function getPrimaryAction({
       command: null,
       enabled: false,
       label: 'Unavailable',
-      copy: 'Could not open this game right now.',
+      copy: 'This game could not be opened right now.',
     } as const
   }
 
@@ -1245,7 +1448,7 @@ function getPrimaryAction({
       command: 'roll',
       enabled: true,
       label: 'Roll dice',
-      copy: 'Roll to move around the game.',
+      copy: 'Roll to move and resolve the tile you land on.',
     } as const
   }
 
@@ -1254,7 +1457,7 @@ function getPrimaryAction({
       command: 'endTurn',
       enabled: true,
       label: 'End turn',
-      copy: 'Pass play to the next player.',
+      copy: 'Your move is settled. Pass play to the next player.',
     } as const
   }
 
@@ -1273,6 +1476,6 @@ function getPrimaryAction({
     command: null,
     enabled: false,
     label: 'No action',
-    copy: 'No move is available right now.',
+    copy: 'The game is resolving the current move.',
   } as const
 }
