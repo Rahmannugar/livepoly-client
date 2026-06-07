@@ -354,6 +354,10 @@ export function useGame(gameId: string) {
     passAuctionBid: () => runCommand(GAME_SOCKET_EVENTS.passAuctionBid),
     payDebt: () => runCommand(GAME_SOCKET_EVENTS.payDebt),
     declareBankruptcy: () => runCommand(GAME_SOCKET_EVENTS.declareBankruptcy),
+    mortgageProperty: (tileKey: string) =>
+      runCommand(GAME_SOCKET_EVENTS.mortgageProperty, { tileKey }),
+    unmortgageProperty: (tileKey: string) =>
+      runCommand(GAME_SOCKET_EVENTS.unmortgageProperty, { tileKey }),
     endTurn: () => runCommand(GAME_SOCKET_EVENTS.endTurn),
   }
 }

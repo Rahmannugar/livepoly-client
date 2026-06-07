@@ -316,11 +316,11 @@ button:disabled,
 
 .game-tile__icon {
   position: absolute;
-  top: -0.15rem;
-  left: -0.05rem;
+  top: -0.05rem;
+  left: -0.02rem;
   display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 1.35rem;
+  height: 1.35rem;
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -332,15 +332,16 @@ button:disabled,
 .game-tile__label {
   display: block;
   overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .game-tile__label--special {
-  padding-top: 1.85rem;
+  padding-top: 1.38rem;
 }
 
 @media (min-width: 1536px) {
   .game-tile__label--special {
-    padding-top: 2rem;
+    padding-top: 1.55rem;
   }
 }
 
