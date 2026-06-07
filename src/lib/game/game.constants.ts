@@ -7,6 +7,7 @@ export const GAME_SOCKET_EVENTS = {
   placeAuctionBid: 'game:place-auction-bid',
   passAuctionBid: 'game:pass-auction-bid',
   payDebt: 'game:pay-debt',
+  payJailFine: 'game:pay-jail-fine',
   declareBankruptcy: 'game:declare-bankruptcy',
   buildProperty: 'game:build-property',
   sellBuilding: 'game:sell-building',
@@ -27,4 +28,5 @@ export const GAME_SOCKET_EVENTS = {
 
 export const GAME_HEARTBEAT_INTERVAL_MS = 25_000
 export const GAME_PRESENCE_INTERVAL_MS = 30_000
-export const GAME_SOCKET_ACK_TIMEOUT_MS = 8_000
+export const GAME_SOCKET_ACKNOWLEDGEMENT_TIMEOUT_MS = 8_000
+export const GAME_SOCKET_EXCEPTION_EVENT = 'exception'

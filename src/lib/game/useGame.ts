@@ -7,7 +7,8 @@ import { getAccessToken } from '#/lib/auth/auth.service'
 import {
   GAME_HEARTBEAT_INTERVAL_MS,
   GAME_PRESENCE_INTERVAL_MS,
-  GAME_SOCKET_ACK_TIMEOUT_MS,
+  GAME_SOCKET_ACKNOWLEDGEMENT_TIMEOUT_MS,
+  GAME_SOCKET_EXCEPTION_EVENT,
   GAME_SOCKET_EVENTS,
 } from './game.constants'
 import type {
@@ -24,9 +25,14 @@ import type {
   GameStateEvent,
 } from './game.types'
 
-type SocketAck<T> = {
+type SocketAcknowledgement<T> = {
   event: string
   data: T
+}
+
+type SocketExceptionPayload = {
+  message?: unknown
+  code?: string
 }
 
 type GameCommandStateResponse = GameStateEvent & {
@@ -57,6 +63,53 @@ function getGameSocketErrorMessage(message: string) {
   }
 
   return normalized
+}
+
+function getSocketPayloadMessage(payload: unknown) {
+  if (typeof payload === 'string') {
+    return payload
+  }
+
+  if (!payload || typeof payload !== 'object') {
+    return 'Game socket request failed.'
+  }
+
+  const message = (payload as SocketExceptionPayload).message
+
+  if (typeof message === 'string') {
+    return message
+  }
+
+  if (message && typeof message === 'object') {
+    const nestedMessage = (message as SocketExceptionPayload).message
+
+    if (typeof nestedMessage === 'string') {
+      return nestedMessage
+    }
+  }
+
+  return 'Game socket request failed.'
+}
+
+function isSocketAcknowledgement<T>(
+  response: unknown,
+): response is SocketAcknowledgement<T> {
+  return Boolean(
+    response &&
+      typeof response === 'object' &&
+      'event' in response &&
+      'data' in response,
+  )
+}
+
+function isGameResponse<TResponse extends { gameId?: string }>(
+  response: unknown,
+): response is TResponse {
+  return Boolean(
+    response &&
+      typeof response === 'object' &&
+      ('gameId' in response || 'state' in response || 'items' in response),
+  )
 }
 
 export function useGame(gameId: string) {
@@ -124,9 +177,9 @@ export function useGame(gameId: string) {
           reject(new Error(getGameSocketErrorMessage(data.message)))
         }
 
-        const handleSocketError = (data: GameSocketErrorEvent) => {
+        const handleSocketError = (data: unknown) => {
           cleanup()
-          reject(new Error(getGameSocketErrorMessage(data.message)))
+          reject(new Error(getGameSocketErrorMessage(getSocketPayloadMessage(data))))
         }
 
         const cleanup = () => {
@@ -134,19 +187,31 @@ export function useGame(gameId: string) {
           socket.off(expectedEvent, handleEvent)
           socket.off(GAME_SOCKET_EVENTS.commandRejected, handleCommandRejected)
           socket.off(GAME_SOCKET_EVENTS.error, handleSocketError)
+          socket.off(GAME_SOCKET_EXCEPTION_EVENT, handleSocketError)
         }
 
         timeoutId = window.setTimeout(() => {
           cleanup()
           reject(new Error('Game server did not respond in time'))
-        }, GAME_SOCKET_ACK_TIMEOUT_MS)
+        }, GAME_SOCKET_ACKNOWLEDGEMENT_TIMEOUT_MS)
 
         socket.on(expectedEvent, handleEvent)
         socket.on(GAME_SOCKET_EVENTS.commandRejected, handleCommandRejected)
         socket.on(GAME_SOCKET_EVENTS.error, handleSocketError)
-        socket.emit(event, payload, (response?: SocketAck<TResponse>) => {
-          if (response?.data) {
+        socket.on(GAME_SOCKET_EXCEPTION_EVENT, handleSocketError)
+        socket.emit(event, payload, (response?: unknown) => {
+          if (isSocketAcknowledgement<TResponse>(response)) {
             handleEvent(response.data)
+            return
+          }
+
+          if (isGameResponse<TResponse>(response)) {
+            handleEvent(response)
+            return
+          }
+
+          if (response) {
+            handleSocketError(response)
           }
         })
       })
@@ -353,6 +418,7 @@ export function useGame(gameId: string) {
       runCommand(GAME_SOCKET_EVENTS.placeAuctionBid, { amount }),
     passAuctionBid: () => runCommand(GAME_SOCKET_EVENTS.passAuctionBid),
     payDebt: () => runCommand(GAME_SOCKET_EVENTS.payDebt),
+    payJailFine: () => runCommand(GAME_SOCKET_EVENTS.payJailFine),
     declareBankruptcy: () => runCommand(GAME_SOCKET_EVENTS.declareBankruptcy),
     buildProperty: (tileKey: string) =>
       runCommand(GAME_SOCKET_EVENTS.buildProperty, { tileKey }),

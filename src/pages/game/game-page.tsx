@@ -104,6 +104,7 @@ export function GamePage({ gameId }: GamePageProps) {
   const game = useGame(gameId)
   const state = game.state
   const [auctionBidAmount, setAuctionBidAmount] = useState(10)
+  const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
   const currentTurnPlayer = state
     ? findPlayer(state.players, state.currentTurnRoomPlayerId)
     : null
@@ -128,12 +129,31 @@ export function GamePage({ gameId }: GamePageProps) {
   const isRollingDice =
     game.commandPending && primaryAction.command === 'roll'
   const minimumAuctionBid = getMinimumAuctionBid(state?.auction)
+  const remainingMatchTimeMs = getRemainingMatchTimeMs(
+    state?.expiresAt,
+    currentTimeMs,
+  )
+  const currentPlayerInJail = Boolean(game.currentPlayer?.inJail)
 
   useEffect(() => {
     if (state?.auction) {
       setAuctionBidAmount(getMinimumAuctionBid(state.auction))
     }
   }, [state?.auction?.currentBid, state?.auction?.tileKey])
+
+  useEffect(() => {
+    if (!state?.expiresAt || state.phase === 'finished') {
+      return
+    }
+
+    setCurrentTimeMs(Date.now())
+
+    const intervalId = window.setInterval(() => {
+      setCurrentTimeMs(Date.now())
+    }, 1_000)
+
+    return () => window.clearInterval(intervalId)
+  }, [state?.expiresAt, state?.phase])
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
@@ -184,6 +204,10 @@ export function GamePage({ gameId }: GamePageProps) {
                 <StatePill label="Turn" value={state ? String(state.turnNumber) : '...'} />
                 <StatePill label="Mode" value={state?.mode ?? '...'} />
                 <StatePill label="Phase" value={formatPhase(state?.phase)} />
+                <StatePill
+                  label="Time"
+                  value={formatRemainingMatchTime(remainingMatchTimeMs)}
+                />
                 <StatePill
                   label="Online"
                   value={`${game.presence?.playersOnline ?? 0} players`}
@@ -254,6 +278,13 @@ export function GamePage({ gameId }: GamePageProps) {
                   commandPending={game.commandPending}
                   onPayDebt={() => void game.payDebt()}
                   onDeclareBankruptcy={() => void game.declareBankruptcy()}
+                />
+              ) : currentPlayerInJail && game.isCurrentTurn ? (
+                <JailActions
+                  player={game.currentPlayer}
+                  commandPending={game.commandPending}
+                  onRoll={() => void game.rollAndMove()}
+                  onPayFine={() => void game.payJailFine()}
                 />
               ) : state?.phase === 'awaiting_auction_bid' && state.auction ? (
                 <AuctionActions
@@ -348,6 +379,76 @@ export function GamePage({ gameId }: GamePageProps) {
         </div>
       </section>
     </main>
+  )
+}
+
+function JailActions({
+  player,
+  commandPending,
+  onRoll,
+  onPayFine,
+}: {
+  player: GamePlayer | null
+  commandPending: boolean
+  onRoll: () => void
+  onPayFine: () => void
+}) {
+  const canPayFine = Boolean(player && player.cash >= 50)
+
+  return (
+    <div className="game-jail-panel grid gap-4">
+      <div>
+        <p className="app-kicker">Jail</p>
+        <h3 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)]">
+          Roll doubles or pay $50.
+        </h3>
+        <p className="mt-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          You can try rolling doubles. After three failed attempts, the fine is
+          forced if you can afford it.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <StatePill
+          label="Attempts"
+          value={`${player?.jailTurnCount ?? 0}/3`}
+        />
+        <StatePill
+          label="Cash"
+          value={player ? `$${formatMoney(player.cash)}` : '...'}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <button
+          type="button"
+          disabled={commandPending}
+          className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+            commandPending ? 'game-command-button--active' : ''
+          }`}
+          onClick={onRoll}
+        >
+          {commandPending ? (
+            <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
+          ) : null}
+          Roll for doubles
+        </button>
+        <button
+          type="button"
+          disabled={!canPayFine || commandPending}
+          className="inline-flex h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+          onClick={onPayFine}
+        >
+          Pay $50 fine
+        </button>
+      </div>
+
+      {!canPayFine ? (
+        <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          You need $50 cash to pay the fine.
+        </p>
+      ) : null}
+    </div>
   )
 }
 
@@ -1010,6 +1111,42 @@ function formatPhase(phase?: string) {
 
 function formatEventType(type: string) {
   return type.replaceAll('_', ' ')
+}
+
+function getRemainingMatchTimeMs(
+  expiresAt: number | null | undefined,
+  currentTimeMs: number,
+) {
+  if (!expiresAt) {
+    return null
+  }
+
+  return Math.max(0, expiresAt - currentTimeMs)
+}
+
+function formatRemainingMatchTime(remainingMs: number | null) {
+  if (remainingMs === null) {
+    return '...'
+  }
+
+  if (remainingMs <= 0) {
+    return 'Ending'
+  }
+
+  const totalSeconds = Math.ceil(remainingMs / 1_000)
+  const hours = Math.floor(totalSeconds / 3_600)
+  const minutes = Math.floor((totalSeconds % 3_600) / 60)
+  const seconds = totalSeconds % 60
+
+  if (hours > 0) {
+    return `${hours}:${padTimerValue(minutes)}:${padTimerValue(seconds)}`
+  }
+
+  return `${minutes}:${padTimerValue(seconds)}`
+}
+
+function padTimerValue(value: number) {
+  return String(value).padStart(2, '0')
 }
 
 function formatDebtReason(reason: GameDebt['reason']) {
