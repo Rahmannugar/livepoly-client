@@ -10,6 +10,7 @@ import {
   PropertyDecisionActions,
   type PrimaryGameAction,
 } from './game-primary-actions'
+import { TileInfoPanel } from './game-tile-info'
 
 export type { PrimaryGameAction } from './game-primary-actions'
 
@@ -26,6 +27,8 @@ export function GameActionsPanel({
   isCurrentTurn,
   auctionTileName,
   pendingTile,
+  activeTile,
+  activeTileLabel,
   auctionBidAmount,
   minimumAuctionBid,
   onAuctionBidAmountChange,
@@ -51,6 +54,8 @@ export function GameActionsPanel({
   isCurrentTurn: boolean
   auctionTileName: string | null
   pendingTile: GameTile | null
+  activeTile: GameTile | null
+  activeTileLabel: string
   auctionBidAmount: number
   minimumAuctionBid: number
   onAuctionBidAmountChange: (amount: number) => void
@@ -64,8 +69,17 @@ export function GameActionsPanel({
   onPayJailFine: () => void
   onDeclareBankruptcy: () => void
 }) {
+  const shouldShowActiveTile =
+    Boolean(activeTile) && primaryAction.command !== 'propertyDecision'
+
   return (
     <GamePanel title="Actions" icon={DiceFiveIcon}>
+      {shouldShowActiveTile ? (
+        <div className="mb-4">
+          <TileInfoPanel tile={activeTile} label={activeTileLabel} />
+        </div>
+      ) : null}
+
       {debt ? (
         <DebtActions
           debt={debt}

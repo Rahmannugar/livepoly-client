@@ -7,6 +7,7 @@ import {
 
 type TileInfoPanelProps = {
   tile: GameTile | null
+  label?: string
 }
 
 type PropertyDecisionControlsProps = {
@@ -16,7 +17,7 @@ type PropertyDecisionControlsProps = {
   onDeclinePropertyPurchase: () => void
 }
 
-export function TileInfoPanel({ tile }: TileInfoPanelProps) {
+export function TileInfoPanel({ tile, label }: TileInfoPanelProps) {
   if (!tile) {
     return null
   }
@@ -35,7 +36,7 @@ export function TileInfoPanel({ tile }: TileInfoPanelProps) {
   return (
     <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4">
       <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
-        {getTileKindLabel(tile)}
+        {label ?? getTileKindLabel(tile)}
       </p>
       <p className="mt-1 text-2xl font-black leading-tight text-[var(--sea-ink)]">
         {tile.name}

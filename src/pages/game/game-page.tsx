@@ -48,6 +48,16 @@ export function GamePage({ gameId }: GamePageProps) {
   const auctionTile = state?.auction
     ? gameTiles.find((tile) => tile.key === state.auction?.tileKey)
     : null
+  const currentPlayerTile =
+    currentTurnPlayer && Number.isInteger(currentTurnPlayer.position)
+      ? gameTiles.find((tile) => tile.index === currentTurnPlayer.position)
+      : null
+  const activeTile = pendingTile ?? auctionTile ?? currentPlayerTile ?? null
+  const activeTileLabel = pendingTile
+    ? 'Landed square'
+    : auctionTile
+      ? 'Auction square'
+      : 'Current square'
   const primaryAction = getPrimaryAction({
     access: game.access,
     isCurrentTurn: game.isCurrentTurn,
@@ -190,6 +200,8 @@ export function GamePage({ gameId }: GamePageProps) {
               isCurrentTurn={game.isCurrentTurn}
               auctionTileName={auctionTile?.name ?? null}
               pendingTile={pendingTile ?? null}
+              activeTile={activeTile}
+              activeTileLabel={activeTileLabel}
               auctionBidAmount={auctionBidAmount}
               minimumAuctionBid={minimumAuctionBid}
               onAuctionBidAmountChange={setAuctionBidAmount}
