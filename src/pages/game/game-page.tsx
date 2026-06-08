@@ -23,6 +23,7 @@ import {
   formatRemainingMatchTime,
   getRemainingMatchTimeMs,
 } from '#/lib/game/game-time'
+import type { GameAuction, GameDebt } from '#/lib/game/game.types'
 import { useGame } from '#/lib/game/useGame'
 
 type GamePageProps = {
@@ -54,6 +55,9 @@ export function GamePage({ gameId }: GamePageProps) {
     status: game.status,
     hasState: Boolean(state),
     pendingTileName: pendingTile?.name,
+    roomPlayerId: game.roomPlayerId,
+    auction: state?.auction,
+    debt: state?.debt,
   })
   const isRollingDice =
     game.commandPending && primaryAction.command === 'roll'
@@ -237,6 +241,9 @@ function getPrimaryAction({
   status,
   hasState,
   pendingTileName,
+  roomPlayerId,
+  auction,
+  debt,
 }: {
   access: string | null
   isCurrentTurn: boolean
@@ -244,6 +251,9 @@ function getPrimaryAction({
   status: string
   hasState: boolean
   pendingTileName?: string
+  roomPlayerId: string | null
+  auction?: GameAuction | null
+  debt?: GameDebt | null
 }): PrimaryGameAction {
   if (!hasState && (status === 'connecting' || status === 'connected')) {
     return {
@@ -278,6 +288,50 @@ function getPrimaryAction({
       enabled: false,
       label: 'Watching game',
       copy: 'Spectators can watch the game but cannot make moves.',
+    }
+  }
+
+  if (phase === 'finished' || phase === 'cancelled') {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Game over',
+      copy: 'This game has ended.',
+    }
+  }
+
+  if (phase === 'awaiting_auction_bid' && auction) {
+    const hasPassed = Boolean(
+      roomPlayerId && auction.passedRoomPlayerIds.includes(roomPlayerId),
+    )
+    const canBid = Boolean(
+      roomPlayerId &&
+        auction.activeRoomPlayerIds.includes(roomPlayerId) &&
+        !hasPassed,
+    )
+
+    return {
+      command: null,
+      enabled: false,
+      label: canBid ? 'Auction live' : hasPassed ? 'Passed' : 'Auction live',
+      copy: canBid
+        ? 'Place a bid or pass in the auction panel.'
+        : hasPassed
+          ? 'You have passed in this auction.'
+          : 'Waiting for active bidders.',
+    }
+  }
+
+  if (phase === 'awaiting_debt_resolution' && debt) {
+    const isDebtor = roomPlayerId === debt.roomPlayerId
+
+    return {
+      command: null,
+      enabled: false,
+      label: isDebtor ? 'Debt due' : 'Debt pending',
+      copy: isDebtor
+        ? 'Clear the payment or declare bankruptcy.'
+        : 'Waiting for the indebted player to resolve payment.',
     }
   }
 
@@ -316,24 +370,6 @@ function getPrimaryAction({
       copy: pendingTileName
         ? `Choose whether to buy ${pendingTileName} or send it to auction.`
         : 'Choose whether to buy this property or send it to auction.',
-    }
-  }
-
-  if (phase === 'awaiting_auction_bid') {
-    return {
-      command: null,
-      enabled: false,
-      label: 'Auction live',
-      copy: 'Place a bid or pass in the auction panel.',
-    }
-  }
-
-  if (phase === 'awaiting_debt_resolution') {
-    return {
-      command: null,
-      enabled: false,
-      label: 'Debt due',
-      copy: 'Clear the payment or declare bankruptcy.',
     }
   }
 
