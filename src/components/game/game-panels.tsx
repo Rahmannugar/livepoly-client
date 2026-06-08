@@ -6,8 +6,8 @@ import {
 } from '@phosphor-icons/react'
 import {
   findPlayer,
+  formatCash,
   formatEventSummary,
-  formatMoney,
   formatPhase,
   gameTiles,
   getPlayerName,
@@ -19,7 +19,6 @@ import type {
   GameProperty,
   GameState,
 } from '#/lib/game/game.types'
-import { formatRemainingMatchTime } from '#/lib/game/game-time'
 import { GamePanel, LoadingBlock, PlayerToken, StatePill } from './game-primitives'
 
 export function PlayersPanel({
@@ -51,11 +50,9 @@ export function PlayersPanel({
 
 export function GameStatePanel({
   state,
-  remainingMatchTimeMs,
   playersOnline,
 }: {
   state: GameState | null
-  remainingMatchTimeMs: number | null
   playersOnline: number
 }) {
   return (
@@ -64,10 +61,6 @@ export function GameStatePanel({
         <StatePill label="Turn" value={state ? String(state.turnNumber) : '...'} />
         <StatePill label="Mode" value={state?.mode ?? '...'} />
         <StatePill label="Phase" value={formatPhase(state?.phase)} />
-        <StatePill
-          label="Time"
-          value={formatRemainingMatchTime(remainingMatchTimeMs)}
-        />
         <StatePill label="Online" value={`${playersOnline} players`} />
       </div>
     </GamePanel>
@@ -133,21 +126,19 @@ function PlayerRow({
   isYou: boolean
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
-      <div className="flex min-w-0 items-center gap-3">
-        <PlayerToken player={player} isActive={isCurrentTurn} />
-        <div className="min-w-0">
-          <p className="truncate text-sm font-black text-[var(--sea-ink)]">
-            {getPlayerName(player)}
-            {isYou ? ' (you)' : ''}
-          </p>
-          <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
-            {isCurrentTurn ? 'Taking turn' : `Tile ${player.position}`}
-          </p>
-        </div>
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+      <PlayerToken player={player} isActive={isCurrentTurn} />
+      <div className="min-w-0">
+        <p className="truncate text-sm font-black text-[var(--sea-ink)]">
+          {getPlayerName(player)}
+          {isYou ? ' (you)' : ''}
+        </p>
+        <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
+          {isCurrentTurn ? 'Taking turn' : `Tile ${player.position}`}
+        </p>
       </div>
-      <span className="shrink-0 text-xs font-black text-[var(--sea-ink)]">
-        ${formatMoney(player.cash)}
+      <span className="min-w-fit text-right text-xs font-black text-[var(--sea-ink)]">
+        {formatCash(player.cash)}
       </span>
     </div>
   )
@@ -239,8 +230,8 @@ function PropertyList({
                       {property.hasHotel
                         ? 'Built out'
                         : property.houseCount === 4
-                          ? `Hotel $${formatMoney(buildingCost)}`
-                          : `Build $${formatMoney(buildingCost)}`}
+                          ? `Hotel ${formatCash(buildingCost)}`
+                          : `Build ${formatCash(buildingCost)}`}
                     </button>
                     <button
                       type="button"
@@ -248,7 +239,7 @@ function PropertyList({
                       className="inline-flex h-9 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onSellBuilding(property.tileKey)}
                     >
-                      Sell +${formatMoney(buildingCost / 2)}
+                      Sell +{formatCash(buildingCost / 2)}
                     </button>
                   </div>
                 ) : null}
@@ -267,8 +258,8 @@ function PropertyList({
                   }}
                 >
                   {property.mortgaged
-                    ? `Unmortgage $${formatMoney(unmortgageCost)}`
-                    : `Mortgage +$${formatMoney(mortgageValue)}`}
+                    ? `Unmortgage ${formatCash(unmortgageCost)}`
+                    : `Mortgage +${formatCash(mortgageValue)}`}
                 </button>
               </div>
             ) : null}

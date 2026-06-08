@@ -1,8 +1,8 @@
 import { SpinnerGapIcon } from '@phosphor-icons/react'
 import {
   findPlayer,
+  formatCash,
   formatDebtReason,
-  formatMoney,
   getPlayerName,
 } from '#/lib/game/game-board'
 import type { GameDebt, GamePlayer } from '#/lib/game/game.types'
@@ -34,7 +34,7 @@ export function DebtActions({
       <div>
         <p className="app-kicker">Debt</p>
         <h3 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)]">
-          ${formatMoney(debt.amount)} due
+          {formatCash(debt.amount)} due
         </h3>
         <p className="mt-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
           {debtor ? getPlayerName(debtor) : 'A player'} owes {creditorName} for{' '}
@@ -45,7 +45,7 @@ export function DebtActions({
       <div className="grid grid-cols-2 gap-2">
         <StatePill
           label="Cash"
-          value={debtor ? `$${formatMoney(debtor.cash)}` : '...'}
+          value={debtor ? formatCash(debtor.cash) : '...'}
         />
         <StatePill label="Owed to" value={creditorName} />
       </div>

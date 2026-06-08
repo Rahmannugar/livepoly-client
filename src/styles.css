@@ -331,7 +331,7 @@ button:disabled,
 
 .game-tile__label {
   display: block;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   hyphens: auto;
 }
 

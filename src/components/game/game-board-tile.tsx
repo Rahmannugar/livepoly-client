@@ -33,7 +33,7 @@ export function GameTileCell({
 
   return (
     <div
-      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--bg-base)] p-1 text-[var(--sea-ink)] sm:rounded-xl sm:p-1.5 2xl:rounded-2xl 2xl:p-2 ${
+      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-lg border border-[var(--line)] bg-[var(--bg-base)] p-1 text-[var(--sea-ink)] sm:rounded-xl sm:p-1.5 2xl:rounded-2xl 2xl:p-2 ${
         TileIcon ? 'game-tile--special' : ''
       }`}
       style={getTileGridStyle(tile.index)}
@@ -55,7 +55,7 @@ export function GameTileCell({
           </span>
         ) : null}
         <span
-          className={`game-tile__label line-clamp-3 text-[0.52rem] font-black leading-tight sm:text-[0.62rem] xl:text-[0.7rem] 2xl:text-[0.78rem] ${
+          className={`game-tile__label line-clamp-3 text-[0.5rem] font-black leading-tight sm:text-[0.6rem] xl:text-[0.66rem] 2xl:text-[0.74rem] ${
             TileIcon ? 'game-tile__label--special' : ''
           }`}
         >
@@ -99,6 +99,10 @@ function getTileGridStyle(index: number): CSSProperties {
 }
 
 function getTileLabel(tile: GameTile) {
+  if (tile.kind !== 'property') {
+    return tile.name
+  }
+
   return tile.shortName ?? tile.name
 }
 

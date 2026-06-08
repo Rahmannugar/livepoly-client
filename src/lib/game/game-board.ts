@@ -86,6 +86,10 @@ export function formatMoney(value: number) {
   return new Intl.NumberFormat('en-US').format(value)
 }
 
+export function formatCash(value: number) {
+  return `Z${formatMoney(value)}`
+}
+
 export function formatPhase(phase?: string) {
   return phase ? phase.replaceAll('_', ' ') : '...'
 }
@@ -154,7 +158,7 @@ export function formatEventSummary(
     case 'player_passed_go':
       return amount === null
         ? `${player} passed Go.`
-        : `${player} passed Go and collected $${formatMoney(amount)}.`
+        : `${player} passed Go and collected ${formatCash(amount)}.`
 
     case 'player_landed_on_tile':
       return `${player} landed on ${tile}.`
@@ -183,14 +187,14 @@ export function formatEventSummary(
       return `${player} paid the forced Jail fine.`
 
     case 'jail_fine_paid':
-      return `${player} paid $${formatMoney(amount ?? 50)} to leave Jail.`
+      return `${player} paid ${formatCash(amount ?? 50)} to leave Jail.`
 
     case 'player_released_from_jail':
       return `${player} left Jail.`
 
     case 'property_bought':
       return `${player} bought ${tile}${
-        amount === null ? '.' : ` for $${formatMoney(amount)}.`
+        amount === null ? '.' : ` for ${formatCash(amount)}.`
       }`
 
     case 'property_purchase_declined':
@@ -200,27 +204,27 @@ export function formatEventSummary(
       return `${tile} went to auction.`
 
     case 'auction_bid_placed':
-      return `${player} bid $${formatMoney(amount ?? 0)} on ${tile}.`
+      return `${player} bid ${formatCash(amount ?? 0)} on ${tile}.`
 
     case 'auction_bid_passed':
       return `${player} passed on ${tile}.`
 
     case 'auction_won':
       return `${player} won ${tile}${
-        amount === null ? '.' : ` for $${formatMoney(amount)}.`
+        amount === null ? '.' : ` for ${formatCash(amount)}.`
       }`
 
     case 'rent_paid':
-      return `${payer} paid ${owner} $${formatMoney(amount ?? 0)} rent on ${tile}.`
+      return `${payer} paid ${owner} ${formatCash(amount ?? 0)} rent on ${tile}.`
 
     case 'tax_paid':
-      return `${player} paid $${formatMoney(amount ?? 0)} tax.`
+      return `${player} paid ${formatCash(amount ?? 0)} tax.`
 
     case 'payment_required':
-      return `${player} needs $${formatMoney(amount ?? 0)}.`
+      return `${player} needs ${formatCash(amount ?? 0)}.`
 
     case 'debt_paid':
-      return `${player} cleared a $${formatMoney(amount ?? 0)} debt.`
+      return `${player} cleared a ${formatCash(amount ?? 0)} debt.`
 
     case 'property_house_built': {
       const houseCount = getEventNumber(payload, 'houseCount')

@@ -1,5 +1,5 @@
 import { SpinnerGapIcon } from '@phosphor-icons/react'
-import { formatMoney } from '#/lib/game/game-board'
+import { formatCash } from '#/lib/game/game-board'
 import type { GamePlayer } from '#/lib/game/game.types'
 import { StatePill } from './game-primitives'
 
@@ -21,7 +21,7 @@ export function JailActions({
       <div>
         <p className="app-kicker">Jail</p>
         <h3 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)]">
-          Roll doubles or pay $50.
+          Roll doubles or pay {formatCash(50)}.
         </h3>
         <p className="mt-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
           You can try rolling doubles. After three failed attempts, the fine is
@@ -36,7 +36,7 @@ export function JailActions({
         />
         <StatePill
           label="Cash"
-          value={player ? `$${formatMoney(player.cash)}` : '...'}
+          value={player ? formatCash(player.cash) : '...'}
         />
       </div>
 
@@ -60,13 +60,13 @@ export function JailActions({
           className="inline-flex h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
           onClick={onPayFine}
         >
-          Pay $50 fine
+          Pay {formatCash(50)} fine
         </button>
       </div>
 
       {!canPayFine ? (
         <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-          You need $50 cash to pay the fine.
+          You need {formatCash(50)} cash to pay the fine.
         </p>
       ) : null}
     </div>

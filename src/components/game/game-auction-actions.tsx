@@ -1,5 +1,5 @@
 import { SpinnerGapIcon } from '@phosphor-icons/react'
-import { findPlayer, formatMoney, getPlayerName } from '#/lib/game/game-board'
+import { findPlayer, formatCash, getPlayerName } from '#/lib/game/game-board'
 import type { GameAuction, GamePlayer } from '#/lib/game/game.types'
 import { StatePill } from './game-primitives'
 
@@ -44,7 +44,7 @@ export function AuctionActions({
           {tileName}
         </h3>
         <p className="mt-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-          Current bid is ${formatMoney(auction.currentBid)}.{' '}
+          Current bid is {formatCash(auction.currentBid)}.{' '}
           {highestBidder
             ? `${getPlayerName(highestBidder)} leads.`
             : 'No one has bid yet.'}
@@ -52,7 +52,7 @@ export function AuctionActions({
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <StatePill label="Minimum" value={`$${formatMoney(minimumBid)}`} />
+        <StatePill label="Minimum" value={formatCash(minimumBid)} />
         <StatePill
           label="Active"
           value={`${auction.activeRoomPlayerIds.length - auction.passedRoomPlayerIds.length}`}

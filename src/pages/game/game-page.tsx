@@ -17,7 +17,10 @@ import {
   getMinimumAuctionBid,
   getPlayerName,
 } from '#/lib/game/game-board'
-import { getRemainingMatchTimeMs } from '#/lib/game/game-time'
+import {
+  formatRemainingMatchTime,
+  getRemainingMatchTimeMs,
+} from '#/lib/game/game-time'
 import { useGame } from '#/lib/game/useGame'
 
 type GamePageProps = {
@@ -104,12 +107,20 @@ export function GamePage({ gameId }: GamePageProps) {
           <ThemeToggle />
         </header>
 
-        <div className="grid flex-1 gap-4 xl:grid-cols-[15rem_minmax(0,1fr)_17rem] 2xl:grid-cols-[16rem_minmax(58rem,1fr)_18rem]">
+        <div className="mx-auto flex w-fit min-w-36 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-2 text-center shadow-[0_18px_45px_rgba(4,12,15,0.14)]">
+          <span className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--sea-ink-soft)]">
+            Time
+          </span>
+          <span className="ml-3 text-lg font-black text-[var(--sea-ink)]">
+            {formatRemainingMatchTime(remainingMatchTimeMs)}
+          </span>
+        </div>
+
+        <div className="grid flex-1 gap-4 xl:grid-cols-[17rem_minmax(0,1fr)_17rem] 2xl:grid-cols-[19rem_minmax(58rem,1fr)_18rem]">
           <aside className="order-2 grid gap-3 md:grid-cols-2 xl:order-1 xl:grid-cols-1 xl:content-start">
             <PlayersPanel state={state} roomPlayerId={game.roomPlayerId} />
             <GameStatePanel
               state={state}
-              remainingMatchTimeMs={remainingMatchTimeMs}
               playersOnline={game.presence?.playersOnline ?? 0}
             />
           </aside>
@@ -255,7 +266,7 @@ function getPrimaryAction({
     }
   }
 
-  if (phase === 'awaiting_roll') {
+  if (phase === 'awaiting_first_turn' || phase === 'awaiting_roll') {
     return {
       command: 'roll',
       enabled: true,
