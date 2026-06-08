@@ -40,6 +40,14 @@ type GameCommandStateResponse = GameStateEvent & {
   events?: GameEngineEvent[]
 }
 
+function debugGameSocket(message: string, details?: Record<string, unknown>) {
+  if (!import.meta.env.DEV) {
+    return
+  }
+
+  console.info(`[LivePoly game socket] ${message}`, details ?? {})
+}
+
 function getGameSocketErrorMessage(message: string) {
   const normalized = message.trim()
 
@@ -219,6 +227,12 @@ export function useGame(gameId: string) {
         socket.on(GAME_SOCKET_EVENTS.error, handleSocketError)
         socket.on(GAME_SOCKET_EXCEPTION_EVENT, handleSocketError)
         socket.emit(event, payload, (response?: unknown) => {
+          debugGameSocket('ack received', {
+            event,
+            expectedEvent,
+            response,
+          })
+
           if (isSocketAcknowledgement<TResponse>(response)) {
             handleEvent(response.data)
             return
@@ -241,6 +255,13 @@ export function useGame(gameId: string) {
   useEffect(() => {
     const token = getAccessToken()
 
+    debugGameSocket('auth check before connect', {
+      gameId,
+      hasToken: Boolean(token),
+      hydrated: authHydration.data,
+      authUserId: authUser.data?.id ?? null,
+    })
+
     if (!token && !authHydration.data) {
       disconnectSocket()
       setStatus('connecting')
@@ -261,6 +282,7 @@ export function useGame(gameId: string) {
 
     const socket = io(`${env.realtimeBaseUrl}/game`, {
       auth: { token },
+      autoConnect: false,
       withCredentials: true,
       reconnection: true,
       reconnectionDelay: 900,
@@ -271,6 +293,13 @@ export function useGame(gameId: string) {
 
     async function joinGame() {
       try {
+        if (!socket.connected) {
+          debugGameSocket('join skipped until socket connects', { gameId })
+          return
+        }
+
+        debugGameSocket('join requested', { gameId })
+
         const joined = await requestGameEvent<GameJoinedEvent>(
           GAME_SOCKET_EVENTS.join,
           GAME_SOCKET_EVENTS.joined,
@@ -281,6 +310,14 @@ export function useGame(gameId: string) {
         setAccess(joined.access)
         setRoomPlayerId(joined.roomPlayerId ?? null)
         setState(joined.state)
+
+        debugGameSocket('join succeeded', {
+          gameId,
+          access: joined.access,
+          roomPlayerId: joined.roomPlayerId ?? null,
+          spectatorId: joined.spectatorId ?? null,
+          phase: joined.state.phase,
+        })
 
         const recovered = await requestGameEvent<GameEventsRecoveredEvent>(
           GAME_SOCKET_EVENTS.eventsGet,
@@ -298,6 +335,10 @@ export function useGame(gameId: string) {
 
         setPresence(presenceSummary)
       } catch (error) {
+        debugGameSocket('join failed', {
+          gameId,
+          error: error instanceof Error ? error.message : error,
+        })
         setStatus('error')
         setErrorMessage(
           error instanceof Error
@@ -308,15 +349,32 @@ export function useGame(gameId: string) {
     }
 
     socket.on('connect', () => {
+      debugGameSocket('connected', {
+        gameId,
+        socketId: socket.id,
+      })
       setStatus('connected')
+    })
+
+    socket.on(GAME_SOCKET_EVENTS.authenticated, (payload: unknown) => {
+      debugGameSocket('authenticated', {
+        gameId,
+        socketId: socket.id,
+        payload,
+      })
       void joinGame()
     })
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
+      debugGameSocket('disconnected', { gameId, reason })
       setStatus('disconnected')
     })
 
     socket.on('connect_error', (error) => {
+      debugGameSocket('connect error', {
+        gameId,
+        message: error.message,
+      })
       setStatus('error')
       setErrorMessage(getGameSocketErrorMessage(error.message))
     })
@@ -359,7 +417,18 @@ export function useGame(gameId: string) {
     )
 
     socket.on(GAME_SOCKET_EVENTS.error, (payload: GameSocketErrorEvent) => {
+      debugGameSocket('game:error received', {
+        gameId,
+        payload,
+      })
+      setStatus('error')
       setErrorMessage(getGameSocketErrorMessage(payload.message))
+    })
+
+    socket.on(GAME_SOCKET_EXCEPTION_EVENT, (payload: unknown) => {
+      debugGameSocket('exception received', { gameId, payload })
+      setStatus('error')
+      setErrorMessage(getGameSocketErrorMessage(getSocketPayloadMessage(payload)))
     })
 
     const heartbeatId = window.setInterval(() => {
@@ -374,10 +443,17 @@ export function useGame(gameId: string) {
       }
     }, GAME_PRESENCE_INTERVAL_MS)
 
+    socket.connect()
+
     return () => {
       window.clearInterval(heartbeatId)
       window.clearInterval(presenceId)
-      disconnectSocket()
+      socket.off()
+      socket.disconnect()
+
+      if (socketRef.current === socket) {
+        socketRef.current = null
+      }
     }
   }, [
     authHydration.data,
