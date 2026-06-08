@@ -1,5 +1,10 @@
 import { DiceFiveIcon } from '@phosphor-icons/react'
-import type { GameAuction, GameDebt, GamePlayer } from '#/lib/game/game.types'
+import type {
+  GameAuction,
+  GameDebt,
+  GamePhase,
+  GamePlayer,
+} from '#/lib/game/game.types'
 import type { GameTile } from '#/lib/game/game-board'
 import { AuctionActions } from './game-auction-actions'
 import { DebtActions } from './game-debt-actions'
@@ -25,6 +30,7 @@ export function GameActionsPanel({
   currentPlayer,
   currentPlayerInJail,
   isCurrentTurn,
+  phase,
   auctionTileName,
   pendingTile,
   activeTile,
@@ -52,6 +58,7 @@ export function GameActionsPanel({
   currentPlayer: GamePlayer | null
   currentPlayerInJail: boolean
   isCurrentTurn: boolean
+  phase: GamePhase | undefined
   auctionTileName: string | null
   pendingTile: GameTile | null
   activeTile: GameTile | null
@@ -71,6 +78,11 @@ export function GameActionsPanel({
 }) {
   const shouldShowActiveTile =
     Boolean(activeTile) && primaryAction.command !== 'propertyDecision'
+  const shouldShowJailActions = Boolean(
+    currentPlayerInJail &&
+      isCurrentTurn &&
+      (phase === 'awaiting_first_turn' || phase === 'awaiting_roll'),
+  )
 
   return (
     <GamePanel title="Actions" icon={DiceFiveIcon}>
@@ -89,7 +101,7 @@ export function GameActionsPanel({
           onPayDebt={onPayDebt}
           onDeclareBankruptcy={onDeclareBankruptcy}
         />
-      ) : currentPlayerInJail && isCurrentTurn ? (
+      ) : shouldShowJailActions ? (
         <JailActions
           player={currentPlayer}
           commandPending={commandPending}

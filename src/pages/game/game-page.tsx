@@ -198,6 +198,7 @@ export function GamePage({ gameId }: GamePageProps) {
               currentPlayer={game.currentPlayer}
               currentPlayerInJail={currentPlayerInJail}
               isCurrentTurn={game.isCurrentTurn}
+              phase={state?.phase}
               auctionTileName={auctionTile?.name ?? null}
               pendingTile={pendingTile ?? null}
               activeTile={activeTile}
@@ -352,7 +353,12 @@ function getPrimaryAction({
       command: null,
       enabled: false,
       label: 'Waiting',
-      copy: 'Waiting for the active player.',
+      copy:
+        phase === 'awaiting_property_decision'
+          ? 'Waiting for the active player to decide on the property.'
+          : phase === 'awaiting_turn_end'
+            ? 'Waiting for the active player to end the turn.'
+            : 'Waiting for the active player.',
     }
   }
 
@@ -361,7 +367,10 @@ function getPrimaryAction({
       command: 'roll',
       enabled: true,
       label: 'Roll dice',
-      copy: 'Roll to move and resolve the tile you land on.',
+      copy:
+        phase === 'awaiting_first_turn'
+          ? 'Roll to start your first move.'
+          : 'Roll to move and resolve the tile you land on.',
     }
   }
 
@@ -388,7 +397,9 @@ function getPrimaryAction({
   return {
     command: null,
     enabled: false,
-    label: 'Waiting',
-    copy: 'Waiting for the next game state.',
+    label: 'Resolving',
+    copy: phase
+      ? `Resolving ${phase.replaceAll('_', ' ')}.`
+      : 'Waiting for the next game state.',
   }
 }
