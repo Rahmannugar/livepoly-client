@@ -132,11 +132,21 @@ export function GamePage({ gameId }: GamePageProps) {
           <section className="order-1 rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-5 xl:order-2">
             <div className="mb-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <h1 className="display-title max-w-full truncate text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
-                  {currentTurnPlayer
-                    ? `${getPlayerName(currentTurnPlayer)} is up.`
-                    : 'Opening the game.'}
-                </h1>
+                {currentTurnPlayer ? (
+                  <h1 className="display-title flex max-w-full items-baseline gap-2 text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
+                    <span
+                      className="min-w-0 truncate"
+                      title={getPlayerName(currentTurnPlayer)}
+                    >
+                      {getPlayerName(currentTurnPlayer)}
+                    </span>
+                    <span className="shrink-0">is up.</span>
+                  </h1>
+                ) : (
+                  <h1 className="display-title max-w-full truncate text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
+                    Opening the game.
+                  </h1>
+                )}
               </div>
               <span className="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-xs font-black capitalize text-[var(--sea-ink)]">
                 {game.status === 'connecting' ? (
@@ -309,10 +319,28 @@ function getPrimaryAction({
     }
   }
 
+  if (phase === 'awaiting_auction_bid') {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Auction live',
+      copy: 'Place a bid or pass in the auction panel.',
+    }
+  }
+
+  if (phase === 'awaiting_debt_resolution') {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Debt due',
+      copy: 'Clear the payment or declare bankruptcy.',
+    }
+  }
+
   return {
     command: null,
     enabled: false,
-    label: 'No action',
-    copy: 'The game is resolving the current move.',
+    label: 'Waiting',
+    copy: 'Waiting for the next game state.',
   }
 }

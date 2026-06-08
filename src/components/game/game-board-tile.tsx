@@ -45,7 +45,7 @@ export function GameTileCell({
         />
       ) : null}
 
-      <div className="game-tile__body mt-1 min-h-0 pb-7">
+      <div className="game-tile__body mt-1 min-h-0 pb-8">
         {TileIcon ? (
           <span className="game-tile__icon">
             <TileIcon
@@ -55,7 +55,7 @@ export function GameTileCell({
           </span>
         ) : null}
         <span
-          className={`game-tile__label line-clamp-3 text-[0.5rem] font-black leading-tight sm:text-[0.6rem] xl:text-[0.66rem] 2xl:text-[0.74rem] ${
+          className={`game-tile__label line-clamp-3 text-[0.5rem] font-black leading-tight sm:text-[0.6rem] xl:text-[0.66rem] 2xl:text-[0.72rem] ${
             TileIcon ? 'game-tile__label--special' : ''
           }`}
         >
@@ -63,7 +63,7 @@ export function GameTileCell({
         </span>
       </div>
 
-      <div className="pointer-events-none absolute bottom-1 right-1 z-20 flex min-h-5 max-w-[calc(100%-0.5rem)] flex-wrap items-end justify-end gap-1">
+      <div className="pointer-events-none absolute inset-x-1 bottom-1 z-20 flex min-h-5 flex-wrap items-end justify-end gap-1 rounded-md bg-[linear-gradient(90deg,transparent,color-mix(in_oklab,var(--bg-base)_78%,transparent)_34%)]">
         {owner ? (
           <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[0.55rem] font-black">
             {owner.seatNumber}

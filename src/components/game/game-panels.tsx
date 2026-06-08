@@ -126,20 +126,25 @@ function PlayerRow({
   isYou: boolean
 }) {
   return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
       <PlayerToken player={player} isActive={isCurrentTurn} />
-      <div className="min-w-0">
-        <p className="truncate text-sm font-black text-[var(--sea-ink)]">
-          {getPlayerName(player)}
-          {isYou ? ' (you)' : ''}
-        </p>
-        <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
+      <div className="grid min-w-0 gap-1">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+          <p
+            className="truncate text-sm font-black text-[var(--sea-ink)]"
+            title={getPlayerName(player)}
+          >
+            {getPlayerName(player)}
+            {isYou ? ' (you)' : ''}
+          </p>
+          <span className="shrink-0 rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2 py-1 text-[0.68rem] font-black leading-none text-[var(--sea-ink)]">
+            {formatCash(player.cash)}
+          </span>
+        </div>
+        <p className="truncate text-xs font-bold text-[var(--sea-ink-soft)]">
           {isCurrentTurn ? 'Taking turn' : `Tile ${player.position}`}
         </p>
       </div>
-      <span className="min-w-fit text-right text-xs font-black text-[var(--sea-ink)]">
-        {formatCash(player.cash)}
-      </span>
     </div>
   )
 }
