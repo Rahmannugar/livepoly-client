@@ -96,12 +96,28 @@ export function GameActionsPanel({
           onPass={onPassAuctionBid}
         />
       ) : primaryAction.command === 'propertyDecision' ? (
-        <PropertyDecisionActions
-          tile={pendingTile}
-          commandPending={commandPending}
-          onBuyProperty={onBuyProperty}
-          onDeclinePropertyPurchase={onDeclinePropertyPurchase}
-        />
+        <>
+          <div className="hidden md:block">
+            <PropertyDecisionActions
+              tile={pendingTile}
+              commandPending={commandPending}
+              onBuyProperty={onBuyProperty}
+              onDeclinePropertyPurchase={onDeclinePropertyPurchase}
+            />
+          </div>
+          <div className="md:hidden">
+            <PrimaryActionButton
+              primaryAction={{
+                ...primaryAction,
+                enabled: false,
+                label: 'Decision ready',
+              }}
+              commandPending={commandPending}
+              onRollAndMove={onRollAndMove}
+              onEndTurn={onEndTurn}
+            />
+          </div>
+        </>
       ) : (
         <PrimaryActionButton
           primaryAction={primaryAction}

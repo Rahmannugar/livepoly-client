@@ -1,6 +1,7 @@
 import { ArrowLeftIcon, SpinnerGapIcon } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import '#/components/game/game.css'
 import { GameActionsPanel, type PrimaryGameAction } from '#/components/game/game-actions-panel'
 import { GameBoard } from '#/components/game/game-board'
 import {
@@ -9,6 +10,7 @@ import {
   PlayersPanel,
   PropertiesPanel,
 } from '#/components/game/game-panels'
+import { MobilePropertyDecisionSheet } from '#/components/game/game-tile-info'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
 import {
@@ -61,6 +63,8 @@ export function GamePage({ gameId }: GamePageProps) {
     currentTimeMs,
   )
   const currentPlayerInJail = Boolean(game.currentPlayer?.inJail)
+  const showMobilePropertyDecision =
+    game.isCurrentTurn && state?.phase === 'awaiting_property_decision'
 
   useEffect(() => {
     if (state?.auction) {
@@ -202,6 +206,15 @@ export function GamePage({ gameId }: GamePageProps) {
             <EventsPanel events={recentEvents} players={state?.players ?? []} />
           </aside>
         </div>
+        <MobilePropertyDecisionSheet
+          open={showMobilePropertyDecision}
+          tile={pendingTile ?? null}
+          commandPending={game.commandPending}
+          onBuyProperty={() => void game.buyProperty()}
+          onDeclinePropertyPurchase={() =>
+            void game.declinePropertyPurchase()
+          }
+        />
       </section>
     </main>
   )
