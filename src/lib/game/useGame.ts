@@ -4,6 +4,7 @@ import { io, type Socket } from 'socket.io-client'
 import { env } from '#/config/env'
 import { AUTH_QUERY_KEYS } from '#/lib/auth/auth.constants'
 import { getAccessToken } from '#/lib/auth/auth.service'
+import type { AuthUser } from '#/lib/auth/auth.types'
 import {
   GAME_HEARTBEAT_INTERVAL_MS,
   GAME_PRESENCE_INTERVAL_MS,
@@ -113,6 +114,12 @@ function isGameResponse<TResponse extends { gameId?: string }>(
 }
 
 export function useGame(gameId: string) {
+  const authUser = useQuery<AuthUser | null>({
+    queryKey: AUTH_QUERY_KEYS.currentUser,
+    queryFn: () => null,
+    enabled: false,
+    initialData: null,
+  })
   const authHydration = useQuery({
     queryKey: AUTH_QUERY_KEYS.hydration,
     queryFn: () => true,
@@ -128,6 +135,18 @@ export function useGame(gameId: string) {
   const [events, setEvents] = useState<GameEventLogItem[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [commandPending, setCommandPending] = useState(false)
+
+  const disconnectSocket = useCallback(() => {
+    const socket = socketRef.current
+
+    if (!socket) {
+      return
+    }
+
+    socket.off()
+    socket.disconnect()
+    socketRef.current = null
+  }, [])
 
   const currentPlayer = useMemo(() => {
     if (!state || !roomPlayerId) {
@@ -223,17 +242,20 @@ export function useGame(gameId: string) {
     const token = getAccessToken()
 
     if (!token && !authHydration.data) {
+      disconnectSocket()
       setStatus('connecting')
       setErrorMessage(null)
       return
     }
 
     if (!token) {
+      disconnectSocket()
       setStatus('error')
       setErrorMessage('Sign in again to continue this game.')
       return
     }
 
+    disconnectSocket()
     setStatus('connecting')
     setErrorMessage(null)
 
@@ -355,11 +377,15 @@ export function useGame(gameId: string) {
     return () => {
       window.clearInterval(heartbeatId)
       window.clearInterval(presenceId)
-      socket.off()
-      socket.disconnect()
-      socketRef.current = null
+      disconnectSocket()
     }
-  }, [authHydration.data, requestGameEvent, gameId])
+  }, [
+    authHydration.data,
+    authUser.data?.id,
+    disconnectSocket,
+    requestGameEvent,
+    gameId,
+  ])
 
   const runCommand = useCallback(
     async (event: string, payload: Record<string, unknown> = {}) => {
