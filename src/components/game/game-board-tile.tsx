@@ -45,7 +45,7 @@ export function GameTileCell({
         />
       ) : null}
 
-      <div className="game-tile__body mt-1 min-h-0">
+      <div className="game-tile__body mt-1 min-h-0 pb-7">
         {TileIcon ? (
           <span className="game-tile__icon">
             <TileIcon
@@ -63,7 +63,7 @@ export function GameTileCell({
         </span>
       </div>
 
-      <div className="flex min-h-5 flex-wrap items-end gap-1">
+      <div className="pointer-events-none absolute bottom-1 right-1 z-20 flex min-h-5 max-w-[calc(100%-0.5rem)] flex-wrap items-end justify-end gap-1">
         {owner ? (
           <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[0.55rem] font-black">
             {owner.seatNumber}

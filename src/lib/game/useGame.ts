@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import { io, type Socket } from 'socket.io-client'
 import { env } from '#/config/env'
 import { AUTH_QUERY_KEYS } from '#/lib/auth/auth.constants'
-import { getAccessToken } from '#/lib/auth/auth.service'
+import { getAccessToken, refreshSession } from '#/lib/auth/auth.service'
 import type { AuthUser } from '#/lib/auth/auth.types'
 import {
+  GAME_ACCESS_TOKEN_REFRESH_INTERVAL_MS,
   GAME_HEARTBEAT_INTERVAL_MS,
   GAME_PRESENCE_INTERVAL_MS,
   GAME_SOCKET_ACKNOWLEDGEMENT_TIMEOUT_MS,
@@ -143,6 +144,7 @@ export function useGame(gameId: string) {
   const [events, setEvents] = useState<GameEventLogItem[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [commandPending, setCommandPending] = useState(false)
+  const [authRefreshTick, setAuthRefreshTick] = useState(0)
 
   const disconnectSocket = useCallback(() => {
     const socket = socketRef.current
@@ -270,10 +272,25 @@ export function useGame(gameId: string) {
     }
 
     if (!token) {
-      disconnectSocket()
-      setStatus('error')
-      setErrorMessage('Sign in again to continue this game.')
-      return
+      let cancelled = false
+
+      void refreshSession()
+        .then(() => {
+          if (!cancelled) {
+            setAuthRefreshTick((current) => current + 1)
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            disconnectSocket()
+            setStatus('error')
+            setErrorMessage('Sign in again to continue this game.')
+          }
+        })
+
+      return () => {
+        cancelled = true
+      }
     }
 
     disconnectSocket()
@@ -290,6 +307,50 @@ export function useGame(gameId: string) {
       timeout: 10_000,
     })
     socketRef.current = socket
+    let authRefreshInFlight = false
+    let authRecoveryAttempts = 0
+
+    async function refreshGameSocketToken() {
+      if (authRefreshInFlight) {
+        return null
+      }
+
+      authRefreshInFlight = true
+
+      try {
+        const session = await refreshSession()
+        socket.auth = { token: session.accessToken }
+        return session.accessToken
+      } catch {
+        return null
+      } finally {
+        authRefreshInFlight = false
+      }
+    }
+
+    async function recoverFromSocketAuthFailure() {
+      if (authRecoveryAttempts >= 1) {
+        setStatus('error')
+        setErrorMessage('Sign in again to continue this game.')
+        return
+      }
+
+      authRecoveryAttempts += 1
+      debugGameSocket('auth refresh requested', { gameId })
+
+      const nextToken = await refreshGameSocketToken()
+
+      if (!nextToken) {
+        setStatus('error')
+        setErrorMessage('Sign in again to continue this game.')
+        return
+      }
+
+      setStatus('connecting')
+      setErrorMessage(null)
+      socket.disconnect()
+      socket.connect()
+    }
 
     async function joinGame() {
       try {
@@ -357,6 +418,7 @@ export function useGame(gameId: string) {
     })
 
     socket.on(GAME_SOCKET_EVENTS.authenticated, (payload: unknown) => {
+      authRecoveryAttempts = 0
       debugGameSocket('authenticated', {
         gameId,
         socketId: socket.id,
@@ -375,6 +437,12 @@ export function useGame(gameId: string) {
         gameId,
         message: error.message,
       })
+
+      if (error.message === 'Authentication required') {
+        void recoverFromSocketAuthFailure()
+        return
+      }
+
       setStatus('error')
       setErrorMessage(getGameSocketErrorMessage(error.message))
     })
@@ -421,14 +489,27 @@ export function useGame(gameId: string) {
         gameId,
         payload,
       })
+
+      if (payload.message === 'Authentication required') {
+        void recoverFromSocketAuthFailure()
+        return
+      }
+
       setStatus('error')
       setErrorMessage(getGameSocketErrorMessage(payload.message))
     })
 
     socket.on(GAME_SOCKET_EXCEPTION_EVENT, (payload: unknown) => {
       debugGameSocket('exception received', { gameId, payload })
+      const message = getSocketPayloadMessage(payload)
+
+      if (message === 'Authentication required') {
+        void recoverFromSocketAuthFailure()
+        return
+      }
+
       setStatus('error')
-      setErrorMessage(getGameSocketErrorMessage(getSocketPayloadMessage(payload)))
+      setErrorMessage(getGameSocketErrorMessage(message))
     })
 
     const heartbeatId = window.setInterval(() => {
@@ -443,11 +524,16 @@ export function useGame(gameId: string) {
       }
     }, GAME_PRESENCE_INTERVAL_MS)
 
+    const authRefreshId = window.setInterval(() => {
+      void refreshGameSocketToken()
+    }, GAME_ACCESS_TOKEN_REFRESH_INTERVAL_MS)
+
     socket.connect()
 
     return () => {
       window.clearInterval(heartbeatId)
       window.clearInterval(presenceId)
+      window.clearInterval(authRefreshId)
       socket.off()
       socket.disconnect()
 
@@ -458,6 +544,7 @@ export function useGame(gameId: string) {
   }, [
     authHydration.data,
     authUser.data?.id,
+    authRefreshTick,
     disconnectSocket,
     requestGameEvent,
     gameId,

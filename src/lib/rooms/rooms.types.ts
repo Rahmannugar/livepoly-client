@@ -80,6 +80,7 @@ export type Game = {
   turnNumber: number
   state: Record<string, unknown>
   startedAt: string
+  expiresAt: string
   finishedAt: string | null
   createdAt: string
   updatedAt: string

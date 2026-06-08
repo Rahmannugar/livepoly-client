@@ -1,5 +1,6 @@
 import { DiceFiveIcon } from '@phosphor-icons/react'
 import type { GameAuction, GameDebt, GamePlayer } from '#/lib/game/game.types'
+import type { GameTile } from '#/lib/game/game-board'
 import { AuctionActions } from './game-auction-actions'
 import { DebtActions } from './game-debt-actions'
 import { JailActions } from './game-jail-actions'
@@ -24,6 +25,7 @@ export function GameActionsPanel({
   currentPlayerInJail,
   isCurrentTurn,
   auctionTileName,
+  pendingTile,
   auctionBidAmount,
   minimumAuctionBid,
   onAuctionBidAmountChange,
@@ -48,6 +50,7 @@ export function GameActionsPanel({
   currentPlayerInJail: boolean
   isCurrentTurn: boolean
   auctionTileName: string | null
+  pendingTile: GameTile | null
   auctionBidAmount: number
   minimumAuctionBid: number
   onAuctionBidAmountChange: (amount: number) => void
@@ -94,6 +97,7 @@ export function GameActionsPanel({
         />
       ) : primaryAction.command === 'propertyDecision' ? (
         <PropertyDecisionActions
+          tile={pendingTile}
           commandPending={commandPending}
           onBuyProperty={onBuyProperty}
           onDeclinePropertyPurchase={onDeclinePropertyPurchase}

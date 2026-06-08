@@ -18,7 +18,6 @@ export function GameBoard({
     <div className="mx-auto w-full overflow-x-auto pb-1">
       <div className="grid aspect-square w-full min-w-[34rem] grid-cols-11 grid-rows-11 gap-1 rounded-[28px] border border-[var(--line)] bg-[var(--surface)] p-2 sm:min-w-[42rem] sm:gap-1.5 sm:p-3 lg:min-w-0 2xl:gap-2 2xl:p-4">
         <GameBoardCenter
-          roomCode={state?.roomCode}
           dice={state?.lastDiceRoll}
           access={access}
           isCurrentTurn={isCurrentTurn}

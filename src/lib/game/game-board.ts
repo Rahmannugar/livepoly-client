@@ -87,7 +87,15 @@ export function formatMoney(value: number) {
 }
 
 export function formatCash(value: number) {
-  return `Z${formatMoney(value)}`
+  return `W${formatMoney(value)}`
+}
+
+export function getTilePurchasePrice(tile?: GameTile | null) {
+  if (!tile?.mortgageValue) {
+    return null
+  }
+
+  return tile.mortgageValue * 2
 }
 
 export function formatPhase(phase?: string) {
