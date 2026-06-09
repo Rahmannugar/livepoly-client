@@ -371,6 +371,7 @@ export function useGame(gameId: string) {
         setAccess(joined.access)
         setRoomPlayerId(joined.roomPlayerId ?? null)
         setState(joined.state)
+        setErrorMessage(null)
 
         debugGameSocket('join succeeded', {
           gameId,
@@ -450,6 +451,7 @@ export function useGame(gameId: string) {
     socket.on(GAME_SOCKET_EVENTS.state, (payload: GameStateEvent) => {
       if (payload.gameId === gameId) {
         setState(payload.state)
+        setErrorMessage(null)
       }
     })
 
@@ -563,6 +565,7 @@ export function useGame(gameId: string) {
         )
 
         setState(response.state)
+        setErrorMessage(null)
 
         if (response.events?.length) {
           setEvents((current) => [
