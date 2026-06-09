@@ -11,6 +11,7 @@ import {
   PropertiesPanel,
 } from '#/components/game/game-panels'
 import { MobilePropertyDecisionSheet } from '#/components/game/game-tile-info'
+import { GameTurnSummary } from '#/components/game/game-turn-summary'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
 import {
@@ -169,6 +170,14 @@ export function GamePage({ gameId }: GamePageProps) {
                 {game.status}
               </span>
             </div>
+
+            <GameTurnSummary
+              player={currentTurnPlayer}
+              phase={state?.phase}
+              dice={state?.lastDiceRoll}
+              tile={activeTile}
+              isCurrentTurn={game.isCurrentTurn}
+            />
 
             <GameBoard
               state={state}
