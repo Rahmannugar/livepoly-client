@@ -41,6 +41,8 @@ type GameCommandStateResponse = GameStateEvent & {
   events?: GameEngineEvent[]
 }
 
+const MAX_GAME_EVENTS = 80
+
 function debugGameSocket(message: string, details?: Record<string, unknown>) {
   if (!import.meta.env.DEV) {
     return
@@ -120,6 +122,45 @@ function isGameResponse<TResponse extends { gameId?: string }>(
       typeof response === 'object' &&
       ('gameId' in response || 'state' in response || 'items' in response),
   )
+}
+
+function createLiveEventItems(events: GameEngineEvent[]): GameEventLogItem[] {
+  const createdAt = new Date().toISOString()
+
+  return events.map((event) => ({
+    sequence: null,
+    type: event.type,
+    payload: event,
+    createdAt,
+  }))
+}
+
+function mergeGameEvents(
+  current: GameEventLogItem[],
+  incoming: GameEventLogItem[],
+) {
+  const seen = new Set<string>()
+
+  return [...incoming, ...current]
+    .filter((event) => {
+      const key = getGameEventIdentity(event)
+
+      if (seen.has(key)) {
+        return false
+      }
+
+      seen.add(key)
+      return true
+    })
+    .slice(0, MAX_GAME_EVENTS)
+}
+
+function getGameEventIdentity(event: GameEventLogItem) {
+  if (event.sequence !== null) {
+    return `sequence:${event.sequence}`
+  }
+
+  return `${event.type}:${JSON.stringify(event.payload)}`
 }
 
 export function useGame(gameId: string) {
@@ -460,15 +501,9 @@ export function useGame(gameId: string) {
         return
       }
 
-      setEvents((current) => [
-        ...payload.events.map((event) => ({
-          sequence: null,
-          type: event.type,
-          payload: event,
-          createdAt: new Date().toISOString(),
-        })),
-        ...current,
-      ])
+      setEvents((current) =>
+        mergeGameEvents(current, createLiveEventItems(payload.events)),
+      )
     })
 
     socket.on(GAME_SOCKET_EVENTS.presence, (payload: GamePresenceEvent) => {
@@ -568,15 +603,9 @@ export function useGame(gameId: string) {
         setErrorMessage(null)
 
         if (response.events?.length) {
-          setEvents((current) => [
-            ...response.events!.map((item) => ({
-              sequence: null,
-              type: item.type,
-              payload: item,
-              createdAt: new Date().toISOString(),
-            })),
-            ...current,
-          ])
+          setEvents((current) =>
+            mergeGameEvents(current, createLiveEventItems(response.events!)),
+          )
         }
       } catch (error) {
         setErrorMessage(

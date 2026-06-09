@@ -37,12 +37,23 @@ function EventList({
       {events.map((event, index) => (
         <div
           key={`${event.type}-${event.sequence ?? index}`}
-          className="game-event-card rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3"
+          className={`game-event-card rounded-2xl border border-[var(--line)] p-3 ${
+            index === 0
+              ? 'bg-[color-mix(in_oklab,var(--primary)_14%,var(--surface))]'
+              : 'bg-[var(--surface)]'
+          }`}
         >
-          <p className="text-sm font-black text-[var(--sea-ink)]">
-            {formatEventSummary(event, players)}
-          </p>
-          <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-black leading-5 text-[var(--sea-ink)]">
+              {formatEventSummary(event, players)}
+            </p>
+            {index === 0 ? (
+              <span className="shrink-0 rounded-full bg-[var(--primary)] px-2 py-1 text-[0.58rem] font-black uppercase tracking-[0.1em] text-[var(--primary-foreground)]">
+                Latest
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-1 text-xs font-bold text-[var(--sea-ink-soft)]">
             {new Date(event.createdAt).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit',
