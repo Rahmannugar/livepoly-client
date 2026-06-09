@@ -16,9 +16,11 @@ import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
 import {
   findPlayer,
+  formatCash,
   gameTiles,
   getMinimumAuctionBid,
   getPlayerName,
+  getTilePurchasePrice,
 } from '#/lib/game/game-board'
 import {
   formatRemainingMatchTime,
@@ -59,6 +61,11 @@ export function GamePage({ gameId }: GamePageProps) {
     : auctionTile
       ? 'Auction square'
       : 'Current square'
+  const turnConsequence = getTurnConsequence({
+    phase: state?.phase,
+    tile: activeTile,
+    recentEvent: recentEvents[0],
+  })
   const primaryAction = getPrimaryAction({
     access: game.access,
     isCurrentTurn: game.isCurrentTurn,
@@ -176,6 +183,7 @@ export function GamePage({ gameId }: GamePageProps) {
               phase={state?.phase}
               dice={state?.lastDiceRoll}
               tile={activeTile}
+              consequence={turnConsequence}
               isCurrentTurn={game.isCurrentTurn}
             />
 
@@ -254,6 +262,65 @@ export function GamePage({ gameId }: GamePageProps) {
       </section>
     </main>
   )
+}
+
+function getTurnConsequence({
+  phase,
+  tile,
+  recentEvent,
+}: {
+  phase?: string
+  tile: (typeof gameTiles)[number] | null
+  recentEvent: { type: string; payload: Record<string, unknown> } | undefined
+}) {
+  if (phase === 'awaiting_property_decision' && tile) {
+    const price = getTilePurchasePrice(tile)
+
+    return price
+      ? `${tile.name} is unowned. Buy it for ${formatCash(price)} or send it to auction.`
+      : `${tile.name} is waiting for your decision.`
+  }
+
+  if (phase === 'awaiting_auction_bid' && tile) {
+    return `${tile.name} is in auction. Bid or pass when it is your chance.`
+  }
+
+  if (phase === 'awaiting_debt_resolution') {
+    return 'A payment is due before the game can continue.'
+  }
+
+  if (recentEvent?.type === 'rent_paid') {
+    return 'Rent was paid on the landed property.'
+  }
+
+  if (recentEvent?.type === 'tax_paid') {
+    return 'Tax was paid. The turn can continue.'
+  }
+
+  if (
+    recentEvent?.type === 'card_drawn' ||
+    recentEvent?.type === 'card_applied'
+  ) {
+    return 'A card was drawn and resolved.'
+  }
+
+  if (recentEvent?.type === 'player_landed_on_tile' && tile) {
+    return `${tile.name} is the latest landed square.`
+  }
+
+  if (phase === 'awaiting_turn_end') {
+    return 'The move is settled. End the turn when ready.'
+  }
+
+  if (phase === 'awaiting_first_turn' || phase === 'awaiting_roll') {
+    return 'Roll the dice to move around the game.'
+  }
+
+  if (phase === 'finished' || phase === 'cancelled') {
+    return 'This game has ended.'
+  }
+
+  return 'Waiting for the next game update.'
 }
 
 function getPrimaryAction({

@@ -13,12 +13,14 @@ export function GameTurnSummary({
   phase,
   dice,
   tile,
+  consequence,
   isCurrentTurn,
 }: {
   player: GamePlayer | null
   phase: GamePhase | undefined
   dice?: readonly [number, number] | null
   tile: GameTile | null
+  consequence: string
   isCurrentTurn: boolean
 }) {
   return (
@@ -31,6 +33,9 @@ export function GameTurnSummary({
           {player
             ? `${getPlayerName(player)} ${isCurrentTurn ? 'is making your move.' : 'is taking a turn.'}`
             : 'Opening the game.'}
+        </p>
+        <p className="mt-2 line-clamp-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          {consequence}
         </p>
       </div>
 
