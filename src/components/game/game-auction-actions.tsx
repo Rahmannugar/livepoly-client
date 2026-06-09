@@ -35,6 +35,13 @@ export function AuctionActions({
       auction.activeRoomPlayerIds.includes(roomPlayerId) &&
       !hasPassed,
   )
+  const activeBidderCount =
+    auction.activeRoomPlayerIds.length - auction.passedRoomPlayerIds.length
+  const statusCopy = canBid
+    ? 'You can raise the bid or pass.'
+    : hasPassed
+      ? 'You have passed. Waiting for the auction to finish.'
+      : 'Waiting for active bidders.'
 
   return (
     <div className="game-auction-panel grid gap-4">
@@ -53,9 +60,14 @@ export function AuctionActions({
 
       <div className="grid grid-cols-2 gap-2">
         <StatePill label="Minimum" value={formatCash(minimumBid)} />
+        <StatePill label="Active" value={`${activeBidderCount}`} />
         <StatePill
-          label="Active"
-          value={`${auction.activeRoomPlayerIds.length - auction.passedRoomPlayerIds.length}`}
+          label="Leading"
+          value={highestBidder ? getPlayerName(highestBidder) : 'No bid'}
+        />
+        <StatePill
+          label="Passed"
+          value={`${auction.passedRoomPlayerIds.length}`}
         />
       </div>
 
@@ -100,13 +112,9 @@ export function AuctionActions({
         </button>
       </div>
 
-      {!canBid ? (
-        <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-          {hasPassed
-            ? 'You have passed in this auction.'
-            : 'Waiting for active bidders.'}
-        </p>
-      ) : null}
+      <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+        {statusCopy}
+      </p>
     </div>
   )
 }

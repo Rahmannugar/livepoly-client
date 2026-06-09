@@ -28,6 +28,7 @@ export function DebtActions({
   const isDebtor = roomPlayerId === debt.roomPlayerId
   const canPay = Boolean(isDebtor && debtor && debtor.cash >= debt.amount)
   const creditorName = creditor ? getPlayerName(creditor) : 'the bank'
+  const shortfall = debtor ? Math.max(debt.amount - debtor.cash, 0) : 0
 
   return (
     <div className="game-debt-panel grid gap-4">
@@ -47,7 +48,12 @@ export function DebtActions({
           label="Cash"
           value={debtor ? formatCash(debtor.cash) : '...'}
         />
+        <StatePill label="Due" value={formatCash(debt.amount)} />
         <StatePill label="Owed to" value={creditorName} />
+        <StatePill
+          label="Shortfall"
+          value={shortfall > 0 ? formatCash(shortfall) : 'None'}
+        />
       </div>
 
       <div className="grid gap-2">
@@ -81,9 +87,14 @@ export function DebtActions({
         </p>
       ) : !canPay ? (
         <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-          You need more cash. Mortgage a property or declare bankruptcy.
+          You are short by {formatCash(shortfall)}. Mortgage a property or
+          declare bankruptcy.
         </p>
-      ) : null}
+      ) : (
+        <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          Pay the debt to continue the game.
+        </p>
+      )}
     </div>
   )
 }

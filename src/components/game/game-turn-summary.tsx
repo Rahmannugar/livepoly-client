@@ -31,7 +31,7 @@ export function GameTurnSummary({
         </p>
         <p className="mt-1 truncate text-xl font-black text-[var(--sea-ink)] sm:text-2xl">
           {player
-            ? `${getPlayerName(player)} ${isCurrentTurn ? 'is making your move.' : 'is taking a turn.'}`
+            ? `${getPlayerName(player)} ${isCurrentTurn ? 'is making a move.' : 'is taking a turn.'}`
             : 'Opening the game.'}
         </p>
         <p className="mt-2 line-clamp-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
