@@ -76,9 +76,13 @@ export function GameActionsPanel({
   onPayJailFine: () => void
   onDeclareBankruptcy: () => void
 }) {
+  const gameClosed = phase === 'finished' || phase === 'cancelled'
   const shouldShowActiveTile =
-    Boolean(activeTile) && primaryAction.command !== 'propertyDecision'
+    !gameClosed &&
+    Boolean(activeTile) &&
+    primaryAction.command !== 'propertyDecision'
   const shouldShowJailActions = Boolean(
+    !gameClosed &&
     currentPlayerInJail &&
       isCurrentTurn &&
       (phase === 'awaiting_first_turn' || phase === 'awaiting_roll'),
@@ -92,7 +96,14 @@ export function GameActionsPanel({
         </div>
       ) : null}
 
-      {debt ? (
+      {gameClosed ? (
+        <PrimaryActionButton
+          primaryAction={primaryAction}
+          commandPending={commandPending}
+          onRollAndMove={onRollAndMove}
+          onEndTurn={onEndTurn}
+        />
+      ) : debt ? (
         <DebtActions
           debt={debt}
           players={players}

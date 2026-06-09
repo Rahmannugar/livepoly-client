@@ -22,6 +22,7 @@ export function GameBoard({
           access={access}
           isCurrentTurn={isCurrentTurn}
           isRollingDice={isRollingDice}
+          phase={state?.phase}
         />
 
         {gameTiles.map((tile) => (

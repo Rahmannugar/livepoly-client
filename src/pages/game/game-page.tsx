@@ -87,8 +87,11 @@ export function GamePage({ gameId }: GamePageProps) {
     currentTimeMs,
   )
   const currentPlayerInJail = Boolean(game.currentPlayer?.inJail)
+  const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
   const showMobilePropertyDecision =
-    game.isCurrentTurn && state?.phase === 'awaiting_property_decision'
+    !gameClosed &&
+    game.isCurrentTurn &&
+    state?.phase === 'awaiting_property_decision'
 
   useEffect(() => {
     if (state?.auction) {
@@ -97,7 +100,7 @@ export function GamePage({ gameId }: GamePageProps) {
   }, [state?.auction?.currentBid, state?.auction?.tileKey])
 
   useEffect(() => {
-    if (!state?.expiresAt || state.phase === 'finished') {
+    if (!state?.expiresAt || gameClosed) {
       return
     }
 
@@ -108,7 +111,7 @@ export function GamePage({ gameId }: GamePageProps) {
     }, 1_000)
 
     return () => window.clearInterval(intervalId)
-  }, [state?.expiresAt, state?.phase])
+  }, [state?.expiresAt, gameClosed])
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
@@ -156,7 +159,13 @@ export function GamePage({ gameId }: GamePageProps) {
           <section className="order-1 rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-5 xl:order-2">
             <div className="mb-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                {currentTurnPlayer ? (
+                {gameClosed ? (
+                  <h1 className="display-title max-w-full truncate text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
+                    {state?.phase === 'cancelled'
+                      ? 'Game cancelled.'
+                      : 'Game over.'}
+                  </h1>
+                ) : currentTurnPlayer ? (
                   <h1 className="display-title flex max-w-full items-baseline gap-2 text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
                     <span
                       className="min-w-0 truncate"
@@ -277,6 +286,14 @@ function getTurnConsequence({
   currentTurnPlayer: GamePlayer | null
   recentEvent: { type: string; payload: Record<string, unknown> } | undefined
 }) {
+  if (phase === 'finished') {
+    return 'The game has ended. Final results are being saved.'
+  }
+
+  if (phase === 'cancelled') {
+    return 'This game was cancelled and no more moves can be made.'
+  }
+
   if (
     currentTurnPlayer?.playerType === 'bot' &&
     (phase === 'awaiting_first_turn' ||
@@ -330,10 +347,6 @@ function getTurnConsequence({
 
   if (phase === 'awaiting_first_turn' || phase === 'awaiting_roll') {
     return 'Roll the dice to move around the game.'
-  }
-
-  if (phase === 'finished' || phase === 'cancelled') {
-    return 'This game has ended.'
   }
 
   return 'Waiting for the next game update.'
@@ -402,8 +415,11 @@ function getPrimaryAction({
     return {
       command: null,
       enabled: false,
-      label: 'Game over',
-      copy: 'This game has ended.',
+      label: phase === 'cancelled' ? 'Cancelled' : 'Game over',
+      copy:
+        phase === 'cancelled'
+          ? 'This game was cancelled.'
+          : 'Final results are being saved.',
     }
   }
 
