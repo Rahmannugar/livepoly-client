@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import '#/components/game/game.css'
 import { GameActionsPanel, type PrimaryGameAction } from '#/components/game/game-actions-panel'
 import { GameBoard } from '#/components/game/game-board'
+import { GameResultsPanel } from '#/components/game/game-results-panel'
 import {
   EventsPanel,
   GameStatePanel,
@@ -28,6 +29,7 @@ import {
 } from '#/lib/game/game-time'
 import type { GameAuction, GameDebt, GamePlayer } from '#/lib/game/game.types'
 import { useGame } from '#/lib/game/useGame'
+import { useGameResult } from '#/lib/game/useGameResult'
 
 type GamePageProps = {
   gameId: string
@@ -88,6 +90,7 @@ export function GamePage({ gameId }: GamePageProps) {
   )
   const currentPlayerInJail = Boolean(game.currentPlayer?.inJail)
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
+  const gameResult = useGameResult(gameId, gameClosed)
   const showMobilePropertyDecision =
     !gameClosed &&
     game.isCurrentTurn &&
@@ -247,16 +250,28 @@ export function GamePage({ gameId }: GamePageProps) {
               onDeclareBankruptcy={() => void game.declareBankruptcy()}
             />
 
-            <PropertiesPanel
-              properties={ownedProperties}
-              players={state?.players ?? []}
-              roomPlayerId={game.roomPlayerId}
-              commandPending={game.commandPending}
-              onBuild={(tileKey) => void game.buildProperty(tileKey)}
-              onSellBuilding={(tileKey) => void game.sellBuilding(tileKey)}
-              onMortgage={(tileKey) => void game.mortgageProperty(tileKey)}
-              onUnmortgage={(tileKey) => void game.unmortgageProperty(tileKey)}
-            />
+            {gameClosed ? (
+              <GameResultsPanel
+                result={gameResult.data}
+                isLoading={gameResult.isFetching}
+                errorMessage={
+                  gameResult.error instanceof Error
+                    ? gameResult.error.message
+                    : null
+                }
+              />
+            ) : (
+              <PropertiesPanel
+                properties={ownedProperties}
+                players={state?.players ?? []}
+                roomPlayerId={game.roomPlayerId}
+                commandPending={game.commandPending}
+                onBuild={(tileKey) => void game.buildProperty(tileKey)}
+                onSellBuilding={(tileKey) => void game.sellBuilding(tileKey)}
+                onMortgage={(tileKey) => void game.mortgageProperty(tileKey)}
+                onUnmortgage={(tileKey) => void game.unmortgageProperty(tileKey)}
+              />
+            )}
 
             <EventsPanel events={recentEvents} players={state?.players ?? []} />
           </aside>

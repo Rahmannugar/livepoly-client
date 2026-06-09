@@ -157,3 +157,32 @@ export type GameEventLogItem =
       payload: GameEngineEvent
       createdAt: string
     }
+
+export type GameResultEndReason = 'bankruptcy' | 'time_elapsed' | 'cancelled'
+
+export type GameResultPlayer = {
+  roomPlayerId: string
+  userId: string | null
+  username: string | null
+  playerType: 'human' | 'bot'
+  botName: string | null
+  seatNumber: number
+  startingCash: number
+  finalCash: number
+  finalNetWorth: number
+  placement: number
+  bankruptAt: string | null
+}
+
+export type GameResult = {
+  gameId: string
+  roomId: string
+  roomCode: string
+  mode: 'ranked' | 'casual'
+  endReason: GameResultEndReason
+  winnerRoomPlayerId: string | null
+  winnerUserId: string | null
+  durationSeconds: number
+  completedAt: string
+  players: GameResultPlayer[]
+}

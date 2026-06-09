@@ -32,3 +32,7 @@ export const GAME_PRESENCE_INTERVAL_MS = 30_000
 export const GAME_ACCESS_TOKEN_REFRESH_INTERVAL_MS = 12 * 60 * 1_000
 export const GAME_SOCKET_ACKNOWLEDGEMENT_TIMEOUT_MS = 8_000
 export const GAME_SOCKET_EXCEPTION_EVENT = 'exception'
+
+export const GAME_QUERY_KEYS = {
+  result: (gameId: string) => ['game', gameId, 'result'] as const,
+} as const
