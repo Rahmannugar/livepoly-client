@@ -56,7 +56,11 @@ function PlayerRow({
           </span>
         </div>
         <p className="truncate text-xs font-bold text-[var(--sea-ink-soft)]">
-          {isCurrentTurn ? 'Taking turn' : `Tile ${player.position}`}
+          {isCurrentTurn
+            ? player.playerType === 'bot'
+              ? 'Bot thinking'
+              : 'Taking turn'
+            : `Tile ${player.position}`}
         </p>
       </div>
     </div>

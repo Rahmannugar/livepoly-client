@@ -26,7 +26,7 @@ import {
   formatRemainingMatchTime,
   getRemainingMatchTimeMs,
 } from '#/lib/game/game-time'
-import type { GameAuction, GameDebt } from '#/lib/game/game.types'
+import type { GameAuction, GameDebt, GamePlayer } from '#/lib/game/game.types'
 import { useGame } from '#/lib/game/useGame'
 
 type GamePageProps = {
@@ -64,6 +64,7 @@ export function GamePage({ gameId }: GamePageProps) {
   const turnConsequence = getTurnConsequence({
     phase: state?.phase,
     tile: activeTile,
+    currentTurnPlayer,
     recentEvent: recentEvents[0],
   })
   const primaryAction = getPrimaryAction({
@@ -74,6 +75,7 @@ export function GamePage({ gameId }: GamePageProps) {
     hasState: Boolean(state),
     pendingTileName: pendingTile?.name,
     roomPlayerId: game.roomPlayerId,
+    currentTurnPlayer,
     auction: state?.auction,
     debt: state?.debt,
   })
@@ -267,12 +269,26 @@ export function GamePage({ gameId }: GamePageProps) {
 function getTurnConsequence({
   phase,
   tile,
+  currentTurnPlayer,
   recentEvent,
 }: {
   phase?: string
   tile: (typeof gameTiles)[number] | null
+  currentTurnPlayer: GamePlayer | null
   recentEvent: { type: string; payload: Record<string, unknown> } | undefined
 }) {
+  if (
+    currentTurnPlayer?.playerType === 'bot' &&
+    (phase === 'awaiting_first_turn' ||
+      phase === 'awaiting_roll' ||
+      phase === 'awaiting_turn_end' ||
+      phase === 'awaiting_property_decision' ||
+      phase === 'awaiting_auction_bid' ||
+      phase === 'awaiting_debt_resolution')
+  ) {
+    return `${getPlayerName(currentTurnPlayer)} is making an automated move.`
+  }
+
   if (phase === 'awaiting_property_decision' && tile) {
     const price = getTilePurchasePrice(tile)
 
@@ -331,6 +347,7 @@ function getPrimaryAction({
   hasState,
   pendingTileName,
   roomPlayerId,
+  currentTurnPlayer,
   auction,
   debt,
 }: {
@@ -341,6 +358,7 @@ function getPrimaryAction({
   hasState: boolean
   pendingTileName?: string
   roomPlayerId: string | null
+  currentTurnPlayer: GamePlayer | null
   auction?: GameAuction | null
   debt?: GameDebt | null
 }): PrimaryGameAction {
@@ -425,6 +443,15 @@ function getPrimaryAction({
   }
 
   if (!isCurrentTurn) {
+    if (currentTurnPlayer?.playerType === 'bot') {
+      return {
+        command: null,
+        enabled: false,
+        label: 'Bot turn',
+        copy: `${getPlayerName(currentTurnPlayer)} is making an automated move.`,
+      }
+    }
+
     return {
       command: null,
       enabled: false,
