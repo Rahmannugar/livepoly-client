@@ -40,21 +40,16 @@ function PlayerRow({
   isYou: boolean
 }) {
   return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:gap-4">
       <PlayerToken player={player} isActive={isCurrentTurn} />
       <div className="grid min-w-0 gap-1">
-        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-          <p
-            className="truncate text-sm font-black text-[var(--sea-ink)]"
-            title={getPlayerName(player)}
-          >
-            {getPlayerName(player)}
-            {isYou ? ' (you)' : ''}
-          </p>
-          <span className="shrink-0 rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2 py-1 text-[0.68rem] font-black leading-none text-[var(--sea-ink)]">
-            {formatCash(player.cash)}
-          </span>
-        </div>
+        <p
+          className="truncate text-sm font-black text-[var(--sea-ink)]"
+          title={getPlayerName(player)}
+        >
+          {getPlayerName(player)}
+          {isYou ? ' (you)' : ''}
+        </p>
         <p className="truncate text-xs font-bold text-[var(--sea-ink-soft)]">
           {isCurrentTurn
             ? player.playerType === 'bot'
@@ -63,6 +58,9 @@ function PlayerRow({
             : `Tile ${player.position}`}
         </p>
       </div>
+      <span className="max-w-24 shrink-0 truncate rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2.5 py-1 text-right text-[0.68rem] font-black leading-none text-[var(--sea-ink)] [font-variant-numeric:tabular-nums]">
+        {formatCash(player.cash)}
+      </span>
     </div>
   )
 }

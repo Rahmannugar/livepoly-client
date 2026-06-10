@@ -24,6 +24,7 @@
 .game-tile__body {
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 .game-tile__icon {
@@ -45,6 +46,14 @@
   display: block;
   overflow-wrap: break-word;
   hyphens: auto;
+}
+
+.game-tile__tokens .player-token,
+.game-tile__tokens > span {
+  border: 1px solid color-mix(in oklab, var(--bg-base) 72%, white);
+  box-shadow:
+    0 10px 24px rgba(4, 12, 15, 0.26),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .game-tile__label--special {
@@ -259,5 +268,18 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-turn-summary,
+  .game-decision-backdrop,
+  .game-decision-sheet,
+  .game-event-card,
+  .dice-face--rolling,
+  .dice-face--rolling .dice-pip,
+  .player-token--active,
+  .game-command-button--active::after {
+    animation: none;
   }
 }
