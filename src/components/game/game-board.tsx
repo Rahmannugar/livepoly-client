@@ -1,4 +1,4 @@
-import type { GamePlayer, GameState } from '#/lib/game/game.types'
+import type { GameState } from '#/lib/game/game.types'
 import { findPlayer, gameTiles } from '#/lib/game/game-board'
 import { GameBoardCenter } from './game-board-center'
 import { GameTileCell } from './game-board-tile'

@@ -6,6 +6,7 @@ import { GameActionsPanel, type PrimaryGameAction } from '#/components/game/game
 import { GameBoard } from '#/components/game/game-board'
 import { GameResultsPanel } from '#/components/game/game-results-panel'
 import {
+  BankerPanel,
   EventsPanel,
   GameStatePanel,
   PlayersPanel,
@@ -250,6 +251,15 @@ export function GamePage({ gameId }: GamePageProps) {
               onDeclareBankruptcy={() => void game.declareBankruptcy()}
             />
 
+            <BankerPanel
+              phase={state?.phase}
+              currentTurnPlayer={currentTurnPlayer}
+              roomPlayerId={game.roomPlayerId}
+              activeTile={activeTile}
+              events={recentEvents}
+              players={state?.players ?? []}
+            />
+
             {gameClosed ? (
               <GameResultsPanel
                 result={gameResult.data}
@@ -414,6 +424,23 @@ function getPrimaryAction({
       enabled: false,
       label: 'Unavailable',
       copy: 'This game could not be opened right now.',
+    }
+  }
+
+  if (hasState && status !== 'joined') {
+    return {
+      command: null,
+      enabled: false,
+      label:
+        status === 'disconnected'
+          ? 'Reconnecting'
+          : status === 'error'
+            ? 'Connection needed'
+            : 'Syncing',
+      copy:
+        status === 'error'
+          ? 'Restore the live connection before making another move.'
+          : 'Keeping the game state in sync before the next move.',
     }
   }
 

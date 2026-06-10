@@ -1,3 +1,4 @@
+export { BankerPanel } from './game-banker-panel'
 export { EventsPanel } from './game-events-panel'
 export { PlayersPanel } from './game-players-panel'
 export { PropertiesPanel } from './game-properties-panel'
