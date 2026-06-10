@@ -2,22 +2,32 @@ import { SpinnerGapIcon } from '@phosphor-icons/react'
 import {
   formatCash,
   getTilePurchasePrice,
+  getPlayerName,
   type GameTile,
 } from '#/lib/game/game-board'
+import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
 
 type TileInfoPanelProps = {
   tile: GameTile | null
   label?: string
+  property?: GameProperty | null
+  owner?: GamePlayer | null
 }
 
 type PropertyDecisionControlsProps = {
   tile: GameTile | null
+  property?: GameProperty | null
   commandPending: boolean
   onBuyProperty: () => void
   onDeclinePropertyPurchase: () => void
 }
 
-export function TileInfoPanel({ tile, label }: TileInfoPanelProps) {
+export function TileInfoPanel({
+  tile,
+  label,
+  property,
+  owner,
+}: TileInfoPanelProps) {
   if (!tile) {
     return null
   }
@@ -31,6 +41,10 @@ export function TileInfoPanel({ tile, label }: TileInfoPanelProps) {
       ? { label: 'Mortgage', value: formatCash(tile.mortgageValue) }
       : null,
     tile.houseCost ? { label: 'Build', value: formatCash(tile.houseCost) } : null,
+    getRentDetail(tile, property),
+    owner ? { label: 'Owner', value: getPlayerName(owner) } : null,
+    property?.mortgaged ? { label: 'Status', value: 'Mortgaged' } : null,
+    tile.amount ? { label: 'Charge', value: formatCash(tile.amount) } : null,
   ].filter(Boolean) as Array<{ label: string; value: string }>
 
   return (
@@ -50,12 +64,12 @@ export function TileInfoPanel({ tile, label }: TileInfoPanelProps) {
           {details.map((detail) => (
             <span
               key={detail.label}
-              className="rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-3 py-2"
+              className="min-w-0 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-3 py-2"
             >
               <span className="block text-[0.62rem] uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
                 {detail.label}
               </span>
-              {detail.value}
+              <span className="block break-words leading-5">{detail.value}</span>
             </span>
           ))}
         </div>
@@ -104,7 +118,7 @@ export function PropertyDecisionControls({
 export function PropertyDecisionActions(props: PropertyDecisionControlsProps) {
   return (
     <div className="grid gap-3">
-      <TileInfoPanel tile={props.tile} />
+      <TileInfoPanel tile={props.tile} property={props.property} />
       <PropertyDecisionControls {...props} />
     </div>
   )
@@ -129,7 +143,7 @@ export function MobilePropertyDecisionSheet({
         aria-label={`Decision for ${props.tile.name}`}
         className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 grid gap-3 rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)]"
       >
-        <TileInfoPanel tile={props.tile} />
+        <TileInfoPanel tile={props.tile} property={props.property} />
         <PropertyDecisionControls {...props} />
       </section>
     </div>
@@ -167,4 +181,47 @@ function getTileInfoCopy(tile: GameTile) {
   }
 
   return 'Resolve the square and keep the game moving.'
+}
+
+function getRentDetail(tile: GameTile, property?: GameProperty | null) {
+  if (tile.kind === 'property') {
+    if (property?.mortgaged) {
+      return { label: 'Rent', value: 'None' }
+    }
+
+    if (property?.hasHotel && tile.hotelRent) {
+      return { label: 'Rent', value: formatCash(tile.hotelRent) }
+    }
+
+    if (
+      property &&
+      property.houseCount > 0 &&
+      tile.rentByHouseCount?.[property.houseCount - 1]
+    ) {
+      return {
+        label: 'Rent',
+        value: formatCash(tile.rentByHouseCount[property.houseCount - 1]),
+      }
+    }
+
+    return tile.baseRent
+      ? { label: 'Rent', value: formatCash(tile.baseRent) }
+      : null
+  }
+
+  if (tile.kind === 'airport' && tile.rentByOwnedCount?.length) {
+    return {
+      label: 'Rent',
+      value: tile.rentByOwnedCount.map(formatCash).join(' / '),
+    }
+  }
+
+  if (tile.kind === 'utility' && tile.rentMultiplierByOwnedCount?.length) {
+    return {
+      label: 'Rent',
+      value: `${tile.rentMultiplierByOwnedCount.join('x / ')}x dice`,
+    }
+  }
+
+  return null
 }

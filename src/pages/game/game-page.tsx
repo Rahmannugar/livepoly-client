@@ -59,6 +59,17 @@ export function GamePage({ gameId }: GamePageProps) {
       ? gameTiles.find((tile) => tile.index === currentTurnPlayer.position)
       : null
   const activeTile = pendingTile ?? auctionTile ?? currentPlayerTile ?? null
+  const activeProperty = activeTile
+    ? (state?.properties.find((property) => property.tileKey === activeTile.key) ??
+      null)
+    : null
+  const activeOwner = activeProperty?.ownerRoomPlayerId
+    ? findPlayer(state?.players ?? [], activeProperty.ownerRoomPlayerId)
+    : null
+  const pendingProperty = pendingTile
+    ? (state?.properties.find((property) => property.tileKey === pendingTile.key) ??
+      null)
+    : null
   const activeTileLabel = pendingTile
     ? 'Landed square'
     : auctionTile
@@ -233,7 +244,10 @@ export function GamePage({ gameId }: GamePageProps) {
               phase={state?.phase}
               auctionTileName={auctionTile?.name ?? null}
               pendingTile={pendingTile ?? null}
+              pendingProperty={pendingProperty}
               activeTile={activeTile}
+              activeProperty={activeProperty}
+              activeOwner={activeOwner}
               activeTileLabel={activeTileLabel}
               auctionBidAmount={auctionBidAmount}
               minimumAuctionBid={minimumAuctionBid}
@@ -289,6 +303,7 @@ export function GamePage({ gameId }: GamePageProps) {
         <MobilePropertyDecisionSheet
           open={showMobilePropertyDecision}
           tile={pendingTile ?? null}
+          property={pendingProperty}
           commandPending={game.commandPending}
           onBuyProperty={() => void game.buyProperty()}
           onDeclinePropertyPurchase={() =>

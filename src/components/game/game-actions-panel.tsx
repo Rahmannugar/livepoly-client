@@ -4,6 +4,7 @@ import type {
   GameDebt,
   GamePhase,
   GamePlayer,
+  GameProperty,
 } from '#/lib/game/game.types'
 import type { GameTile } from '#/lib/game/game-board'
 import { AuctionActions } from './game-auction-actions'
@@ -33,7 +34,10 @@ export function GameActionsPanel({
   phase,
   auctionTileName,
   pendingTile,
+  pendingProperty,
   activeTile,
+  activeProperty,
+  activeOwner,
   activeTileLabel,
   auctionBidAmount,
   minimumAuctionBid,
@@ -61,7 +65,10 @@ export function GameActionsPanel({
   phase: GamePhase | undefined
   auctionTileName: string | null
   pendingTile: GameTile | null
+  pendingProperty: GameProperty | null
   activeTile: GameTile | null
+  activeProperty: GameProperty | null
+  activeOwner: GamePlayer | null
   activeTileLabel: string
   auctionBidAmount: number
   minimumAuctionBid: number
@@ -92,7 +99,12 @@ export function GameActionsPanel({
     <GamePanel title="Actions" icon={DiceFiveIcon}>
       {shouldShowActiveTile ? (
         <div className="mb-4">
-          <TileInfoPanel tile={activeTile} label={activeTileLabel} />
+          <TileInfoPanel
+            tile={activeTile}
+            label={activeTileLabel}
+            property={activeProperty}
+            owner={activeOwner}
+          />
         </div>
       ) : null}
 
@@ -137,6 +149,7 @@ export function GameActionsPanel({
           <div className="hidden md:block">
             <PropertyDecisionActions
               tile={pendingTile}
+              property={pendingProperty}
               commandPending={commandPending}
               onBuyProperty={onBuyProperty}
               onDeclinePropertyPurchase={onDeclinePropertyPurchase}
