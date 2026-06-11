@@ -6,13 +6,11 @@ import { GameActionsPanel } from '#/components/game/game-actions-panel'
 import { GameBoard } from '#/components/game/game-board'
 import { GameCardReveal } from '#/components/game/game-card-reveal'
 import { GameResultsPanel } from '#/components/game/game-results-panel'
-import {
-  BankerPanel,
-  EventsPanel,
-  GameStatePanel,
-  PlayersPanel,
-  PropertiesPanel,
-} from '#/components/game/game-panels'
+import { BankerPanel } from '#/components/game/game-banker-panel'
+import { EventsPanel } from '#/components/game/game-events-panel'
+import { PlayersPanel } from '#/components/game/game-players-panel'
+import { PropertiesPanel } from '#/components/game/game-properties-panel'
+import { GameStatePanel } from '#/components/game/game-state-panel'
 import { MobilePropertyDecisionSheet } from '#/components/game/game-tile-info'
 import { GameTurnSummary } from '#/components/game/game-turn-summary'
 import { ThemeToggle } from '#/components/common/theme-toggle'
@@ -48,6 +46,11 @@ export function GamePage({ gameId }: GamePageProps) {
   const currentTurnPlayer = state
     ? findPlayer(state.players, state.currentTurnRoomPlayerId)
     : null
+  const isUserTurn = Boolean(
+    state &&
+      game.roomPlayerId &&
+      state.currentTurnRoomPlayerId === game.roomPlayerId,
+  )
   const ownedProperties = state
     ? state.properties.filter((property) => property.ownerRoomPlayerId)
     : []
@@ -99,7 +102,7 @@ export function GamePage({ gameId }: GamePageProps) {
   )
   const primaryAction = getPrimaryGameAction({
     access: game.access,
-    isCurrentTurn: game.isCurrentTurn,
+    isCurrentTurn: isUserTurn,
     phase: state?.phase,
     status: game.status,
     hasState: Boolean(state),
@@ -119,7 +122,7 @@ export function GamePage({ gameId }: GamePageProps) {
   const showMobilePropertyDecision =
     !gameClosed &&
     !gameExpired &&
-    game.isCurrentTurn &&
+    isUserTurn &&
     state?.phase === 'awaiting_property_decision'
 
   useEffect(() => {
@@ -235,13 +238,13 @@ export function GamePage({ gameId }: GamePageProps) {
               dice={state?.lastDiceRoll}
               tile={activeTile}
               consequence={turnConsequence}
-              isCurrentTurn={game.isCurrentTurn}
+              isCurrentTurn={isUserTurn}
             />
 
             <GameBoard
               state={state}
               access={game.access}
-              isCurrentTurn={game.isCurrentTurn}
+              isCurrentTurn={isUserTurn}
               isRollingDice={isRollingDice}
             />
           </section>
@@ -266,7 +269,7 @@ export function GamePage({ gameId }: GamePageProps) {
               roomPlayerId={game.roomPlayerId}
               currentPlayer={game.currentPlayer}
               currentPlayerInJail={currentPlayerInJail}
-              isCurrentTurn={game.isCurrentTurn}
+              isCurrentTurn={isUserTurn}
               phase={state?.phase}
               auctionTileName={auctionTile?.name ?? null}
               pendingTile={pendingTile ?? null}

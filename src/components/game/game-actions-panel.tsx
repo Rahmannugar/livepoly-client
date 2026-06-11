@@ -96,6 +96,11 @@ export function GameActionsPanel({
       isCurrentTurn &&
       (phase === 'awaiting_first_turn' || phase === 'awaiting_roll'),
   )
+  const isSpecializedAction =
+    Boolean(debt) ||
+    shouldShowJailActions ||
+    Boolean(auction) ||
+    primaryAction.command === 'propertyDecision'
 
   return (
     <GamePanel title="Actions" icon={DiceFiveIcon}>
@@ -181,7 +186,7 @@ export function GameActionsPanel({
       )}
 
       <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
-        <p>{primaryAction.copy}</p>
+        {!isSpecializedAction ? <p>{primaryAction.copy}</p> : null}
         {errorMessage ? <p className="text-red-500">{errorMessage}</p> : null}
       </div>
     </GamePanel>
