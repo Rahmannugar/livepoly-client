@@ -18,7 +18,7 @@ import { GameTurnSummary } from '#/components/game/game-turn-summary'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
 import {
-  getCardRevealFromEvent,
+  getLatestCardRevealFromEvents,
   type GameCardMetadata,
 } from '#/lib/game/game-cards'
 import {
@@ -46,7 +46,7 @@ export function GamePage({ gameId }: GamePageProps) {
   const state = game.state
   const [auctionBidAmount, setAuctionBidAmount] = useState(10)
   const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
-  const [dismissedCardKey, setDismissedCardKey] = useState<string | null>(null)
+  const [dismissedCardId, setDismissedCardId] = useState<string | null>(null)
   const currentTurnPlayer = state
     ? findPlayer(state.players, state.currentTurnRoomPlayerId)
     : null
@@ -54,7 +54,7 @@ export function GamePage({ gameId }: GamePageProps) {
     ? state.properties.filter((property) => property.ownerRoomPlayerId)
     : []
   const recentEvents = game.events.slice(0, 5)
-  const latestCardReveal = getCardRevealFromEvent(game.events[0])
+  const latestCardReveal = getLatestCardRevealFromEvents(game.events)
   const pendingTile = state?.pendingTileKey
     ? gameTiles.find((tile) => tile.key === state.pendingTileKey)
     : null
@@ -146,13 +146,13 @@ export function GamePage({ gameId }: GamePageProps) {
 
   useEffect(() => {
     if (!latestCardReveal) {
-      setDismissedCardKey(null)
+      setDismissedCardId(null)
     }
   }, [latestCardReveal])
 
   const visibleCardReveal: GameCardMetadata | null =
-    latestCardReveal && latestCardReveal.key !== dismissedCardKey
-      ? latestCardReveal
+    latestCardReveal && latestCardReveal.id !== dismissedCardId
+      ? latestCardReveal.card
       : null
 
   return (
@@ -341,8 +341,8 @@ export function GamePage({ gameId }: GamePageProps) {
         <GameCardReveal
           card={visibleCardReveal}
           onClose={() => {
-            if (visibleCardReveal) {
-              setDismissedCardKey(visibleCardReveal.key)
+            if (latestCardReveal) {
+              setDismissedCardId(latestCardReveal.id)
             }
           }}
         />
