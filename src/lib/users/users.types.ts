@@ -14,3 +14,45 @@ export type UserSearchResponse = {
   items: UserSearchItem[]
   nextCursor: string | null
 }
+
+export type UserStats = {
+  gamesPlayed: number
+  gamesWon: number
+  averagePlacement: number | null
+  rating: number
+}
+
+export type UserProfile = {
+  id: string
+  email: string
+  username: string
+  bio: string | null
+  avatarUrl: string | null
+  stats: UserStats
+  createdAt: string
+  updatedAt: string
+}
+
+export type UserMatchHistoryItem = {
+  gameId: string
+  roomId: string
+  roomCode: string
+  mode: 'ranked' | 'casual'
+  placement: number
+  playerCount: number
+  won: boolean
+  endReason: 'bankruptcy' | 'time_elapsed' | 'cancelled'
+  finalCash: number
+  finalNetWorth: number
+  bankruptAt: string | null
+  ratingBefore: number | null
+  ratingAfter: number | null
+  ratingDelta: number | null
+  durationSeconds: number
+  completedAt: string
+}
+
+export type UserMatchHistoryResponse = {
+  items: UserMatchHistoryItem[]
+  nextCursor: string | null
+}

@@ -35,8 +35,10 @@ export function AuctionActions({
       auction.activeRoomPlayerIds.includes(roomPlayerId) &&
       !hasPassed,
   )
-  const activeBidderCount =
-    auction.activeRoomPlayerIds.length - auction.passedRoomPlayerIds.length
+  const activeBidderCount = auction.activeRoomPlayerIds.filter(
+    (activeRoomPlayerId) =>
+      !auction.passedRoomPlayerIds.includes(activeRoomPlayerId),
+  ).length
   const statusCopy = canBid
     ? 'You can raise the bid or pass.'
     : hasPassed
@@ -84,6 +86,11 @@ export function AuctionActions({
               Number.parseInt(event.target.value, 10) || minimumBid,
             )
           }
+          onBlur={() => {
+            if (bidAmount < minimumBid) {
+              onBidAmountChange(minimumBid)
+            }
+          }}
           className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
         />
       </label>

@@ -32,6 +32,7 @@ type HomeAction = {
   description: string
   icon: ComponentType<{ weight?: 'bold'; className?: string }>
   dialog?: HomeDialogMode
+  to?: '/stats' | '/leaderboard' | '/matches'
 }
 
 const homeActions: HomeAction[] = [
@@ -62,16 +63,19 @@ const homeActions: HomeAction[] = [
     title: 'Stats',
     description: 'Track wins, placements, rating, and your match history.',
     icon: ChartLineUpIcon,
+    to: '/stats',
   },
   {
     title: 'Leaderboard',
     description: 'See how your current rating stacks up.',
     icon: MedalIcon,
+    to: '/leaderboard',
   },
   {
     title: 'Recent matches',
     description: 'Review finished games and results.',
     icon: ClockCounterClockwiseIcon,
+    to: '/matches',
   },
 ]
 
@@ -209,12 +213,13 @@ export function HomePage() {
               </p>
             </div>
 
-            <div
-              aria-hidden="true"
+            <Link
+              to="/profile"
+              aria-label="Open profile"
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] sm:h-10 sm:w-10"
             >
               <UserIcon weight="bold" className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-            </div>
+            </Link>
 
             <button
               type="button"
@@ -280,6 +285,11 @@ export function HomePage() {
                 onClick={() => {
                   if (action.dialog) {
                     setActiveDialog(action.dialog)
+                    return
+                  }
+
+                  if (action.to) {
+                    navigate({ to: action.to })
                     return
                   }
 

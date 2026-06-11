@@ -40,7 +40,7 @@ function PlayerRow({
   isYou: boolean
 }) {
   return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(4.75rem,auto)] items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:gap-3">
+    <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_5.25rem] items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:gap-3">
       <PlayerToken player={player} isActive={isCurrentTurn} />
       <div className="grid min-w-0 gap-1">
         <p
@@ -59,7 +59,7 @@ function PlayerRow({
         </p>
       </div>
       <span
-        className="min-w-0 truncate rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2.5 py-1 text-right text-[0.68rem] font-black leading-none text-[var(--sea-ink)] [font-variant-numeric:tabular-nums]"
+        className="block min-w-0 truncate rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2 py-1 text-right text-[0.66rem] font-black leading-none text-[var(--sea-ink)] [font-variant-numeric:tabular-nums]"
         title={formatCash(player.cash)}
       >
         {formatCash(player.cash)}

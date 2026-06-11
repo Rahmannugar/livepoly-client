@@ -72,8 +72,8 @@ function PropertyList({
   }
 
   return (
-    <div className="grid max-h-52 gap-2 overflow-y-auto pr-1">
-      {properties.slice(0, 8).map((property) => {
+    <div className="grid max-h-72 gap-2 overflow-y-auto pr-1">
+      {properties.map((property) => {
         const tile = gameTiles.find((item) => item.key === property.tileKey)
         const owner = findPlayer(players, property.ownerRoomPlayerId)
         const isMine = Boolean(
@@ -97,14 +97,20 @@ function PropertyList({
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-black text-[var(--sea-ink)]">
+                <p
+                  className="truncate text-sm font-black text-[var(--sea-ink)]"
+                  title={tile?.name ?? property.tileKey}
+                >
                   {tile?.name ?? property.tileKey}
                 </p>
-                <p className="mt-0.5 text-xs font-bold text-[var(--sea-ink-soft)]">
+                <p
+                  className="mt-0.5 truncate text-xs font-bold text-[var(--sea-ink-soft)]"
+                  title={owner ? getPlayerName(owner) : 'Unowned'}
+                >
                   {owner ? getPlayerName(owner) : 'Unowned'}
                 </p>
               </div>
-              <span className="shrink-0 text-xs font-black text-[var(--sea-ink)]">
+              <span className="max-w-24 shrink-0 truncate text-right text-xs font-black text-[var(--sea-ink)]">
                 {property.mortgaged
                   ? 'Mortgaged'
                   : property.hasHotel
