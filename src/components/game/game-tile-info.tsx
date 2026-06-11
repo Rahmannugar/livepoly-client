@@ -1,6 +1,7 @@
 import { SpinnerGapIcon } from '@phosphor-icons/react'
 import {
   formatCash,
+  formatMoney,
   getTilePurchasePrice,
   getPlayerName,
   type GameTile,
@@ -33,7 +34,9 @@ export function TileInfoPanel({
   }
 
   const purchasePrice = getTilePurchasePrice(tile)
+  const rentRows = getRentRows(tile, property)
   const details = [
+    { label: 'Type', value: getTileKindLabel(tile) },
     purchasePrice === null
       ? null
       : { label: 'Price', value: formatCash(purchasePrice) },
@@ -41,9 +44,8 @@ export function TileInfoPanel({
       ? { label: 'Mortgage', value: formatCash(tile.mortgageValue) }
       : null,
     tile.houseCost ? { label: 'Build', value: formatCash(tile.houseCost) } : null,
-    getRentDetail(tile, property),
     owner ? { label: 'Owner', value: getPlayerName(owner) } : null,
-    property?.mortgaged ? { label: 'Status', value: 'Mortgaged' } : null,
+    getTileStatus(tile, property, owner),
     tile.amount ? { label: 'Charge', value: formatCash(tile.amount) } : null,
   ].filter(Boolean) as Array<{ label: string; value: string }>
 
@@ -60,7 +62,7 @@ export function TileInfoPanel({
       </p>
 
       {details.length ? (
-        <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-[var(--sea-ink)]">
+        <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-[var(--sea-ink)] sm:grid-cols-3 xl:grid-cols-2">
           {details.map((detail) => (
             <span
               key={detail.label}
@@ -72,6 +74,27 @@ export function TileInfoPanel({
               <span className="block break-words leading-5">{detail.value}</span>
             </span>
           ))}
+        </div>
+      ) : null}
+
+      {rentRows.length ? (
+        <div className="mt-4 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_74%,transparent)] p-3">
+          <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
+            Earnings
+          </p>
+          <div className="mt-2 grid gap-1.5">
+            {rentRows.map((row) => (
+              <div
+                key={row.label}
+                className="flex min-w-0 items-center justify-between gap-3 text-xs font-black text-[var(--sea-ink)]"
+              >
+                <span className="min-w-0 truncate text-[var(--sea-ink-soft)]">
+                  {row.label}
+                </span>
+                <span className="shrink-0">{row.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>
@@ -141,8 +164,9 @@ export function MobilePropertyDecisionSheet({
         role="dialog"
         aria-modal="true"
         aria-label={`Decision for ${props.tile.name}`}
-        className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 grid gap-3 rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)]"
+        className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 grid max-h-[min(82vh,42rem)] gap-3 overflow-y-auto rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)]"
       >
+        <span className="mx-auto h-1.5 w-12 rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_42%,transparent)]" />
         <TileInfoPanel tile={props.tile} property={props.property} />
         <PropertyDecisionControls {...props} />
       </section>
@@ -169,7 +193,7 @@ function getTileKindLabel(tile: GameTile) {
 
 function getTileInfoCopy(tile: GameTile) {
   if (tile.kind === 'property') {
-    return 'Buy it to collect rent, then build when you own the set.'
+    return 'Buy it to collect rent, then build when you control the full color set.'
   }
 
   if (tile.kind === 'airport') {
@@ -180,48 +204,91 @@ function getTileInfoCopy(tile: GameTile) {
     return 'Utilities scale with dice rolls when another player lands here.'
   }
 
+  if (tile.kind === 'tax') {
+    return 'Landing here charges the listed amount immediately.'
+  }
+
+  if (tile.kind === 'chance' || tile.kind === 'world_fund') {
+    return 'Draw a card and resolve the instruction.'
+  }
+
+  if (tile.kind === 'go') {
+    return 'Pass or land here to collect starting cash.'
+  }
+
+  if (tile.kind === 'jail') {
+    return 'Just visiting unless a card or rule sends you in.'
+  }
+
+  if (tile.kind === 'go_to_jail') {
+    return 'Move directly to Jail and skip passing Go.'
+  }
+
+  if (tile.kind === 'free_parking') {
+    return 'A quiet stop. No payment is due here.'
+  }
+
   return 'Resolve the square and keep the game moving.'
 }
 
-function getRentDetail(tile: GameTile, property?: GameProperty | null) {
+function getTileStatus(
+  tile: GameTile,
+  property?: GameProperty | null,
+  owner?: GamePlayer | null,
+) {
+  if (!getTilePurchasePrice(tile)) {
+    return null
+  }
+
+  if (property?.mortgaged) {
+    return { label: 'Status', value: 'Mortgaged' }
+  }
+
+  if (owner) {
+    return { label: 'Status', value: 'Owned' }
+  }
+
+  return { label: 'Status', value: 'Unowned' }
+}
+
+function getRentRows(tile: GameTile, property?: GameProperty | null) {
   if (tile.kind === 'property') {
     if (property?.mortgaged) {
-      return { label: 'Rent', value: 'None' }
+      return [{ label: 'Rent while mortgaged', value: 'None' }]
     }
 
-    if (property?.hasHotel && tile.hotelRent) {
-      return { label: 'Rent', value: formatCash(tile.hotelRent) }
-    }
+    const rows = [
+      tile.baseRent
+        ? { label: 'Base rent', value: formatCash(tile.baseRent) }
+        : null,
+      tile.baseRent
+        ? { label: 'Full set rent', value: formatCash(tile.baseRent * 2) }
+        : null,
+      ...(tile.rentByHouseCount ?? []).map((rent, index) => ({
+        label: `${formatMoney(index + 1)} house${index === 0 ? '' : 's'}`,
+        value: formatCash(rent),
+      })),
+      tile.hotelRent
+        ? { label: 'Hotel', value: formatCash(tile.hotelRent) }
+        : null,
+    ].filter(Boolean) as Array<{ label: string; value: string }>
 
-    if (
-      property &&
-      property.houseCount > 0 &&
-      tile.rentByHouseCount?.[property.houseCount - 1]
-    ) {
-      return {
-        label: 'Rent',
-        value: formatCash(tile.rentByHouseCount[property.houseCount - 1]),
-      }
-    }
-
-    return tile.baseRent
-      ? { label: 'Rent', value: formatCash(tile.baseRent) }
-      : null
+    return rows
   }
 
   if (tile.kind === 'airport' && tile.rentByOwnedCount?.length) {
-    return {
-      label: 'Rent',
-      value: tile.rentByOwnedCount.map(formatCash).join(' / '),
-    }
+    return tile.rentByOwnedCount.map((rent, index) => ({
+      label: `${formatMoney(index + 1)} airport${index === 0 ? '' : 's'}`,
+      value: formatCash(rent),
+    }))
   }
 
   if (tile.kind === 'utility' && tile.rentMultiplierByOwnedCount?.length) {
-    return {
-      label: 'Rent',
-      value: `${tile.rentMultiplierByOwnedCount.join('x / ')}x dice`,
-    }
+    return tile.rentMultiplierByOwnedCount.map((multiplier, index) => ({
+      label: `${formatMoney(index + 1)} ${index === 0 ? 'utility' : 'utilities'}`,
+      value: `${multiplier}x dice`,
+    }))
   }
 
-  return null
+  return []
 }
