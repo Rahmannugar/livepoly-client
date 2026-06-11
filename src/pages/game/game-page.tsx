@@ -81,6 +81,7 @@ export function GamePage({ gameId }: GamePageProps) {
     currentTurnPlayer,
     recentEvent: recentEvents[0],
   })
+  const currentPlayerInJail = Boolean(game.currentPlayer?.inJail)
   const primaryAction = getPrimaryAction({
     access: game.access,
     isCurrentTurn: game.isCurrentTurn,
@@ -90,6 +91,8 @@ export function GamePage({ gameId }: GamePageProps) {
     pendingTileName: pendingTile?.name,
     roomPlayerId: game.roomPlayerId,
     currentTurnPlayer,
+    currentPlayerInJail,
+    shouldCurrentPlayerPlayAgain: Boolean(state?.shouldCurrentPlayerPlayAgain),
     auction: state?.auction,
     debt: state?.debt,
   })
@@ -100,7 +103,6 @@ export function GamePage({ gameId }: GamePageProps) {
     state?.expiresAt,
     currentTimeMs,
   )
-  const currentPlayerInJail = Boolean(game.currentPlayer?.inJail)
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
   const gameResult = useGameResult(gameId, gameClosed)
   const showMobilePropertyDecision =
@@ -401,6 +403,8 @@ function getPrimaryAction({
   pendingTileName,
   roomPlayerId,
   currentTurnPlayer,
+  currentPlayerInJail,
+  shouldCurrentPlayerPlayAgain,
   auction,
   debt,
 }: {
@@ -412,6 +416,8 @@ function getPrimaryAction({
   pendingTileName?: string
   roomPlayerId: string | null
   currentTurnPlayer: GamePlayer | null
+  currentPlayerInJail: boolean
+  shouldCurrentPlayerPlayAgain: boolean
   auction?: GameAuction | null
   debt?: GameDebt | null
 }): PrimaryGameAction {
@@ -493,9 +499,9 @@ function getPrimaryAction({
     return {
       command: null,
       enabled: false,
-      label: canBid ? 'Auction live' : hasPassed ? 'Passed' : 'Auction live',
+      label: canBid ? 'Bid or pass' : hasPassed ? 'Passed' : 'Auction live',
       copy: canBid
-        ? 'Place a bid or pass in the auction panel.'
+        ? 'Raise the bid or pass in the auction controls.'
         : hasPassed
           ? 'You have passed in this auction.'
           : 'Waiting for active bidders.',
@@ -510,7 +516,7 @@ function getPrimaryAction({
       enabled: false,
       label: isDebtor ? 'Debt due' : 'Debt pending',
       copy: isDebtor
-        ? 'Clear the payment or declare bankruptcy.'
+        ? 'Resolve this payment before the game can continue.'
         : 'Waiting for the indebted player to resolve payment.',
     }
   }
@@ -539,6 +545,15 @@ function getPrimaryAction({
   }
 
   if (phase === 'awaiting_first_turn' || phase === 'awaiting_roll') {
+    if (currentPlayerInJail) {
+      return {
+        command: null,
+        enabled: false,
+        label: 'Jail turn',
+        copy: 'Roll doubles or pay the fine in the jail controls.',
+      }
+    }
+
     return {
       command: 'roll',
       enabled: true,
@@ -555,7 +570,9 @@ function getPrimaryAction({
       command: 'endTurn',
       enabled: true,
       label: 'End turn',
-      copy: 'Your move is settled. Pass play to the next player.',
+      copy: shouldCurrentPlayerPlayAgain
+        ? 'You rolled doubles. End this move to keep your turn.'
+        : 'Your move is settled. Pass play to the next player.',
     }
   }
 
@@ -563,9 +580,9 @@ function getPrimaryAction({
     return {
       command: 'propertyDecision',
       enabled: true,
-      label: 'Property decision',
+      label: 'Buy or auction',
       copy: pendingTileName
-        ? `Choose whether to buy ${pendingTileName} or send it to auction.`
+        ? `Buy ${pendingTileName} or send it to auction.`
         : 'Choose whether to buy this property or send it to auction.',
     }
   }

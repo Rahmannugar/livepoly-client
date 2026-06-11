@@ -160,7 +160,8 @@ export function GameActionsPanel({
               primaryAction={{
                 ...primaryAction,
                 enabled: false,
-                label: 'Decision ready',
+                label: 'Choose below',
+                copy: 'Use the property decision sheet at the bottom of the screen.',
               }}
               commandPending={commandPending}
               onRollAndMove={onRollAndMove}
