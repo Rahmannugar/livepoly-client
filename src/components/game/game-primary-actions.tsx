@@ -1,12 +1,7 @@
 import { SpinnerGapIcon } from '@phosphor-icons/react'
+import type { PrimaryGameAction } from '#/lib/game/game-view'
 export { PropertyDecisionActions } from './game-tile-info'
-
-export type PrimaryGameAction = {
-  command: 'roll' | 'endTurn' | 'propertyDecision' | null
-  enabled: boolean
-  label: string
-  copy: string
-}
+export type { PrimaryGameAction } from '#/lib/game/game-view'
 
 export function PrimaryActionButton({
   primaryAction,
