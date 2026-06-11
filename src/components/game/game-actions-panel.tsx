@@ -23,6 +23,7 @@ export type { PrimaryGameAction } from './game-primary-actions'
 export function GameActionsPanel({
   primaryAction,
   commandPending,
+  gameExpired,
   errorMessage,
   debt,
   auction,
@@ -54,6 +55,7 @@ export function GameActionsPanel({
 }: {
   primaryAction: PrimaryGameAction
   commandPending: boolean
+  gameExpired: boolean
   errorMessage: string | null
   debt: GameDebt | null | undefined
   auction: GameAuction | null | undefined
@@ -108,7 +110,7 @@ export function GameActionsPanel({
         </div>
       ) : null}
 
-      {gameClosed ? (
+      {gameClosed || gameExpired ? (
         <PrimaryActionButton
           primaryAction={primaryAction}
           commandPending={commandPending}

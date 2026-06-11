@@ -40,11 +40,11 @@ function PlayerRow({
   isYou: boolean
 }) {
   return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:gap-4">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(4.75rem,auto)] items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:gap-3">
       <PlayerToken player={player} isActive={isCurrentTurn} />
       <div className="grid min-w-0 gap-1">
         <p
-          className="truncate text-sm font-black text-[var(--sea-ink)]"
+          className="min-w-0 truncate text-sm font-black text-[var(--sea-ink)]"
           title={getPlayerName(player)}
         >
           {getPlayerName(player)}
@@ -58,7 +58,10 @@ function PlayerRow({
             : `Tile ${player.position}`}
         </p>
       </div>
-      <span className="max-w-24 shrink-0 truncate rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2.5 py-1 text-right text-[0.68rem] font-black leading-none text-[var(--sea-ink)] [font-variant-numeric:tabular-nums]">
+      <span
+        className="min-w-0 truncate rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2.5 py-1 text-right text-[0.68rem] font-black leading-none text-[var(--sea-ink)] [font-variant-numeric:tabular-nums]"
+        title={formatCash(player.cash)}
+      >
         {formatCash(player.cash)}
       </span>
     </div>

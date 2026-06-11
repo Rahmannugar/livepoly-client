@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import '#/components/game/game.css'
 import { GameActionsPanel, type PrimaryGameAction } from '#/components/game/game-actions-panel'
 import { GameBoard } from '#/components/game/game-board'
+import { GameCardReveal } from '#/components/game/game-card-reveal'
 import { GameResultsPanel } from '#/components/game/game-results-panel'
 import {
   BankerPanel,
@@ -16,6 +17,10 @@ import { MobilePropertyDecisionSheet } from '#/components/game/game-tile-info'
 import { GameTurnSummary } from '#/components/game/game-turn-summary'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
+import {
+  getCardRevealFromEvent,
+  type GameCardMetadata,
+} from '#/lib/game/game-cards'
 import {
   findPlayer,
   formatCash,
@@ -41,6 +46,7 @@ export function GamePage({ gameId }: GamePageProps) {
   const state = game.state
   const [auctionBidAmount, setAuctionBidAmount] = useState(10)
   const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
+  const [dismissedCardKey, setDismissedCardKey] = useState<string | null>(null)
   const currentTurnPlayer = state
     ? findPlayer(state.players, state.currentTurnRoomPlayerId)
     : null
@@ -48,6 +54,7 @@ export function GamePage({ gameId }: GamePageProps) {
     ? state.properties.filter((property) => property.ownerRoomPlayerId)
     : []
   const recentEvents = game.events.slice(0, 5)
+  const latestCardReveal = getCardRevealFromEvent(game.events[0])
   const pendingTile = state?.pendingTileKey
     ? gameTiles.find((tile) => tile.key === state.pendingTileKey)
     : null
@@ -82,6 +89,16 @@ export function GamePage({ gameId }: GamePageProps) {
     recentEvent: recentEvents[0],
   })
   const currentPlayerInJail = Boolean(game.currentPlayer?.inJail)
+  const minimumAuctionBid = getMinimumAuctionBid(state?.auction)
+  const remainingMatchTimeMs = getRemainingMatchTimeMs(
+    state?.expiresAt,
+    currentTimeMs,
+  )
+  const gameExpired = Boolean(
+    state?.expiresAt &&
+      remainingMatchTimeMs !== null &&
+      remainingMatchTimeMs <= 0,
+  )
   const primaryAction = getPrimaryAction({
     access: game.access,
     isCurrentTurn: game.isCurrentTurn,
@@ -95,18 +112,15 @@ export function GamePage({ gameId }: GamePageProps) {
     shouldCurrentPlayerPlayAgain: Boolean(state?.shouldCurrentPlayerPlayAgain),
     auction: state?.auction,
     debt: state?.debt,
+    gameExpired,
   })
   const isRollingDice =
     game.commandPending && primaryAction.command === 'roll'
-  const minimumAuctionBid = getMinimumAuctionBid(state?.auction)
-  const remainingMatchTimeMs = getRemainingMatchTimeMs(
-    state?.expiresAt,
-    currentTimeMs,
-  )
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
   const gameResult = useGameResult(gameId, gameClosed)
   const showMobilePropertyDecision =
     !gameClosed &&
+    !gameExpired &&
     game.isCurrentTurn &&
     state?.phase === 'awaiting_property_decision'
 
@@ -129,6 +143,17 @@ export function GamePage({ gameId }: GamePageProps) {
 
     return () => window.clearInterval(intervalId)
   }, [state?.expiresAt, gameClosed])
+
+  useEffect(() => {
+    if (!latestCardReveal) {
+      setDismissedCardKey(null)
+    }
+  }, [latestCardReveal])
+
+  const visibleCardReveal: GameCardMetadata | null =
+    latestCardReveal && latestCardReveal.key !== dismissedCardKey
+      ? latestCardReveal
+      : null
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
@@ -227,6 +252,7 @@ export function GamePage({ gameId }: GamePageProps) {
             <GameActionsPanel
               primaryAction={primaryAction}
               commandPending={game.commandPending}
+              gameExpired={gameExpired}
               errorMessage={game.errorMessage}
               debt={
                 state?.phase === 'awaiting_debt_resolution'
@@ -311,6 +337,14 @@ export function GamePage({ gameId }: GamePageProps) {
           onDeclinePropertyPurchase={() =>
             void game.declinePropertyPurchase()
           }
+        />
+        <GameCardReveal
+          card={visibleCardReveal}
+          onClose={() => {
+            if (visibleCardReveal) {
+              setDismissedCardKey(visibleCardReveal.key)
+            }
+          }}
         />
       </section>
     </main>
@@ -407,6 +441,7 @@ function getPrimaryAction({
   shouldCurrentPlayerPlayAgain,
   auction,
   debt,
+  gameExpired,
 }: {
   access: string | null
   isCurrentTurn: boolean
@@ -420,6 +455,7 @@ function getPrimaryAction({
   shouldCurrentPlayerPlayAgain: boolean
   auction?: GameAuction | null
   debt?: GameDebt | null
+  gameExpired: boolean
 }): PrimaryGameAction {
   if (!hasState && (status === 'connecting' || status === 'connected')) {
     return {
@@ -483,6 +519,15 @@ function getPrimaryAction({
         phase === 'cancelled'
           ? 'This game was cancelled.'
           : 'Final results are being saved.',
+    }
+  }
+
+  if (gameExpired) {
+    return {
+      command: null,
+      enabled: false,
+      label: 'Finishing',
+      copy: 'Time is up. Waiting for final results.',
     }
   }
 
