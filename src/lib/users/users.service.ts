@@ -1,7 +1,10 @@
 import { apiClient } from '#/lib/client/apiClient'
 import { USER_MATCHES_LIMIT, USER_SEARCH_LIMIT } from './users.constants'
 import type {
+  CreateAvatarUploadUrlRequest,
+  AvatarUploadUrlResponse,
   SearchUsersInput,
+  UpdateUserProfileRequest,
   UserMatchHistoryResponse,
   UserProfile,
   UserSearchResponse,
@@ -13,6 +16,13 @@ export function getCurrentUserProfile() {
 
 export function getUserProfile(username: string) {
   return apiClient<UserProfile>(`/users/${encodeURIComponent(username)}`)
+}
+
+export function updateCurrentUserProfile(input: UpdateUserProfileRequest) {
+  return apiClient<UserProfile>('/users/me', {
+    method: 'PATCH',
+    body: input,
+  })
 }
 
 export function searchUsers(input: SearchUsersInput) {
@@ -36,4 +46,25 @@ export function getUserMatches(username: string) {
   return apiClient<UserMatchHistoryResponse>(
     `/users/${encodeURIComponent(username)}/matches?${params.toString()}`,
   )
+}
+
+export function createAvatarUploadUrl(input: CreateAvatarUploadUrlRequest) {
+  return apiClient<AvatarUploadUrlResponse>('/users/me/avatar/upload-url', {
+    method: 'POST',
+    body: input,
+  })
+}
+
+export async function uploadAvatarToStorage(uploadUrl: string, file: File) {
+  const response = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': file.type,
+    },
+    body: file,
+  })
+
+  if (!response.ok) {
+    throw new Error('Could not upload avatar.')
+  }
 }

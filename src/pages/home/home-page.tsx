@@ -32,7 +32,7 @@ type HomeAction = {
   description: string
   icon: ComponentType<{ weight?: 'bold'; className?: string }>
   dialog?: HomeDialogMode
-  to?: '/stats' | '/leaderboard' | '/matches'
+  to?: '/friends' | '/stats' | '/leaderboard' | '/matches'
 }
 
 const homeActions: HomeAction[] = [
@@ -58,6 +58,7 @@ const homeActions: HomeAction[] = [
     title: 'Friends',
     description: 'Find players, manage requests, and build your table circle.',
     icon: UsersIcon,
+    to: '/friends',
   },
   {
     title: 'Stats',

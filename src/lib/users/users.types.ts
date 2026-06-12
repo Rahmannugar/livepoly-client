@@ -33,6 +33,11 @@ export type UserProfile = {
   updatedAt: string
 }
 
+export type UpdateUserProfileRequest = {
+  username?: string
+  bio?: string | null
+}
+
 export type UserMatchHistoryItem = {
   gameId: string
   roomId: string
@@ -55,4 +60,19 @@ export type UserMatchHistoryItem = {
 export type UserMatchHistoryResponse = {
   items: UserMatchHistoryItem[]
   nextCursor: string | null
+}
+
+export type AvatarContentType = 'image/webp' | 'image/jpeg' | 'image/png'
+
+export type CreateAvatarUploadUrlRequest = {
+  contentType: AvatarContentType
+  contentLength: number
+}
+
+export type AvatarUploadUrlResponse = {
+  uploadId: string
+  uploadUrl: string
+  objectKey: string
+  avatarUrl: string
+  expiresInSeconds: number
 }
