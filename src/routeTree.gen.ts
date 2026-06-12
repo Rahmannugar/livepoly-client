@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StatsRouteImport } from './routes/stats'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as FriendsRouteImport } from './routes/friends'
@@ -32,6 +33,11 @@ const StatsRoute = StatsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/friends': typeof FriendsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/matches': typeof MatchesRoute
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/friends': typeof FriendsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/matches': typeof MatchesRoute
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/friends': typeof FriendsRoute
   '/leaderboard': typeof LeaderboardRoute
   '/matches': typeof MatchesRoute
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/stats': typeof StatsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/leaderboard'
     | '/matches'
+    | '/notifications'
     | '/profile'
     | '/stats'
     | '/auth/callback'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/leaderboard'
     | '/matches'
+    | '/notifications'
     | '/profile'
     | '/stats'
     | '/auth/callback'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/friends'
     | '/leaderboard'
     | '/matches'
+    | '/notifications'
     | '/profile'
     | '/stats'
     | '/auth/callback'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   FriendsRoute: typeof FriendsRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MatchesRoute: typeof MatchesRoute
+  NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
   StatsRoute: typeof StatsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -320,6 +340,7 @@ const rootRouteChildren: RootRouteChildren = {
   FriendsRoute: FriendsRoute,
   LeaderboardRoute: LeaderboardRoute,
   MatchesRoute: MatchesRoute,
+  NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
   StatsRoute: StatsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
@@ -334,12 +355,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

@@ -1,4 +1,5 @@
 import {
+  BellIcon,
   ChartLineUpIcon,
   ClockCounterClockwiseIcon,
   DoorOpenIcon,
@@ -21,6 +22,7 @@ import { APP_NAME } from '#/config/app.constants'
 import { useToast } from '#/components/common/toast'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useAuth } from '#/lib/auth/useAuth'
+import { useUnreadNotificationCount } from '#/lib/notifications/useNotifications'
 import { useCurrentRoom, useLiveRooms, useRooms } from '#/lib/rooms/useRooms'
 import type { RoomDurationMinutes } from '#/lib/rooms/rooms.types'
 
@@ -32,7 +34,7 @@ type HomeAction = {
   description: string
   icon: ComponentType<{ weight?: 'bold'; className?: string }>
   dialog?: HomeDialogMode
-  to?: '/friends' | '/stats' | '/leaderboard' | '/matches'
+  to?: '/friends' | '/stats' | '/leaderboard' | '/matches' | '/notifications'
 }
 
 const homeActions: HomeAction[] = [
@@ -93,6 +95,7 @@ export function HomePage() {
   const [roomCode, setRoomCode] = useState('')
   const currentRoom = useCurrentRoom(Boolean(user))
   const liveRooms = useLiveRooms(activeDialog === 'liveRooms')
+  const unreadNotifications = useUnreadNotificationCount()
   const activeRoomAction =
     activeDialog === 'create' || activeDialog === 'join' ? activeDialog : null
 
@@ -220,6 +223,21 @@ export function HomePage() {
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] sm:h-10 sm:w-10"
             >
               <UserIcon weight="bold" className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+            </Link>
+
+            <Link
+              to="/notifications"
+              aria-label="Open notifications"
+              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] sm:h-10 sm:w-10"
+            >
+              <BellIcon weight="bold" className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+              {unreadNotifications.count ? (
+                <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--primary)] px-1 text-[0.65rem] font-black text-[var(--primary-foreground)]">
+                  {unreadNotifications.count > 9
+                    ? '9+'
+                    : unreadNotifications.count}
+                </span>
+              ) : null}
             </Link>
 
             <button
