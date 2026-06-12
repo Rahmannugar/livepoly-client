@@ -5,8 +5,12 @@ import type {
   NotificationsPageResponse,
 } from './notifications.types'
 
-export function listNotifications() {
+export function listNotifications(cursor?: string | null) {
   const params = new URLSearchParams({ limit: String(NOTIFICATIONS_LIMIT) })
+
+  if (cursor) {
+    params.set('cursor', cursor)
+  }
 
   return apiClient<NotificationsPageResponse>(
     `/notifications?${params.toString()}`,

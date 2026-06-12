@@ -1,4 +1,5 @@
 import {
+  ArrowClockwiseIcon,
   BellIcon,
   CheckCircleIcon,
   GameControllerIcon,
@@ -71,7 +72,8 @@ export function NotificationsPage() {
   const mutations = useNotificationMutations()
   const navigate = useNavigate()
   const { showToast } = useToast()
-  const items = notifications.data?.items ?? []
+  const items =
+    notifications.data?.pages.flatMap((page) => page.items) ?? []
   const unreadCount = items.filter((notification) => !notification.read).length
 
   function markAsRead(notificationId: string) {
@@ -163,6 +165,39 @@ export function NotificationsPage() {
         </div>
 
         <section className="grid gap-3">
+          {notifications.isLoading ? (
+            <>
+              <NotificationSkeleton />
+              <NotificationSkeleton />
+              <NotificationSkeleton />
+            </>
+          ) : null}
+
+          {notifications.isError ? (
+            <article className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-base font-black text-[var(--sea-ink)]">
+                    Could not load notifications.
+                  </p>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+                    {notifications.error instanceof Error
+                      ? notifications.error.message
+                      : 'Try again in a moment.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)]"
+                  onClick={() => void notifications.refetch()}
+                >
+                  <ArrowClockwiseIcon weight="bold" className="h-4 w-4" />
+                  Retry
+                </button>
+              </div>
+            </article>
+          ) : null}
+
           {items.map((notification) => (
             <NotificationCard
               key={notification.id}
@@ -173,7 +208,7 @@ export function NotificationsPage() {
             />
           ))}
 
-          {!items.length ? (
+          {!notifications.isLoading && !notifications.isError && !items.length ? (
             <article className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 text-center shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
               <BellIcon
                 weight="bold"
@@ -187,9 +222,35 @@ export function NotificationsPage() {
               </p>
             </article>
           ) : null}
+
+          {notifications.hasNextPage ? (
+            <button
+              type="button"
+              disabled={notifications.isFetchingNextPage}
+              className="mx-auto mt-2 inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => void notifications.fetchNextPage()}
+            >
+              {notifications.isFetchingNextPage ? 'Loading...' : 'Load more'}
+            </button>
+          ) : null}
         </section>
       </section>
     </main>
+  )
+}
+
+function NotificationSkeleton() {
+  return (
+    <article className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
+      <div className="flex items-start gap-4">
+        <div className="h-12 w-12 shrink-0 animate-pulse rounded-2xl bg-[color-mix(in_oklab,var(--sea-ink-soft)_20%,transparent)]" />
+        <div className="grid flex-1 gap-3">
+          <div className="h-5 w-2/5 animate-pulse rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_20%,transparent)]" />
+          <div className="h-4 w-4/5 animate-pulse rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_16%,transparent)]" />
+          <div className="h-3 w-32 animate-pulse rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_14%,transparent)]" />
+        </div>
+      </div>
+    </article>
   )
 }
 
