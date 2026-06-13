@@ -168,7 +168,7 @@ export function ProfilePage() {
                 <button
                   type="button"
                   aria-label="Upload profile avatar"
-                  className="group relative grid h-32 w-32 shrink-0 place-items-center overflow-hidden rounded-[34px] border border-[var(--line)] bg-[radial-gradient(circle_at_35%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_42%),var(--surface)] text-[var(--sea-ink)] shadow-[0_18px_45px_rgba(8,28,32,0.14)] transition duration-300 hover:translate-y-[-2px] hover:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70 sm:h-36 sm:w-36"
+                  className="group relative grid h-32 w-32 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[radial-gradient(circle_at_35%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_42%),var(--surface)] text-[var(--sea-ink)] shadow-[0_18px_45px_rgba(8,28,32,0.14)] transition duration-300 hover:translate-y-[-2px] hover:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70 sm:h-36 sm:w-36"
                   disabled={avatarUpload.isPending}
                   onClick={() => fileInputRef.current?.click()}
                 >
@@ -220,7 +220,7 @@ export function ProfilePage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="app-kicker">Player profile</p>
-                    <h1 className="display-title mt-2 truncate text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl xl:text-[3.25rem]">
+                    <h1 className="display-title mt-2 truncate text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-[2.35rem] xl:text-[2.85rem]">
                       {user?.username ?? 'Loading...'}
                     </h1>
                   </div>
