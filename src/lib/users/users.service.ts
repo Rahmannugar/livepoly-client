@@ -56,13 +56,21 @@ export function createAvatarUploadUrl(input: CreateAvatarUploadUrlRequest) {
 }
 
 export async function uploadAvatarToStorage(uploadUrl: string, file: File) {
-  const response = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': file.type,
-    },
-    body: file,
-  })
+  let response: Response
+
+  try {
+    response = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+      },
+      body: file,
+    })
+  } catch {
+    throw new Error(
+      'Avatar upload was blocked by storage CORS. Check the R2 bucket CORS policy.',
+    )
+  }
 
   if (!response.ok) {
     throw new Error('Could not upload avatar.')

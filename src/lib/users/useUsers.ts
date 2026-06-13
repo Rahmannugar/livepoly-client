@@ -8,7 +8,11 @@ import {
   USERS_QUERY_KEYS,
 } from './users.constants'
 import * as usersService from './users.service'
-import type { AvatarContentType, UpdateUserProfileRequest } from './users.types'
+import type {
+  AvatarContentType,
+  UpdateUserProfileRequest,
+  UserProfile,
+} from './users.types'
 
 export function useCurrentUserProfile(enabled = true) {
   return useQuery({
@@ -89,7 +93,18 @@ export function useAvatarUpload() {
 
       return upload
     },
-    onSuccess: () => {
+    onSuccess: (upload) => {
+      queryClient.setQueryData<UserProfile | undefined>(
+        USERS_QUERY_KEYS.me,
+        (currentProfile) =>
+          currentProfile
+            ? {
+                ...currentProfile,
+                avatarUrl: upload.avatarUrl,
+                updatedAt: new Date().toISOString(),
+              }
+            : currentProfile,
+      )
       void queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEYS.me })
     },
   })

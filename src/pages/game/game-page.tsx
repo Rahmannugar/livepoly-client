@@ -45,6 +45,7 @@ export function GamePage({ gameId }: GamePageProps) {
             turnConsequence={model.turnConsequence}
             isCurrentTurn={model.isUserTurn}
             isRollingDice={model.isRollingDice}
+            remainingTurnTimeMs={model.remainingTurnTimeMs}
           />
 
           <aside className="order-3 grid gap-3 md:grid-cols-2 xl:order-3 xl:grid-cols-1 xl:content-start">

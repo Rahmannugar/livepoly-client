@@ -69,6 +69,10 @@ export function useGamePage(gameId: string) {
     state?.expiresAt,
     currentTimeMs,
   )
+  const remainingTurnTimeMs = getRemainingMatchTimeMs(
+    state?.turnExpiresAt,
+    currentTimeMs,
+  )
   const gameExpired = Boolean(
     state?.expiresAt &&
       remainingMatchTimeMs !== null &&
@@ -107,7 +111,7 @@ export function useGamePage(gameId: string) {
   }, [state?.auction?.currentBid, state?.auction?.tileKey])
 
   useEffect(() => {
-    if (!state?.expiresAt || gameClosed) {
+    if (gameClosed) {
       return
     }
 
@@ -118,7 +122,7 @@ export function useGamePage(gameId: string) {
     }, 1_000)
 
     return () => window.clearInterval(intervalId)
-  }, [state?.expiresAt, gameClosed])
+  }, [state?.expiresAt, state?.turnExpiresAt, gameClosed])
 
   useEffect(() => {
     if (!latestCardReveal) {
@@ -149,6 +153,7 @@ export function useGamePage(gameId: string) {
     currentPlayerInJail,
     minimumAuctionBid,
     remainingMatchTimeMs,
+    remainingTurnTimeMs,
     gameExpired,
     primaryAction,
     isRollingDice,

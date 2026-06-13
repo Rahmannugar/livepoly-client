@@ -24,6 +24,7 @@ import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useAuth } from '#/lib/auth/useAuth'
 import { useUnreadNotificationCount } from '#/lib/notifications/useNotifications'
 import { useCurrentRoom, useLiveRooms, useRooms } from '#/lib/rooms/useRooms'
+import { useCurrentUserProfile } from '#/lib/users/useUsers'
 import type { RoomDurationMinutes } from '#/lib/rooms/rooms.types'
 
 type RoomActionMode = 'create' | 'join'
@@ -88,7 +89,9 @@ export function HomePage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
   const user = auth.currentUser.data
+  const profile = useCurrentUserProfile(Boolean(user))
   const displayName = user?.username ?? 'player'
+  const avatarUrl = profile.data?.avatarUrl
   const [activeDialog, setActiveDialog] = useState<HomeDialogMode | null>(null)
   const [durationMinutes, setDurationMinutes] =
     useState<RoomDurationMinutes>(getInitialRoomDuration)
@@ -220,9 +223,17 @@ export function HomePage() {
             <Link
               to="/profile"
               aria-label="Open profile"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] sm:h-10 sm:w-10"
+              className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] sm:h-10 sm:w-10"
             >
-              <UserIcon weight="bold" className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <UserIcon weight="bold" className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+              )}
             </Link>
 
             <Link

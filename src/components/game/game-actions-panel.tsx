@@ -111,6 +111,7 @@ export function GameActionsPanel({
             label={activeTileLabel}
             property={activeProperty}
             owner={activeOwner}
+            defaultCollapsed
           />
         </div>
       ) : null}

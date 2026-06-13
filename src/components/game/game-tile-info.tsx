@@ -1,4 +1,5 @@
-import { SpinnerGapIcon } from '@phosphor-icons/react'
+import { CaretDownIcon, SpinnerGapIcon } from '@phosphor-icons/react'
+import { useState } from 'react'
 import {
   formatCash,
   formatMoney,
@@ -13,6 +14,7 @@ type TileInfoPanelProps = {
   label?: string
   property?: GameProperty | null
   owner?: GamePlayer | null
+  defaultCollapsed?: boolean
 }
 
 type PropertyDecisionControlsProps = {
@@ -28,7 +30,10 @@ export function TileInfoPanel({
   label,
   property,
   owner,
+  defaultCollapsed = false,
 }: TileInfoPanelProps) {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed)
+
   if (!tile) {
     return null
   }
@@ -51,52 +56,74 @@ export function TileInfoPanel({
 
   return (
     <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4">
-      <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
-        {label ?? getTileKindLabel(tile)}
-      </p>
-      <p className="mt-1 text-2xl font-black leading-tight text-[var(--sea-ink)]">
-        {tile.name}
-      </p>
-      <p className="mt-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-        {getTileInfoCopy(tile)}
-      </p>
+      <button
+        type="button"
+        aria-expanded={!collapsed}
+        className="flex w-full min-w-0 items-start gap-3 text-left"
+        onClick={() => setCollapsed((value) => !value)}
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
+            {label ?? getTileKindLabel(tile)}
+          </span>
+          <span className="mt-1 block truncate text-2xl font-black leading-tight text-[var(--sea-ink)]">
+            {tile.name}
+          </span>
+        </span>
+        <CaretDownIcon
+          weight="bold"
+          className={`mt-1 h-5 w-5 shrink-0 text-[var(--sea-ink-soft)] transition duration-300 ${
+            collapsed ? '' : 'rotate-180'
+          }`}
+        />
+      </button>
 
-      {details.length ? (
-        <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-[var(--sea-ink)] sm:grid-cols-3 xl:grid-cols-2">
-          {details.map((detail) => (
-            <span
-              key={detail.label}
-              className="min-w-0 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-3 py-2"
-            >
-              <span className="block text-[0.62rem] uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
-                {detail.label}
-              </span>
-              <span className="block break-words leading-5">{detail.value}</span>
-            </span>
-          ))}
-        </div>
-      ) : null}
-
-      {rentRows.length ? (
-        <div className="mt-4 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_74%,transparent)] p-3">
-          <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
-            Earnings
+      <div className={`game-collapsible ${collapsed ? '' : 'game-collapsible--open'}`}>
+        <div className="pt-2">
+          <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+            {getTileInfoCopy(tile)}
           </p>
-          <div className="mt-2 grid gap-1.5">
-            {rentRows.map((row) => (
-              <div
-                key={row.label}
-                className="flex min-w-0 items-center justify-between gap-3 text-xs font-black text-[var(--sea-ink)]"
-              >
-                <span className="min-w-0 truncate text-[var(--sea-ink-soft)]">
-                  {row.label}
+
+          {details.length ? (
+            <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-[var(--sea-ink)] sm:grid-cols-3 xl:grid-cols-2">
+              {details.map((detail) => (
+                <span
+                  key={detail.label}
+                  className="min-w-0 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-3 py-2"
+                >
+                  <span className="block text-[0.62rem] uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
+                    {detail.label}
+                  </span>
+                  <span className="block break-words leading-5">
+                    {detail.value}
+                  </span>
                 </span>
-                <span className="shrink-0">{row.value}</span>
+              ))}
+            </div>
+          ) : null}
+
+          {rentRows.length ? (
+            <div className="mt-4 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_74%,transparent)] p-3">
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
+                Earnings
+              </p>
+              <div className="mt-2 grid gap-1.5">
+                {rentRows.map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex min-w-0 items-center justify-between gap-3 text-xs font-black text-[var(--sea-ink)]"
+                  >
+                    <span className="min-w-0 truncate text-[var(--sea-ink-soft)]">
+                      {row.label}
+                    </span>
+                    <span className="shrink-0">{row.value}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }
@@ -141,7 +168,11 @@ export function PropertyDecisionControls({
 export function PropertyDecisionActions(props: PropertyDecisionControlsProps) {
   return (
     <div className="grid gap-3">
-      <TileInfoPanel tile={props.tile} property={props.property} />
+      <TileInfoPanel
+        tile={props.tile}
+        property={props.property}
+        defaultCollapsed
+      />
       <PropertyDecisionControls {...props} />
     </div>
   )
@@ -167,7 +198,11 @@ export function MobilePropertyDecisionSheet({
         className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 grid max-h-[min(82vh,42rem)] gap-3 overflow-y-auto rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)]"
       >
         <span className="mx-auto h-1.5 w-12 rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_42%,transparent)]" />
-        <TileInfoPanel tile={props.tile} property={props.property} />
+        <TileInfoPanel
+          tile={props.tile}
+          property={props.property}
+          defaultCollapsed
+        />
         <PropertyDecisionControls {...props} />
       </section>
     </div>

@@ -116,20 +116,22 @@ function isAuthEndpoint(path: string) {
   return path.startsWith('/auth/')
 }
 
-function runStatusInterceptor(error: ApiClientError, path: string) {
+async function runStatusInterceptor(error: ApiClientError, path: string) {
   if (error.statusCode === 401 && !isAuthEndpoint(path)) {
-    unauthorizedInterceptor?.(error)
-    return
+    return unauthorizedInterceptor?.(error)
   }
 
   if (error.statusCode === 403) {
-    forbiddenInterceptor?.(error)
+    return forbiddenInterceptor?.(error)
   }
+
+  return false
 }
 
-export async function apiClient<T>(
+async function requestApi<T>(
   path: string,
   options: ApiRequestOptions = {},
+  canRecoverAuth = true,
 ): Promise<T> {
   const response = await fetch(`${env.apiBaseUrl}${path}`, {
     ...options,
@@ -150,7 +152,11 @@ export async function apiClient<T>(
       response.status,
     )
 
-    runStatusInterceptor(error, path)
+    const recovered = await runStatusInterceptor(error, path)
+
+    if (canRecoverAuth && error.statusCode === 401 && recovered === true) {
+      return requestApi<T>(path, options, false)
+    }
 
     throw error
   }
@@ -165,4 +171,11 @@ export async function apiClient<T>(
   }
 
   return body as T
+}
+
+export async function apiClient<T>(
+  path: string,
+  options: ApiRequestOptions = {},
+): Promise<T> {
+  return requestApi<T>(path, options)
 }

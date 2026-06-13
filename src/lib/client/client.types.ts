@@ -25,7 +25,7 @@ export type ApiRequestOptions = Omit<RequestInit, 'body'> & {
   authToken?: string | null
 }
 
-export type ApiClientInterceptor = (error: ApiClientError) => void
+export type ApiClientInterceptor = (error: ApiClientError) => void | boolean | Promise<void | boolean>
 
 export type ApiClientError = Error & {
   statusCode: number

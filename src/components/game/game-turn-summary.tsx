@@ -6,6 +6,7 @@ import {
   getPlayerName,
   type GameTile,
 } from '#/lib/game/game-board'
+import { formatRemainingMatchTime } from '#/lib/game/game-time'
 import type { GamePhase, GamePlayer } from '#/lib/game/game.types'
 
 export function GameTurnSummary({
@@ -15,6 +16,7 @@ export function GameTurnSummary({
   tile,
   consequence,
   isCurrentTurn,
+  remainingTurnTimeMs,
 }: {
   player: GamePlayer | null
   phase: GamePhase | undefined
@@ -22,6 +24,7 @@ export function GameTurnSummary({
   tile: GameTile | null
   consequence: string
   isCurrentTurn: boolean
+  remainingTurnTimeMs: number | null
 }) {
   return (
     <section className="game-turn-summary mb-4 grid gap-3 rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface)_78%,transparent)] p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -40,6 +43,10 @@ export function GameTurnSummary({
       </div>
 
       <div className="grid gap-2 sm:min-w-56">
+        <SummaryPill
+          label="Move"
+          value={formatRemainingMatchTime(remainingTurnTimeMs)}
+        />
         <SummaryPill label="Dice" value={formatDice(dice)} />
         <SummaryPill
           label={tile ? 'Square' : 'Square'}

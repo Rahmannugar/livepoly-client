@@ -9,13 +9,22 @@ export function AuthHydrator({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    setUnauthorizedInterceptor(() => {
-      authService.clearAccessToken()
-      queryClient.removeQueries({ queryKey: AUTH_QUERY_KEYS.currentUser })
-      queryClient.setQueryData(AUTH_QUERY_KEYS.hydration, true)
+    setUnauthorizedInterceptor(async () => {
+      try {
+        const session = await authService.refreshSession()
+        queryClient.setQueryData(AUTH_QUERY_KEYS.currentUser, session.user)
+        queryClient.setQueryData(AUTH_QUERY_KEYS.hydration, true)
+        return true
+      } catch {
+        authService.clearAccessToken()
+        queryClient.removeQueries({ queryKey: AUTH_QUERY_KEYS.currentUser })
+        queryClient.setQueryData(AUTH_QUERY_KEYS.hydration, true)
 
-      if (!window.location.pathname.startsWith('/auth/')) {
-        window.location.assign('/auth/login')
+        if (!window.location.pathname.startsWith('/auth/')) {
+          window.location.assign('/auth/login')
+        }
+
+        return false
       }
     })
 

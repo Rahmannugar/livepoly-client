@@ -13,6 +13,7 @@ export function GameStage({
   turnConsequence,
   isCurrentTurn,
   isRollingDice,
+  remainingTurnTimeMs,
 }: {
   state: GameState | null
   access: string | null
@@ -22,6 +23,7 @@ export function GameStage({
   turnConsequence: string
   isCurrentTurn: boolean
   isRollingDice: boolean
+  remainingTurnTimeMs: number | null
 }) {
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
 
@@ -43,6 +45,7 @@ export function GameStage({
         tile={activeTile}
         consequence={turnConsequence}
         isCurrentTurn={isCurrentTurn}
+        remainingTurnTimeMs={remainingTurnTimeMs}
       />
 
       <GameBoard
@@ -97,6 +100,10 @@ function GameStageTitle({
 }
 
 function GameStatusBadge({ status }: { status: string }) {
+  if (status === 'joined') {
+    return null
+  }
+
   return (
     <span className="inline-flex h-10 w-fit items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-xs font-black capitalize text-[var(--sea-ink)]">
       {status === 'connecting' ? (
