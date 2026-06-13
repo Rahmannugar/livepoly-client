@@ -103,7 +103,7 @@ export function GamePage({ gameId }: GamePageProps) {
               players={state?.players ?? []}
             />
 
-            {model.gameClosed ? (
+            {model.shouldLoadGameResult ? (
               <GameResultsPanel
                 result={model.gameResult.data}
                 isLoading={model.gameResult.isFetching}

@@ -92,7 +92,8 @@ export function useGamePage(gameId: string) {
   const isRollingDice =
     game.commandPending && primaryAction.command === 'roll'
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
-  const gameResult = useGameResult(gameId, gameClosed)
+  const shouldLoadGameResult = gameClosed || gameExpired
+  const gameResult = useGameResult(gameId, shouldLoadGameResult)
   const showMobilePropertyDecision =
     !gameClosed &&
     !gameExpired &&
@@ -152,6 +153,7 @@ export function useGamePage(gameId: string) {
     primaryAction,
     isRollingDice,
     gameClosed,
+    shouldLoadGameResult,
     gameResult,
     showMobilePropertyDecision,
     auctionBidAmount,

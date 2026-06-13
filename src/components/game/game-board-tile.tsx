@@ -2,7 +2,7 @@ import {
   AirplaneTiltIcon,
   BankIcon,
   CarIcon,
-  CurrencyDollarIcon,
+  CoinsIcon,
   DropIcon,
   LightningIcon,
   PoliceCarIcon,
@@ -45,7 +45,7 @@ export function GameTileCell({
         />
       ) : null}
 
-      <div className="game-tile__body mt-1 min-h-0 pr-1">
+      <div className="game-tile__body mt-1 min-h-0 pr-1 pb-5">
         {TileIcon ? (
           <span className="game-tile__icon">
             <TileIcon
@@ -64,9 +64,9 @@ export function GameTileCell({
         </span>
       </div>
 
-      <div className="game-tile__tokens pointer-events-none absolute bottom-1 right-1 z-30 flex max-w-[calc(100%-0.5rem)] flex-wrap items-end justify-end gap-0.5">
+      <div className="game-tile__tokens pointer-events-none absolute bottom-1 right-1 z-40 flex max-w-[calc(100%-0.5rem)] flex-wrap items-end justify-end gap-0.5">
         {owner ? (
-          <span className="rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[0.55rem] font-black">
+          <span className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-1.5 py-0.5 text-[0.55rem] font-black shadow-sm">
             {owner.seatNumber}
           </span>
         ) : null}
@@ -133,7 +133,7 @@ function getTileIcon(tile: GameTile): Icon | null {
   }
 
   if (tile.kind === 'go') {
-    return CurrencyDollarIcon
+    return CoinsIcon
   }
 
   if (tile.key === 'water_works') {

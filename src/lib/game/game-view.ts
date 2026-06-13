@@ -151,6 +151,19 @@ export function getPrimaryGameAction({
   }
 
   if (hasState && status !== 'joined') {
+    if (
+      isActivePlayer &&
+      (phase === 'awaiting_first_turn' || phase === 'awaiting_roll') &&
+      status === 'connected'
+    ) {
+      return {
+        command: 'roll',
+        enabled: false,
+        label: 'Syncing dice',
+        copy: 'The live game connection is opening your turn controls.',
+      }
+    }
+
     return {
       command: null,
       enabled: false,
@@ -301,9 +314,11 @@ export function getPrimaryGameAction({
   return {
     command: null,
     enabled: false,
-    label: 'Resolving',
+    label: isActivePlayer ? 'No action yet' : 'Resolving',
     copy: phase
-      ? `Resolving ${phase.replaceAll('_', ' ')}.`
+      ? isActivePlayer
+        ? `You are up, but ${phase.replaceAll('_', ' ')} has no direct action yet.`
+        : `Resolving ${phase.replaceAll('_', ' ')}.`
       : 'Waiting for the next game state.',
   }
 }
