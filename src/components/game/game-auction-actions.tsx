@@ -1,4 +1,5 @@
 import { SpinnerGapIcon } from '@phosphor-icons/react'
+import { useEffect, useState } from 'react'
 import { findPlayer, formatCash, getPlayerName } from '#/lib/game/game-board'
 import type { GameAuction, GamePlayer } from '#/lib/game/game.types'
 import { StatePill } from './game-primitives'
@@ -26,7 +27,9 @@ export function AuctionActions({
   onPlaceBid: () => void
   onPass: () => void
 }) {
+  const [bidInputValue, setBidInputValue] = useState(String(bidAmount))
   const highestBidder = findPlayer(players, auction.highestBidderRoomPlayerId)
+  const parsedBidAmount = Number.parseInt(bidInputValue, 10)
   const hasPassed = Boolean(
     roomPlayerId && auction.passedRoomPlayerIds.includes(roomPlayerId),
   )
@@ -44,6 +47,21 @@ export function AuctionActions({
     : hasPassed
       ? 'You have passed. Waiting for the auction to finish.'
       : 'Waiting for active bidders.'
+
+  useEffect(() => {
+    setBidInputValue(String(bidAmount))
+  }, [bidAmount])
+
+  function normalizeBidInput() {
+    if (!Number.isFinite(parsedBidAmount) || parsedBidAmount < minimumBid) {
+      setBidInputValue(String(minimumBid))
+      onBidAmountChange(minimumBid)
+      return
+    }
+
+    setBidInputValue(String(parsedBidAmount))
+    onBidAmountChange(parsedBidAmount)
+  }
 
   return (
     <div className="game-auction-panel grid gap-4">
@@ -80,17 +98,18 @@ export function AuctionActions({
           min={minimumBid}
           step={10}
           disabled={!canBid || commandPending}
-          value={bidAmount}
-          onChange={(event) =>
-            onBidAmountChange(
-              Number.parseInt(event.target.value, 10) || minimumBid,
-            )
-          }
-          onBlur={() => {
-            if (bidAmount < minimumBid) {
-              onBidAmountChange(minimumBid)
+          value={bidInputValue}
+          onChange={(event) => {
+            const nextValue = event.target.value
+            const nextAmount = Number.parseInt(nextValue, 10)
+
+            setBidInputValue(nextValue)
+
+            if (Number.isFinite(nextAmount)) {
+              onBidAmountChange(nextAmount)
             }
           }}
+          onBlur={normalizeBidInput}
           className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
         />
       </label>
@@ -98,11 +117,19 @@ export function AuctionActions({
       <div className="grid gap-2">
         <button
           type="button"
-          disabled={!canBid || commandPending || bidAmount < minimumBid}
+          disabled={
+            !canBid ||
+            commandPending ||
+            !Number.isFinite(parsedBidAmount) ||
+            parsedBidAmount < minimumBid
+          }
           className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
             commandPending ? 'game-command-button--active' : ''
           }`}
-          onClick={onPlaceBid}
+          onClick={() => {
+            normalizeBidInput()
+            onPlaceBid()
+          }}
         >
           {commandPending ? (
             <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />

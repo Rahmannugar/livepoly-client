@@ -471,7 +471,9 @@ export function useGame(gameId: string) {
 
     socket.on('disconnect', (reason) => {
       debugGameSocket('disconnected', { gameId, reason })
-      setStatus('disconnected')
+      setStatus((currentStatus) =>
+        currentStatus === 'joined' ? 'connecting' : 'disconnected',
+      )
     })
 
     socket.on('connect_error', (error) => {
@@ -532,7 +534,6 @@ export function useGame(gameId: string) {
         return
       }
 
-      setStatus('error')
       setErrorMessage(getGameSocketErrorMessage(payload.message))
     })
 
@@ -545,7 +546,6 @@ export function useGame(gameId: string) {
         return
       }
 
-      setStatus('error')
       setErrorMessage(getGameSocketErrorMessage(message))
     })
 
