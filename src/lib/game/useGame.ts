@@ -493,6 +493,7 @@ export function useGame(gameId: string) {
 
     socket.on(GAME_SOCKET_EVENTS.state, (payload: GameStateEvent) => {
       if (payload.gameId === gameId) {
+        setStatus('joined')
         setState(payload.state)
         setErrorMessage(null)
       }
@@ -589,8 +590,17 @@ export function useGame(gameId: string) {
 
   const runCommand = useCallback(
     async (event: string, payload: Record<string, unknown> = {}) => {
+      const socket = socketRef.current
+
+      if (!socket?.connected) {
+        setStatus('disconnected')
+        setErrorMessage('Trying to restore the live game connection.')
+        return
+      }
+
       setCommandPending(true)
       setErrorMessage(null)
+      setStatus('joined')
 
       try {
         const response = await requestGameEvent<GameCommandStateResponse>(
@@ -599,6 +609,7 @@ export function useGame(gameId: string) {
           { gameId, ...payload },
         )
 
+        setStatus('joined')
         setState(response.state)
         setErrorMessage(null)
 

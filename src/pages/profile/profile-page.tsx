@@ -200,11 +200,6 @@ export function ProfilePage() {
                   <ImageSquareIcon weight="bold" className="h-4 w-4" />
                   {avatarUpload.isPending ? 'Uploading...' : 'Upload avatar'}
                 </button>
-                {!avatarPreviewUrl ? (
-                  <p className="max-w-32 text-center text-[0.7rem] font-bold leading-5 text-[var(--sea-ink-soft)]">
-                    WebP, PNG, or JPG
-                  </p>
-                ) : null}
               </div>
               <input
                 ref={fileInputRef}
@@ -220,14 +215,14 @@ export function ProfilePage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="app-kicker">Player profile</p>
-                    <h1 className="display-title mt-2 truncate text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-[2.35rem] xl:text-[2.85rem]">
+                    <h1 className="display-title mt-2 truncate text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl xl:text-4xl">
                       {user?.username ?? 'Loading...'}
                     </h1>
                   </div>
                   <button
                     type="button"
                     disabled={!user}
-                    className="inline-flex h-11 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[var(--primary)] px-5 text-sm font-black text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-36"
+                    className="inline-flex h-11 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-32"
                     onClick={() => setIsEditingProfile((value) => !value)}
                   >
                     {isEditingProfile ? 'Close editor' : 'Edit profile'}

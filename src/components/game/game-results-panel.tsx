@@ -17,7 +17,7 @@ export function GameResultsPanel({
   )
 
   return (
-    <GamePanel title="Results" icon={TrophyIcon}>
+    <GamePanel title="Results" icon={TrophyIcon} collapsible={false}>
       {errorMessage ? (
         <p className="text-sm font-bold leading-6 text-red-500">
           {errorMessage}

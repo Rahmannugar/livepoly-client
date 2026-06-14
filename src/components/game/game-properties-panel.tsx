@@ -13,6 +13,7 @@ export function PropertiesPanel({
   properties,
   players,
   roomPlayerId,
+  canManageProperties,
   commandPending,
   onBuild,
   onSellBuilding,
@@ -22,6 +23,7 @@ export function PropertiesPanel({
   properties: GameProperty[]
   players: GamePlayer[]
   roomPlayerId: string | null
+  canManageProperties: boolean
   commandPending: boolean
   onBuild: (tileKey: string) => void
   onSellBuilding: (tileKey: string) => void
@@ -29,11 +31,12 @@ export function PropertiesPanel({
   onUnmortgage: (tileKey: string) => void
 }) {
   return (
-    <GamePanel title="Properties" icon={BuildingsIcon}>
+    <GamePanel title="Properties" icon={BuildingsIcon} collapsible={false}>
       <PropertyList
         properties={properties}
         players={players}
         roomPlayerId={roomPlayerId}
+        canManageProperties={canManageProperties}
         commandPending={commandPending}
         onBuild={onBuild}
         onSellBuilding={onSellBuilding}
@@ -48,6 +51,7 @@ function PropertyList({
   properties,
   players,
   roomPlayerId,
+  canManageProperties,
   commandPending,
   onBuild,
   onSellBuilding,
@@ -57,6 +61,7 @@ function PropertyList({
   properties: GameProperty[]
   players: GamePlayer[]
   roomPlayerId: string | null
+  canManageProperties: boolean
   commandPending: boolean
   onBuild: (tileKey: string) => void
   onSellBuilding: (tileKey: string) => void
@@ -82,7 +87,8 @@ function PropertyList({
         const mortgageValue = tile?.mortgageValue ?? 0
         const unmortgageCost = getUnmortgageCost(mortgageValue)
         const canManageBuilding = Boolean(
-          isMine &&
+          canManageProperties &&
+            isMine &&
             tile?.kind === 'property' &&
             !property.mortgaged &&
             !property.hasHotel,
@@ -119,10 +125,10 @@ function PropertyList({
               </span>
             </div>
 
-            {mortgageValue > 0 ? (
+            {canManageProperties && isMine && mortgageValue > 0 ? (
               <div className="grid gap-2">
                 {tile?.kind === 'property' ? (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-2 2xl:grid-cols-2">
                     <button
                       type="button"
                       disabled={
@@ -130,7 +136,7 @@ function PropertyList({
                         commandPending ||
                         buildingCost <= 0
                       }
-                      className="inline-flex h-9 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onBuild(property.tileKey)}
                     >
                       {property.hasHotel
@@ -142,7 +148,7 @@ function PropertyList({
                     <button
                       type="button"
                       disabled={!isMine || !hasBuilding || commandPending}
-                      className="inline-flex h-9 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onSellBuilding(property.tileKey)}
                     >
                       Sell +{formatCash(buildingCost / 2)}
@@ -153,7 +159,7 @@ function PropertyList({
                 <button
                   type="button"
                   disabled={!isMine || commandPending}
-                  className="inline-flex h-9 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={() => {
                     if (property.mortgaged) {
                       onUnmortgage(property.tileKey)

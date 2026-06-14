@@ -1,6 +1,8 @@
-import type { ROOM_DURATIONS } from './rooms.constants'
+import type { BOT_DIFFICULTIES, ROOM_DURATIONS } from './rooms.constants'
 
 export type RoomDurationMinutes = (typeof ROOM_DURATIONS)[number]
+
+export type BotDifficulty = (typeof BOT_DIFFICULTIES)[number]
 
 export type RoomStatus = 'waiting' | 'active' | 'finished' | 'cancelled'
 
@@ -16,6 +18,11 @@ export type CreateRoomRequest = {
 
 export type InviteRoomRequest = {
   username: string
+}
+
+export type StartRoomRequest = {
+  code: string
+  botDifficulty?: BotDifficulty
 }
 
 export type RoomPlayer = {

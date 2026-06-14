@@ -23,20 +23,25 @@ export function GameTileCell({
   players,
   owner,
   currentTurnRoomPlayerId,
+  onSelect,
 }: {
   tile: GameTile
   players: GamePlayer[]
   owner: GamePlayer | null
   currentTurnRoomPlayerId: string | null
+  onSelect: (tile: GameTile) => void
 }) {
   const TileIcon = getTileIcon(tile)
 
   return (
-    <div
-      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-lg border border-[var(--line)] bg-[var(--bg-base)] p-1 text-[var(--sea-ink)] sm:rounded-xl sm:p-1.5 2xl:rounded-2xl 2xl:p-2 ${
+    <button
+      type="button"
+      aria-label={`View ${tile.name}`}
+      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-lg border border-[var(--line)] bg-[var(--bg-base)] p-1 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-xl sm:p-1.5 2xl:rounded-2xl 2xl:p-2 ${
         TileIcon ? 'game-tile--special' : ''
       }`}
       style={getTileGridStyle(tile.index)}
+      onClick={() => onSelect(tile)}
     >
       {tile.setKey ? (
         <span
@@ -79,7 +84,7 @@ export function GameTileCell({
           />
         ))}
       </div>
-    </div>
+    </button>
   )
 }
 

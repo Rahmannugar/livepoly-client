@@ -7,6 +7,8 @@ import type {
   ApiRequestOptions,
 } from './client.types'
 
+const API_CLIENT_REQUEST_TIMEOUT_MS = 60_000
+
 let unauthorizedInterceptor: ApiClientInterceptor | null = null
 let forbiddenInterceptor: ApiClientInterceptor | null = null
 let accessToken: string | null = null
@@ -50,6 +52,15 @@ function createApiClientError(
     statusCode,
     code: nestedError?.code ?? error.code,
     details: nestedError?.details ?? error.details,
+  })
+}
+
+function createRequestTimeoutError(): ApiClientError {
+  return Object.assign(new Error('Request timed out. Try again.'), {
+    name: 'ApiClientError',
+    statusCode: 408,
+    code: 'REQUEST_TIMEOUT',
+    details: undefined,
   })
 }
 
@@ -133,12 +144,41 @@ async function requestApi<T>(
   options: ApiRequestOptions = {},
   canRecoverAuth = true,
 ): Promise<T> {
-  const response = await fetch(`${env.apiBaseUrl}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers: buildHeaders(options),
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-  })
+  const abortController = new AbortController()
+  const timeoutId = window.setTimeout(() => {
+    abortController.abort()
+  }, API_CLIENT_REQUEST_TIMEOUT_MS)
+  const abortRequest = () => abortController.abort()
+
+  if (options.signal) {
+    if (options.signal.aborted) {
+      abortController.abort()
+    } else {
+      options.signal.addEventListener('abort', abortRequest, { once: true })
+    }
+  }
+
+  let response: Response
+
+  try {
+    response = await fetch(`${env.apiBaseUrl}${path}`, {
+      ...options,
+      credentials: 'include',
+      headers: buildHeaders(options),
+      body:
+        options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: abortController.signal,
+    })
+  } catch (error) {
+    if (abortController.signal.aborted && !options.signal?.aborted) {
+      throw createRequestTimeoutError()
+    }
+
+    throw error
+  } finally {
+    window.clearTimeout(timeoutId)
+    options.signal?.removeEventListener('abort', abortRequest)
+  }
 
   const body = await parseResponseBody(response)
 

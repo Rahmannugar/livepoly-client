@@ -1,4 +1,4 @@
-import { CaretDownIcon, SpinnerGapIcon } from '@phosphor-icons/react'
+import { CaretDownIcon, SpinnerGapIcon, XIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import {
   formatCash,
@@ -204,6 +204,60 @@ export function MobilePropertyDecisionSheet({
           defaultCollapsed
         />
         <PropertyDecisionControls {...props} />
+      </section>
+    </div>
+  )
+}
+
+export function TileInfoSheet({
+  open,
+  tile,
+  property,
+  owner,
+  onClose,
+}: {
+  open: boolean
+  tile: GameTile | null
+  property?: GameProperty | null
+  owner?: GamePlayer | null
+  onClose: () => void
+}) {
+  if (!open || !tile) {
+    return null
+  }
+
+  return (
+    <div aria-live="polite">
+      <button
+        type="button"
+        aria-label="Close square details"
+        className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.46)] backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${tile.name} details`}
+        className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 mx-auto grid max-h-[min(82vh,42rem)] w-auto max-w-xl gap-3 overflow-y-auto rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:inset-x-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <span className="h-1.5 w-12 rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_42%,transparent)] md:hidden" />
+          <p className="app-kicker hidden md:block">Square details</p>
+          <button
+            type="button"
+            aria-label="Close square details"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
+            onClick={onClose}
+          >
+            <XIcon weight="bold" className="h-4 w-4" />
+          </button>
+        </div>
+        <TileInfoPanel
+          tile={tile}
+          property={property}
+          owner={owner}
+          defaultCollapsed={false}
+        />
       </section>
     </div>
   )

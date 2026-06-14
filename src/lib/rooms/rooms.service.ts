@@ -6,6 +6,7 @@ import type {
   RoomInviteResponse,
   RoomMessageResponse,
   RoomSpectatorResponse,
+  StartRoomRequest,
   StartRoomResponse,
 } from './rooms.types'
 
@@ -61,10 +62,17 @@ export function leaveRoom(code: string) {
   )
 }
 
-export function startRoom(code: string) {
-  return apiClient<StartRoomResponse>(`/rooms/${encodeURIComponent(code)}/start`, {
-    method: 'POST',
-  })
+export function startRoom(input: StartRoomRequest) {
+  return apiClient<StartRoomResponse>(
+    `/rooms/${encodeURIComponent(input.code)}/start`,
+    {
+      method: 'POST',
+      body:
+        input.botDifficulty === undefined
+          ? undefined
+          : { botDifficulty: input.botDifficulty },
+    },
+  )
 }
 
 export function inviteToRoom(code: string, input: InviteRoomRequest) {

@@ -24,18 +24,19 @@ export function AuctionActions({
   minimumBid: number
   commandPending: boolean
   onBidAmountChange: (amount: number) => void
-  onPlaceBid: () => void
+  onPlaceBid: (amount: number) => void
   onPass: () => void
 }) {
   const [bidInputValue, setBidInputValue] = useState(String(bidAmount))
   const highestBidder = findPlayer(players, auction.highestBidderRoomPlayerId)
+  const currentBidder = findPlayer(players, auction.currentBidderRoomPlayerId)
   const parsedBidAmount = Number.parseInt(bidInputValue, 10)
   const hasPassed = Boolean(
     roomPlayerId && auction.passedRoomPlayerIds.includes(roomPlayerId),
   )
   const canBid = Boolean(
     roomPlayerId &&
-      auction.activeRoomPlayerIds.includes(roomPlayerId) &&
+      auction.currentBidderRoomPlayerId === roomPlayerId &&
       !hasPassed,
   )
   const activeBidderCount = auction.activeRoomPlayerIds.filter(
@@ -46,7 +47,9 @@ export function AuctionActions({
     ? 'You can raise the bid or pass.'
     : hasPassed
       ? 'You have passed. Waiting for the auction to finish.'
-      : 'Waiting for active bidders.'
+      : currentBidder
+        ? `Waiting for ${getPlayerName(currentBidder)}.`
+        : 'Waiting for the auction to settle.'
 
   useEffect(() => {
     setBidInputValue(String(bidAmount))
@@ -56,11 +59,12 @@ export function AuctionActions({
     if (!Number.isFinite(parsedBidAmount) || parsedBidAmount < minimumBid) {
       setBidInputValue(String(minimumBid))
       onBidAmountChange(minimumBid)
-      return
+      return null
     }
 
     setBidInputValue(String(parsedBidAmount))
     onBidAmountChange(parsedBidAmount)
+    return parsedBidAmount
   }
 
   return (
@@ -86,6 +90,10 @@ export function AuctionActions({
           value={highestBidder ? getPlayerName(highestBidder) : 'No bid'}
         />
         <StatePill
+          label="Turn"
+          value={currentBidder ? getPlayerName(currentBidder) : 'Settling'}
+        />
+        <StatePill
           label="Passed"
           value={`${auction.passedRoomPlayerIds.length}`}
         />
@@ -94,9 +102,8 @@ export function AuctionActions({
       <label className="grid gap-2 text-sm font-black text-[var(--sea-ink)]">
         Bid amount
         <input
-          type="number"
-          min={minimumBid}
-          step={10}
+          type="text"
+          inputMode="numeric"
           disabled={!canBid || commandPending}
           value={bidInputValue}
           onChange={(event) => {
@@ -127,8 +134,11 @@ export function AuctionActions({
             commandPending ? 'game-command-button--active' : ''
           }`}
           onClick={() => {
-            normalizeBidInput()
-            onPlaceBid()
+            const normalizedBidAmount = normalizeBidInput()
+
+            if (normalizedBidAmount !== null) {
+              onPlaceBid(normalizedBidAmount)
+            }
           }}
         >
           {commandPending ? (

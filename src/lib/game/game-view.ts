@@ -150,36 +150,6 @@ export function getPrimaryGameAction({
     }
   }
 
-  if (hasState && status !== 'joined') {
-    if (
-      isActivePlayer &&
-      (phase === 'awaiting_first_turn' || phase === 'awaiting_roll') &&
-      status === 'connected'
-    ) {
-      return {
-        command: 'roll',
-        enabled: false,
-        label: 'Syncing dice',
-        copy: 'The live game connection is opening your turn controls.',
-      }
-    }
-
-    return {
-      command: null,
-      enabled: false,
-      label:
-        status === 'disconnected'
-          ? 'Reconnecting'
-          : status === 'error'
-            ? 'Connection needed'
-            : 'Syncing',
-      copy:
-        status === 'error'
-          ? 'Restore the live connection before making another move.'
-          : 'Keeping the game state in sync before the next move.',
-    }
-  }
-
   if (access === 'spectator') {
     return {
       command: null,
@@ -216,7 +186,7 @@ export function getPrimaryGameAction({
     )
     const canBid = Boolean(
       roomPlayerId &&
-        auction.activeRoomPlayerIds.includes(roomPlayerId) &&
+        auction.currentBidderRoomPlayerId === roomPlayerId &&
         !hasPassed,
     )
 
@@ -228,7 +198,7 @@ export function getPrimaryGameAction({
         ? 'Raise the bid or pass in the auction controls.'
         : hasPassed
           ? 'You have passed in this auction.'
-          : 'Waiting for active bidders.',
+          : 'Waiting for the active bidder.',
     }
   }
 

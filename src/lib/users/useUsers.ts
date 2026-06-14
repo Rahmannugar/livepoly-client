@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { AUTH_QUERY_KEYS } from '#/lib/auth/auth.constants'
+import type { AuthUser } from '#/lib/auth/auth.types'
 import {
   USER_AVATAR_ALLOWED_TYPES,
   USER_AVATAR_MAX_BYTES,
@@ -94,6 +96,16 @@ export function useAvatarUpload() {
       return upload
     },
     onSuccess: (upload) => {
+      queryClient.setQueryData<AuthUser | null | undefined>(
+        AUTH_QUERY_KEYS.currentUser,
+        (currentUser) =>
+          currentUser
+            ? {
+                ...currentUser,
+                avatarUrl: upload.avatarUrl,
+              }
+            : currentUser,
+      )
       queryClient.setQueryData<UserProfile | undefined>(
         USERS_QUERY_KEYS.me,
         (currentProfile) =>

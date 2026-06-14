@@ -29,7 +29,7 @@ export function BankerPanel({
   const latestEvent = events[0] ?? null
 
   return (
-    <GamePanel title="Banker" icon={BankIcon}>
+    <GamePanel title="Banker" icon={BankIcon} collapsible={false}>
       <div className="grid gap-3">
         <div className="rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--primary)_10%,var(--surface))] p-4">
           <p className="text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">

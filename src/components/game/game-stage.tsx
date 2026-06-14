@@ -14,6 +14,7 @@ export function GameStage({
   isCurrentTurn,
   isRollingDice,
   remainingTurnTimeMs,
+  onSelectTile,
 }: {
   state: GameState | null
   access: string | null
@@ -24,6 +25,7 @@ export function GameStage({
   isCurrentTurn: boolean
   isRollingDice: boolean
   remainingTurnTimeMs: number | null
+  onSelectTile: (tile: GameTile) => void
 }) {
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
 
@@ -53,6 +55,7 @@ export function GameStage({
         access={access}
         isCurrentTurn={isCurrentTurn}
         isRollingDice={isRollingDice}
+        onSelectTile={onSelectTile}
       />
     </section>
   )
@@ -70,7 +73,7 @@ function GameStageTitle({
   if (gameClosed) {
     return (
       <div className="min-w-0">
-        <h1 className="display-title max-w-full truncate text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
+        <h1 className="display-title max-w-full truncate text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl 2xl:text-5xl">
           {phase === 'cancelled' ? 'Game cancelled.' : 'Game over.'}
         </h1>
       </div>
@@ -80,7 +83,7 @@ function GameStageTitle({
   if (!player) {
     return (
       <div className="min-w-0">
-        <h1 className="display-title max-w-full truncate text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
+        <h1 className="display-title max-w-full truncate text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl 2xl:text-5xl">
           Opening the game.
         </h1>
       </div>
@@ -89,7 +92,7 @@ function GameStageTitle({
 
   return (
     <div className="min-w-0">
-      <h1 className="display-title flex max-w-full items-baseline gap-2 text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
+      <h1 className="display-title flex max-w-full items-baseline gap-2 text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl 2xl:text-5xl">
         <span className="min-w-0 truncate" title={getPlayerName(player)}>
           {getPlayerName(player)}
         </span>

@@ -18,9 +18,13 @@ import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useToast } from '#/components/common/toast'
 import { useAuth } from '#/lib/auth/useAuth'
 import { useDebouncedValue } from '#/lib/common/useDebouncedValue'
+import {
+  BOT_DIFFICULTIES,
+  DEFAULT_BOT_DIFFICULTY,
+} from '#/lib/rooms/rooms.constants'
 import { useRoom, useRooms } from '#/lib/rooms/useRooms'
 import { useUserSearch } from '#/lib/users/useUsers'
-import type { RoomPlayer } from '#/lib/rooms/rooms.types'
+import type { BotDifficulty, RoomPlayer } from '#/lib/rooms/rooms.types'
 
 type RoomPageProps = {
   code: string
@@ -35,6 +39,9 @@ export function RoomPage({ code }: RoomPageProps) {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [inviteQuery, setInviteQuery] = useState('')
   const [selectedInviteUsername, setSelectedInviteUsername] = useState('')
+  const [botDifficulty, setBotDifficulty] = useState<BotDifficulty>(
+    DEFAULT_BOT_DIFFICULTY,
+  )
   const debouncedInviteQuery = useDebouncedValue(inviteQuery, 250)
   const user = auth.currentUser.data
   const room = roomQuery.data
@@ -56,6 +63,13 @@ export function RoomPage({ code }: RoomPageProps) {
     : []
   const canStartRoom = Boolean(
     room && isHost && room.status === 'waiting' && playersAtTable.length > 0,
+  )
+  const willFillOpenSeats = Boolean(
+    room &&
+      isHost &&
+      room.status === 'waiting' &&
+      playersAtTable.length > 0 &&
+      playersAtTable.length < room.maxPlayers,
   )
   const exitActionLabel = getExitActionLabel({
     access: room?.currentUserAccess,
@@ -145,25 +159,31 @@ export function RoomPage({ code }: RoomPageProps) {
       return
     }
 
-    rooms.startRoom.mutate(room.code, {
-      onSuccess: (response) => {
-        showToast({
-          kind: 'success',
-          message: 'Room started.',
-        })
-        navigate({
-          to: '/games/$gameId',
-          params: { gameId: response.game.id },
-        })
+    rooms.startRoom.mutate(
+      {
+        code: room.code,
+        botDifficulty: willFillOpenSeats ? botDifficulty : undefined,
       },
-      onError: (error) => {
-        showToast({
-          kind: 'error',
-          message:
-            error instanceof Error ? error.message : 'Could not start room.',
-        })
+      {
+        onSuccess: (response) => {
+          showToast({
+            kind: 'success',
+            message: 'Room started.',
+          })
+          navigate({
+            to: '/games/$gameId',
+            params: { gameId: response.game.id },
+          })
+        },
+        onError: (error) => {
+          showToast({
+            kind: 'error',
+            message:
+              error instanceof Error ? error.message : 'Could not start room.',
+          })
+        },
       },
-    })
+    )
   }
 
   function enterGame() {
@@ -351,15 +371,50 @@ export function RoomPage({ code }: RoomPageProps) {
                   </p>
 
                   {isHost && room.status === 'waiting' ? (
-                    <button
-                      type="button"
-                      disabled={!canStartRoom || rooms.startRoom.isPending}
-                      className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
-                      onClick={startRoom}
-                    >
-                      <PlayIcon weight="bold" className="h-4.5 w-4.5" />
-                      {rooms.startRoom.isPending ? 'Starting...' : 'Start room'}
-                    </button>
+                    <>
+                      {willFillOpenSeats ? (
+                        <div className="mt-5 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
+                                Bot fill
+                              </p>
+                              <p className="mt-1 text-sm font-bold text-[var(--sea-ink)]">
+                                Choose the bot level for open seats.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-3 grid grid-cols-3 gap-2">
+                            {BOT_DIFFICULTIES.map((difficulty) => (
+                              <button
+                                key={difficulty}
+                                type="button"
+                                className={`h-10 rounded-full border px-3 text-sm font-black capitalize transition hover:translate-y-[-1px] ${
+                                  botDifficulty === difficulty
+                                    ? 'border-transparent bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[0_12px_26px_rgba(23,58,64,0.16)]'
+                                    : 'border-[var(--line)] bg-[var(--bg-base)] text-[var(--sea-ink)]'
+                                }`}
+                                onClick={() => setBotDifficulty(difficulty)}
+                              >
+                                {difficulty}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        disabled={!canStartRoom || rooms.startRoom.isPending}
+                        className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                        onClick={startRoom}
+                      >
+                        <PlayIcon weight="bold" className="h-4.5 w-4.5" />
+                        {rooms.startRoom.isPending
+                          ? 'Starting...'
+                          : 'Start room'}
+                      </button>
+                    </>
                   ) : null}
 
                   {canInvite ? (

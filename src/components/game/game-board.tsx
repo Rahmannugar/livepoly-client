@@ -1,5 +1,5 @@
 import type { GameState } from '#/lib/game/game.types'
-import { findPlayer, gameTiles } from '#/lib/game/game-board'
+import { findPlayer, gameTiles, type GameTile } from '#/lib/game/game-board'
 import { GameBoardCenter } from './game-board-center'
 import { GameTileCell } from './game-board-tile'
 
@@ -8,11 +8,13 @@ export function GameBoard({
   access,
   isCurrentTurn,
   isRollingDice,
+  onSelectTile,
 }: {
   state: GameState | null
   access: string | null
   isCurrentTurn: boolean
   isRollingDice: boolean
+  onSelectTile: (tile: GameTile) => void
 }) {
   return (
     <div className="mx-auto w-full overflow-x-auto pb-1">
@@ -32,6 +34,7 @@ export function GameBoard({
             players={getPlayersOnTile(state, tile.index)}
             owner={getTileOwner(state, tile.key)}
             currentTurnRoomPlayerId={state?.currentTurnRoomPlayerId ?? null}
+            onSelect={onSelectTile}
           />
         ))}
       </div>

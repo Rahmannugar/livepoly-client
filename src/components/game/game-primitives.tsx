@@ -9,36 +9,52 @@ export function GamePanel({
   icon: IconComponent,
   children,
   defaultCollapsed = false,
+  collapsible = true,
 }: {
   title: string
   icon: Icon
   children: ReactNode
   defaultCollapsed?: boolean
+  collapsible?: boolean
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
-
-  return (
-    <section className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-4 shadow-[0_18px_55px_rgba(4,12,15,0.12)] backdrop-blur-xl">
-      <button
-        type="button"
-        aria-expanded={!collapsed}
-        className="flex w-full min-w-0 items-center gap-2 text-left"
-        onClick={() => setCollapsed((value) => !value)}
-      >
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
-          <IconComponent weight="bold" className="h-5 w-5" />
-        </span>
-        <h2 className="display-title min-w-0 flex-1 truncate text-2xl font-semibold text-[var(--sea-ink)]">
-          {title}
-        </h2>
+  const isCollapsed = collapsible && collapsed
+  const headerContent = (
+    <>
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
+        <IconComponent weight="bold" className="h-5 w-5" />
+      </span>
+      <h2 className="display-title min-w-0 flex-1 truncate text-2xl font-semibold text-[var(--sea-ink)]">
+        {title}
+      </h2>
+      {collapsible ? (
         <CaretDownIcon
           weight="bold"
           className={`h-5 w-5 shrink-0 text-[var(--sea-ink-soft)] transition duration-300 ${
-            collapsed ? '' : 'rotate-180'
+            isCollapsed ? '' : 'rotate-180'
           }`}
         />
-      </button>
-      <div className={`game-collapsible ${collapsed ? '' : 'game-collapsible--open'}`}>
+      ) : null}
+    </>
+  )
+
+  return (
+    <section className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-4 shadow-[0_18px_55px_rgba(4,12,15,0.12)] backdrop-blur-xl">
+      {collapsible ? (
+        <button
+          type="button"
+          aria-expanded={!isCollapsed}
+          className="flex w-full min-w-0 items-center gap-2 text-left"
+          onClick={() => setCollapsed((value) => !value)}
+        >
+          {headerContent}
+        </button>
+      ) : (
+        <div className="flex w-full min-w-0 items-center gap-2 text-left">
+          {headerContent}
+        </div>
+      )}
+      <div className={`game-collapsible ${isCollapsed ? '' : 'game-collapsible--open'}`}>
         <div className="pt-4">{children}</div>
       </div>
     </section>
@@ -80,7 +96,7 @@ export function PlayerToken({
     <span
       className={`player-token ${isActive ? 'player-token--active' : ''} ${
         compact
-          ? 'grid h-4 w-4 place-items-center rounded-full text-[0.52rem] font-black text-white shadow-sm sm:h-5 sm:w-5 sm:text-[0.62rem]'
+          ? 'grid h-3.5 w-3.5 place-items-center rounded-full text-[0.46rem] font-black text-white shadow-sm sm:h-4 sm:w-4 sm:text-[0.54rem] xl:h-5 xl:w-5 xl:text-[0.62rem]'
           : 'grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-black text-white shadow-sm'
       }`}
       style={{ backgroundColor: getPlayerColor(player.seatNumber) }}

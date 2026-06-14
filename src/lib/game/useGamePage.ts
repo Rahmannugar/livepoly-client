@@ -16,6 +16,7 @@ export function useGamePage(gameId: string) {
   const [auctionBidAmount, setAuctionBidAmount] = useState(10)
   const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
   const [dismissedCardId, setDismissedCardId] = useState<string | null>(null)
+  const [selectedTileKey, setSelectedTileKey] = useState<string | null>(null)
 
   const currentTurnPlayer = state
     ? findPlayer(state.players, state.currentTurnRoomPlayerId)
@@ -47,6 +48,17 @@ export function useGamePage(gameId: string) {
     : null
   const activeOwner = activeProperty?.ownerRoomPlayerId
     ? findPlayer(state?.players ?? [], activeProperty.ownerRoomPlayerId)
+    : null
+  const selectedTile = selectedTileKey
+    ? (gameTiles.find((tile) => tile.key === selectedTileKey) ?? null)
+    : null
+  const selectedTileProperty = selectedTile
+    ? (state?.properties.find(
+        (property) => property.tileKey === selectedTile.key,
+      ) ?? null)
+    : null
+  const selectedTileOwner = selectedTileProperty?.ownerRoomPlayerId
+    ? findPlayer(state?.players ?? [], selectedTileProperty.ownerRoomPlayerId)
     : null
   const pendingProperty = pendingTile
     ? (state?.properties.find((property) => property.tileKey === pendingTile.key) ??
@@ -103,6 +115,12 @@ export function useGamePage(gameId: string) {
     !gameExpired &&
     isUserTurn &&
     state?.phase === 'awaiting_property_decision'
+  const canManageProperties =
+    !gameClosed &&
+    !gameExpired &&
+    isUserTurn &&
+    state?.phase === 'awaiting_turn_end' &&
+    game.status === 'joined'
 
   useEffect(() => {
     if (state?.auction) {
@@ -147,6 +165,9 @@ export function useGamePage(gameId: string) {
     activeTile,
     activeProperty,
     activeOwner,
+    selectedTile,
+    selectedTileProperty,
+    selectedTileOwner,
     pendingProperty,
     activeTileLabel,
     turnConsequence,
@@ -161,9 +182,12 @@ export function useGamePage(gameId: string) {
     shouldLoadGameResult,
     gameResult,
     showMobilePropertyDecision,
+    canManageProperties,
     auctionBidAmount,
     setAuctionBidAmount,
     visibleCardReveal,
+    selectTile: (tileKey: string) => setSelectedTileKey(tileKey),
+    clearSelectedTile: () => setSelectedTileKey(null),
     dismissVisibleCardReveal: () => {
       if (latestCardReveal) {
         setDismissedCardId(latestCardReveal.id)

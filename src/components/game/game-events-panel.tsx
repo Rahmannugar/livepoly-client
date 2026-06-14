@@ -11,7 +11,7 @@ export function EventsPanel({
   players: GamePlayer[]
 }) {
   return (
-    <GamePanel title="Events" icon={ListChecksIcon}>
+    <GamePanel title="Events" icon={ListChecksIcon} collapsible={false}>
       <EventList events={events} players={players} />
     </GamePanel>
   )

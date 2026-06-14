@@ -42,6 +42,7 @@ export type GameAuction = {
   tileKey: string
   currentBid: number
   highestBidderRoomPlayerId: string | null
+  currentBidderRoomPlayerId: string | null
   activeRoomPlayerIds: string[]
   passedRoomPlayerIds: string[]
 }

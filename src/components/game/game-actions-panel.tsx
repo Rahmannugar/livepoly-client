@@ -1,4 +1,6 @@
-import { DiceFiveIcon } from '@phosphor-icons/react'
+import { DiceFiveIcon, XIcon } from '@phosphor-icons/react'
+import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import type {
   GameAuction,
   GameDebt,
@@ -79,12 +81,13 @@ export function GameActionsPanel({
   onEndTurn: () => void
   onBuyProperty: () => void
   onDeclinePropertyPurchase: () => void
-  onPlaceAuctionBid: () => void
+  onPlaceAuctionBid: (amount: number) => void
   onPassAuctionBid: () => void
   onPayDebt: () => void
   onPayJailFine: () => void
   onDeclareBankruptcy: () => void
 }) {
+  const [actionSheetOpen, setActionSheetOpen] = useState(false)
   const gameClosed = phase === 'finished' || phase === 'cancelled'
   const shouldShowActiveTile =
     !gameClosed &&
@@ -101,9 +104,32 @@ export function GameActionsPanel({
     shouldShowJailActions ||
     Boolean(auction) ||
     primaryAction.command === 'propertyDecision'
+  const canOpenActionSheet = Boolean(
+    !gameClosed &&
+      !gameExpired &&
+      (isSpecializedAction || primaryAction.enabled),
+  )
+  const actionSheetTitle = useMemo(() => {
+    if (debt) return 'Settle payment'
+    if (shouldShowJailActions) return 'Jail move'
+    if (auction) return 'Auction'
+    if (primaryAction.command === 'propertyDecision') return 'Property decision'
+    return primaryAction.label
+  }, [auction, debt, primaryAction.command, primaryAction.label, shouldShowJailActions])
 
-  return (
-    <GamePanel title="Actions" icon={DiceFiveIcon}>
+  useEffect(() => {
+    if (!canOpenActionSheet) {
+      setActionSheetOpen(false)
+    }
+  }, [canOpenActionSheet])
+
+  const runAndClose = (handler: () => void) => {
+    handler()
+    setActionSheetOpen(false)
+  }
+
+  const actionControls = (
+    <>
       {shouldShowActiveTile ? (
         <div className="mb-4">
           <TileInfoPanel
@@ -111,7 +137,7 @@ export function GameActionsPanel({
             label={activeTileLabel}
             property={activeProperty}
             owner={activeOwner}
-            defaultCollapsed
+            defaultCollapsed={isSpecializedAction}
           />
         </div>
       ) : null}
@@ -120,8 +146,8 @@ export function GameActionsPanel({
         <PrimaryActionButton
           primaryAction={primaryAction}
           commandPending={commandPending}
-          onRollAndMove={onRollAndMove}
-          onEndTurn={onEndTurn}
+          onRollAndMove={() => runAndClose(onRollAndMove)}
+          onEndTurn={() => runAndClose(onEndTurn)}
         />
       ) : debt ? (
         <DebtActions
@@ -129,15 +155,15 @@ export function GameActionsPanel({
           players={players}
           roomPlayerId={roomPlayerId}
           commandPending={commandPending}
-          onPayDebt={onPayDebt}
-          onDeclareBankruptcy={onDeclareBankruptcy}
+          onPayDebt={() => runAndClose(onPayDebt)}
+          onDeclareBankruptcy={() => runAndClose(onDeclareBankruptcy)}
         />
       ) : shouldShowJailActions ? (
         <JailActions
           player={currentPlayer}
           commandPending={commandPending}
-          onRoll={onRollAndMove}
-          onPayFine={onPayJailFine}
+          onRoll={() => runAndClose(onRollAndMove)}
+          onPayFine={() => runAndClose(onPayJailFine)}
         />
       ) : auction ? (
         <AuctionActions
@@ -149,34 +175,43 @@ export function GameActionsPanel({
           minimumBid={minimumAuctionBid}
           commandPending={commandPending}
           onBidAmountChange={onAuctionBidAmountChange}
-          onPlaceBid={onPlaceAuctionBid}
-          onPass={onPassAuctionBid}
+          onPlaceBid={(amount) => {
+            onPlaceAuctionBid(amount)
+            setActionSheetOpen(false)
+          }}
+          onPass={() => runAndClose(onPassAuctionBid)}
         />
       ) : primaryAction.command === 'propertyDecision' ? (
-        <>
-          <div className="hidden md:block">
-            <PropertyDecisionActions
-              tile={pendingTile}
-              property={pendingProperty}
-              commandPending={commandPending}
-              onBuyProperty={onBuyProperty}
-              onDeclinePropertyPurchase={onDeclinePropertyPurchase}
-            />
-          </div>
-          <div className="md:hidden">
-            <PrimaryActionButton
-              primaryAction={{
-                ...primaryAction,
-                enabled: false,
-                label: 'Choose below',
-                copy: 'Use the property decision sheet at the bottom of the screen.',
-              }}
-              commandPending={commandPending}
-              onRollAndMove={onRollAndMove}
-              onEndTurn={onEndTurn}
-            />
-          </div>
-        </>
+        <PropertyDecisionActions
+          tile={pendingTile}
+          property={pendingProperty}
+          commandPending={commandPending}
+          onBuyProperty={() => runAndClose(onBuyProperty)}
+          onDeclinePropertyPurchase={() =>
+            runAndClose(onDeclinePropertyPurchase)
+          }
+        />
+      ) : (
+        <PrimaryActionButton
+          primaryAction={primaryAction}
+          commandPending={commandPending}
+          onRollAndMove={() => runAndClose(onRollAndMove)}
+          onEndTurn={() => runAndClose(onEndTurn)}
+        />
+      )}
+    </>
+  )
+
+  return (
+    <GamePanel title="Actions" icon={DiceFiveIcon} collapsible={false}>
+      {canOpenActionSheet ? (
+        <button
+          type="button"
+          className="game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px]"
+          onClick={() => setActionSheetOpen(true)}
+        >
+          {actionSheetTitle}
+        </button>
       ) : (
         <PrimaryActionButton
           primaryAction={primaryAction}
@@ -187,9 +222,63 @@ export function GameActionsPanel({
       )}
 
       <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
-        {!isSpecializedAction ? <p>{primaryAction.copy}</p> : null}
+        <p>{primaryAction.copy}</p>
         {errorMessage ? <p className="text-red-500">{errorMessage}</p> : null}
       </div>
+
+      {actionSheetOpen ? (
+        <GameActionSheet
+          title={actionSheetTitle}
+          onClose={() => setActionSheetOpen(false)}
+        >
+          {actionControls}
+        </GameActionSheet>
+      ) : null}
     </GamePanel>
+  )
+}
+
+function GameActionSheet({
+  title,
+  children,
+  onClose,
+}: {
+  title: string
+  children: ReactNode
+  onClose: () => void
+}) {
+  return (
+    <div aria-live="polite">
+      <button
+        type="button"
+        aria-label="Close action"
+        className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.46)] backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 mx-auto grid max-h-[min(84vh,44rem)] w-auto max-w-2xl gap-4 overflow-y-auto rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:inset-x-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="app-kicker">Action</p>
+            <h3 className="display-title mt-1 truncate text-3xl font-semibold text-[var(--sea-ink)]">
+              {title}
+            </h3>
+          </div>
+          <button
+            type="button"
+            aria-label="Close action"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
+            onClick={onClose}
+          >
+            <XIcon weight="bold" className="h-4 w-4" />
+          </button>
+        </div>
+        {children}
+      </section>
+    </div>
   )
 }
