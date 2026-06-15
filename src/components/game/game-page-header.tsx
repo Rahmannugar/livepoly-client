@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from '@phosphor-icons/react'
+import { ArrowLeftIcon, SignOutIcon, SpinnerGapIcon } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { APP_NAME } from '#/config/app.constants'
@@ -6,9 +6,15 @@ import { APP_NAME } from '#/config/app.constants'
 export function GamePageHeader({
   roomCode,
   gameId,
+  canLeave = false,
+  isLeaving = false,
+  onLeave,
 }: {
   roomCode?: string | null
   gameId: string
+  canLeave?: boolean
+  isLeaving?: boolean
+  onLeave?: () => void
 }) {
   return (
     <header className="flex items-center justify-between gap-3">
@@ -30,7 +36,24 @@ export function GamePageHeader({
         </div>
       </div>
 
-      <ThemeToggle />
+      <div className="flex shrink-0 items-center gap-2">
+        {canLeave ? (
+          <button
+            type="button"
+            disabled={isLeaving}
+            aria-label="Exit game"
+            className="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+            onClick={onLeave}
+          >
+            {isLeaving ? (
+              <SpinnerGapIcon weight="bold" className="h-5 w-5 animate-spin" />
+            ) : (
+              <SignOutIcon weight="bold" className="h-5 w-5" />
+            )}
+          </button>
+        ) : null}
+        <ThemeToggle />
+      </div>
     </header>
   )
 }

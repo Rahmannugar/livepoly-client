@@ -9,10 +9,8 @@ export function AuctionActions({
   players,
   roomPlayerId,
   tileName,
-  bidAmount,
   minimumBid,
   commandPending,
-  onBidAmountChange,
   onPlaceBid,
   onPass,
 }: {
@@ -20,17 +18,17 @@ export function AuctionActions({
   players: GamePlayer[]
   roomPlayerId: string | null
   tileName: string
-  bidAmount: number
   minimumBid: number
   commandPending: boolean
-  onBidAmountChange: (amount: number) => void
   onPlaceBid: (amount: number) => void
   onPass: () => void
 }) {
-  const [bidInputValue, setBidInputValue] = useState(String(bidAmount))
+  const [bidInputValue, setBidInputValue] = useState('')
   const highestBidder = findPlayer(players, auction.highestBidderRoomPlayerId)
   const currentBidder = findPlayer(players, auction.currentBidderRoomPlayerId)
   const parsedBidAmount = Number.parseInt(bidInputValue, 10)
+  const bidIsValid =
+    Number.isFinite(parsedBidAmount) && parsedBidAmount >= minimumBid
   const hasPassed = Boolean(
     roomPlayerId && auction.passedRoomPlayerIds.includes(roomPlayerId),
   )
@@ -43,8 +41,15 @@ export function AuctionActions({
     (activeRoomPlayerId) =>
       !auction.passedRoomPlayerIds.includes(activeRoomPlayerId),
   ).length
+  const turnCopy = canBid
+    ? `Your turn to bid on ${tileName}.`
+    : hasPassed
+      ? `You passed on ${tileName}.`
+      : currentBidder
+        ? `${getPlayerName(currentBidder)} is deciding on ${tileName}.`
+        : `The auction for ${tileName} is settling.`
   const statusCopy = canBid
-    ? 'You can raise the bid or pass.'
+    ? `Enter any whole number from ${formatCash(minimumBid)} upward, or pass.`
     : hasPassed
       ? 'You have passed. Waiting for the auction to finish.'
       : currentBidder
@@ -52,18 +57,18 @@ export function AuctionActions({
         : 'Waiting for the auction to settle.'
 
   useEffect(() => {
-    setBidInputValue(String(bidAmount))
-  }, [bidAmount])
+    if (!canBid) {
+      setBidInputValue('')
+      return
+    }
+  }, [canBid])
 
   function normalizeBidInput() {
-    if (!Number.isFinite(parsedBidAmount) || parsedBidAmount < minimumBid) {
-      setBidInputValue(String(minimumBid))
-      onBidAmountChange(minimumBid)
+    if (!bidIsValid) {
       return null
     }
 
     setBidInputValue(String(parsedBidAmount))
-    onBidAmountChange(parsedBidAmount)
     return parsedBidAmount
   }
 
@@ -74,24 +79,30 @@ export function AuctionActions({
         <h3 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)]">
           {tileName}
         </h3>
-        <p className="mt-2 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-          Current bid is {formatCash(auction.currentBid)}.{' '}
-          {highestBidder
-            ? `${getPlayerName(highestBidder)} leads.`
-            : 'No one has bid yet.'}
+        <p className="mt-2 text-base font-black leading-7 text-[var(--sea-ink)]">
+          {turnCopy}
+        </p>
+        <p className="mt-1 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+          {auction.currentBid > 0
+            ? `Current bid is ${formatCash(auction.currentBid)}.`
+            : 'No bid yet.'}{' '}
+          {highestBidder ? `${getPlayerName(highestBidder)} leads.` : ''}
+        </p>
+        <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
+          Bids move one player at a time.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <StatePill label="Minimum" value={formatCash(minimumBid)} />
-        <StatePill label="Active" value={`${activeBidderCount}`} />
+        <StatePill label="Next bid" value={`${formatCash(minimumBid)}+`} />
+        <StatePill
+          label="Now deciding"
+          value={currentBidder ? getPlayerName(currentBidder) : 'Settling'}
+        />
+        <StatePill label="Still in" value={`${activeBidderCount}`} />
         <StatePill
           label="Leading"
           value={highestBidder ? getPlayerName(highestBidder) : 'No bid'}
-        />
-        <StatePill
-          label="Turn"
-          value={currentBidder ? getPlayerName(currentBidder) : 'Settling'}
         />
         <StatePill
           label="Passed"
@@ -107,18 +118,19 @@ export function AuctionActions({
           disabled={!canBid || commandPending}
           value={bidInputValue}
           onChange={(event) => {
-            const nextValue = event.target.value
-            const nextAmount = Number.parseInt(nextValue, 10)
+            const nextValue = event.target.value.replace(/\D/g, '')
 
             setBidInputValue(nextValue)
-
-            if (Number.isFinite(nextAmount)) {
-              onBidAmountChange(nextAmount)
-            }
           }}
           onBlur={normalizeBidInput}
+          placeholder={formatCash(minimumBid)}
           className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
         />
+        {canBid && bidInputValue && !bidIsValid ? (
+          <span className="text-xs font-black text-red-500">
+            Enter at least {formatCash(minimumBid)}.
+          </span>
+        ) : null}
       </label>
 
       <div className="grid gap-2">
@@ -127,8 +139,7 @@ export function AuctionActions({
           disabled={
             !canBid ||
             commandPending ||
-            !Number.isFinite(parsedBidAmount) ||
-            parsedBidAmount < minimumBid
+            !bidIsValid
           }
           className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
             commandPending ? 'game-command-button--active' : ''

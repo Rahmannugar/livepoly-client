@@ -457,10 +457,12 @@ export function useGame(gameId: string) {
         socketId: socket.id,
       })
       setStatus('connected')
+      setErrorMessage(null)
     })
 
     socket.on(GAME_SOCKET_EVENTS.authenticated, (payload: unknown) => {
       authRecoveryAttempts = 0
+      setErrorMessage(null)
       debugGameSocket('authenticated', {
         gameId,
         socketId: socket.id,
@@ -511,7 +513,9 @@ export function useGame(gameId: string) {
 
     socket.on(GAME_SOCKET_EVENTS.presence, (payload: GamePresenceEvent) => {
       if (payload.gameId === gameId) {
+        setStatus('joined')
         setPresence(payload)
+        setErrorMessage(null)
       }
     })
 
@@ -651,6 +655,8 @@ export function useGame(gameId: string) {
     passAuctionBid: () => runCommand(GAME_SOCKET_EVENTS.passAuctionBid),
     payDebt: () => runCommand(GAME_SOCKET_EVENTS.payDebt),
     payJailFine: () => runCommand(GAME_SOCKET_EVENTS.payJailFine),
+    useGetOutOfJailCard: () =>
+      runCommand(GAME_SOCKET_EVENTS.useGetOutOfJailCard),
     declareBankruptcy: () => runCommand(GAME_SOCKET_EVENTS.declareBankruptcy),
     buildProperty: (tileKey: string) =>
       runCommand(GAME_SOCKET_EVENTS.buildProperty, { tileKey }),

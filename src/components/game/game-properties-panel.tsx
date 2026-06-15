@@ -1,10 +1,12 @@
 import { BuildingsIcon } from '@phosphor-icons/react'
+import { useMemo, useState } from 'react'
 import {
   findPlayer,
   formatCash,
   gameTiles,
   getPlayerName,
   getUnmortgageCost,
+  type GameTile,
 } from '#/lib/game/game-board'
 import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
 import { GamePanel } from './game-primitives'
@@ -30,10 +32,72 @@ export function PropertiesPanel({
   onMortgage: (tileKey: string) => void
   onUnmortgage: (tileKey: string) => void
 }) {
+  const ownerTabs = useMemo(() => {
+    const ownerIds = Array.from(
+      new Set(
+        properties
+          .map((property) => property.ownerRoomPlayerId)
+          .filter(Boolean) as string[],
+      ),
+    )
+
+    return ownerIds.sort((left, right) => {
+      if (left === roomPlayerId) return -1
+      if (right === roomPlayerId) return 1
+
+      const leftPlayer = findPlayer(players, left)
+      const rightPlayer = findPlayer(players, right)
+
+      const leftName = leftPlayer ? getPlayerName(leftPlayer) : left
+      const rightName = rightPlayer ? getPlayerName(rightPlayer) : right
+
+      return leftName.localeCompare(rightName)
+    })
+  }, [players, properties, roomPlayerId])
+  const [activeOwnerId, setActiveOwnerId] = useState<string | null>(null)
+  const selectedOwnerId =
+    activeOwnerId && ownerTabs.includes(activeOwnerId)
+      ? activeOwnerId
+      : (ownerTabs[0] ?? null)
+  const selectedProperties = selectedOwnerId
+    ? properties.filter(
+        (property) => property.ownerRoomPlayerId === selectedOwnerId,
+      )
+    : []
+
   return (
     <GamePanel title="Properties" icon={BuildingsIcon} collapsible={false}>
+      {ownerTabs.length > 1 ? (
+        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+          {ownerTabs.map((ownerId) => {
+            const owner = findPlayer(players, ownerId)
+            const active = ownerId === selectedOwnerId
+            const ownerLabel =
+              ownerId === roomPlayerId
+                ? 'You'
+                : owner
+                  ? getPlayerName(owner)
+                  : 'Unknown player'
+
+            return (
+              <button
+                key={ownerId}
+                type="button"
+                className={`shrink-0 rounded-full border px-4 py-2 text-xs font-black transition ${
+                  active
+                    ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
+                    : 'border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] hover:translate-y-[-1px]'
+                }`}
+                onClick={() => setActiveOwnerId(ownerId)}
+              >
+                {ownerLabel}
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
       <PropertyList
-        properties={properties}
+        properties={selectedProperties}
         players={players}
         roomPlayerId={roomPlayerId}
         canManageProperties={canManageProperties}
@@ -71,7 +135,7 @@ function PropertyList({
   if (properties.length === 0) {
     return (
       <p className="text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-        No properties have been claimed yet.
+        No owned squares here yet.
       </p>
     )
   }
@@ -90,6 +154,7 @@ function PropertyList({
           canManageProperties &&
             isMine &&
             tile?.kind === 'property' &&
+            ownsFullPropertySet(properties, tile, property.ownerRoomPlayerId) &&
             !property.mortgaged &&
             !property.hasHotel,
         )
@@ -117,11 +182,7 @@ function PropertyList({
                 </p>
               </div>
               <span className="max-w-24 shrink-0 truncate text-right text-xs font-black text-[var(--sea-ink)]">
-                {property.mortgaged
-                  ? 'Mortgaged'
-                  : property.hasHotel
-                    ? 'Hotel'
-                    : `${property.houseCount} houses`}
+                {getPropertyBuildLabel(property, tile)}
               </span>
             </div>
 
@@ -155,6 +216,11 @@ function PropertyList({
                     </button>
                   </div>
                 ) : null}
+                {tile?.kind === 'property' && isMine && !canManageBuilding ? (
+                  <p className="text-xs font-bold leading-5 text-[var(--sea-ink-soft)]">
+                    Own the full color set before building here.
+                  </p>
+                ) : null}
 
                 <button
                   type="button"
@@ -179,5 +245,42 @@ function PropertyList({
         )
       })}
     </div>
+  )
+}
+
+function getPropertyBuildLabel(property: GameProperty, tile?: GameTile) {
+  if (property.mortgaged) return 'Mortgaged'
+  if (tile?.kind === 'airport') return 'Airport'
+  if (tile?.kind === 'utility') return 'Utility'
+  if (property.hasHotel) return 'Hotel'
+  if (tile?.kind === 'property') {
+    return property.houseCount === 1
+      ? '1 house'
+      : `${property.houseCount} houses`
+  }
+
+  return 'Owned'
+}
+
+function ownsFullPropertySet(
+  properties: GameProperty[],
+  tile: GameTile | undefined,
+  ownerRoomPlayerId: string | null,
+) {
+  if (!tile?.setKey || !ownerRoomPlayerId) {
+    return false
+  }
+
+  const setTiles = gameTiles.filter(
+    (item) => item.kind === 'property' && item.setKey === tile.setKey,
+  )
+
+  return setTiles.every((setTile) =>
+    properties.some(
+      (property) =>
+        property.tileKey === setTile.key &&
+        property.ownerRoomPlayerId === ownerRoomPlayerId &&
+        !property.mortgaged,
+    ),
   )
 }

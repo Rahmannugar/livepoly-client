@@ -18,7 +18,6 @@ import {
   PropertyDecisionActions,
   type PrimaryGameAction,
 } from './game-primary-actions'
-import { TileInfoPanel } from './game-tile-info'
 
 export type { PrimaryGameAction } from './game-primary-actions'
 
@@ -38,13 +37,7 @@ export function GameActionsPanel({
   auctionTileName,
   pendingTile,
   pendingProperty,
-  activeTile,
-  activeProperty,
-  activeOwner,
-  activeTileLabel,
-  auctionBidAmount,
   minimumAuctionBid,
-  onAuctionBidAmountChange,
   onRollAndMove,
   onEndTurn,
   onBuyProperty,
@@ -53,6 +46,7 @@ export function GameActionsPanel({
   onPassAuctionBid,
   onPayDebt,
   onPayJailFine,
+  onUseGetOutOfJailCard,
   onDeclareBankruptcy,
 }: {
   primaryAction: PrimaryGameAction
@@ -70,13 +64,7 @@ export function GameActionsPanel({
   auctionTileName: string | null
   pendingTile: GameTile | null
   pendingProperty: GameProperty | null
-  activeTile: GameTile | null
-  activeProperty: GameProperty | null
-  activeOwner: GamePlayer | null
-  activeTileLabel: string
-  auctionBidAmount: number
   minimumAuctionBid: number
-  onAuctionBidAmountChange: (amount: number) => void
   onRollAndMove: () => void
   onEndTurn: () => void
   onBuyProperty: () => void
@@ -85,14 +73,11 @@ export function GameActionsPanel({
   onPassAuctionBid: () => void
   onPayDebt: () => void
   onPayJailFine: () => void
+  onUseGetOutOfJailCard: () => void
   onDeclareBankruptcy: () => void
 }) {
   const [actionSheetOpen, setActionSheetOpen] = useState(false)
   const gameClosed = phase === 'finished' || phase === 'cancelled'
-  const shouldShowActiveTile =
-    !gameClosed &&
-    Boolean(activeTile) &&
-    primaryAction.command !== 'propertyDecision'
   const shouldShowJailActions = Boolean(
     !gameClosed &&
     currentPlayerInJail &&
@@ -130,18 +115,6 @@ export function GameActionsPanel({
 
   const actionControls = (
     <>
-      {shouldShowActiveTile ? (
-        <div className="mb-4">
-          <TileInfoPanel
-            tile={activeTile}
-            label={activeTileLabel}
-            property={activeProperty}
-            owner={activeOwner}
-            defaultCollapsed={isSpecializedAction}
-          />
-        </div>
-      ) : null}
-
       {gameClosed || gameExpired ? (
         <PrimaryActionButton
           primaryAction={primaryAction}
@@ -164,6 +137,7 @@ export function GameActionsPanel({
           commandPending={commandPending}
           onRoll={() => runAndClose(onRollAndMove)}
           onPayFine={() => runAndClose(onPayJailFine)}
+          onUseCard={() => runAndClose(onUseGetOutOfJailCard)}
         />
       ) : auction ? (
         <AuctionActions
@@ -171,10 +145,8 @@ export function GameActionsPanel({
           players={players}
           roomPlayerId={roomPlayerId}
           tileName={auctionTileName ?? auction.tileKey}
-          bidAmount={auctionBidAmount}
           minimumBid={minimumAuctionBid}
           commandPending={commandPending}
-          onBidAmountChange={onAuctionBidAmountChange}
           onPlaceBid={(amount) => {
             onPlaceAuctionBid(amount)
             setActionSheetOpen(false)
@@ -222,7 +194,6 @@ export function GameActionsPanel({
       )}
 
       <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
-        <p>{primaryAction.copy}</p>
         {errorMessage ? <p className="text-red-500">{errorMessage}</p> : null}
       </div>
 
@@ -259,7 +230,7 @@ function GameActionSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 mx-auto grid max-h-[min(84vh,44rem)] w-auto max-w-2xl gap-4 overflow-y-auto rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:inset-x-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+        className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[min(86vh,44rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:bottom-auto md:left-1/2 md:top-1/2 md:max-w-2xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[28px] md:p-4"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">

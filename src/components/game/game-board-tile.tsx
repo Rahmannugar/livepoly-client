@@ -45,7 +45,7 @@ export function GameTileCell({
     >
       {tile.setKey ? (
         <span
-          className="absolute inset-x-0 top-0 h-1.5"
+          className="absolute inset-x-1 top-1 h-1 rounded-full"
           style={{ backgroundColor: propertySetColors[tile.setKey] }}
         />
       ) : null}

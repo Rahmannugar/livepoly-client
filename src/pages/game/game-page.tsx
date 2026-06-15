@@ -7,6 +7,8 @@ import {
   type Icon,
 } from '@phosphor-icons/react'
 import { useState, type ReactNode } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import '#/components/game/game.css'
 import { GameActionsPanel } from '#/components/game/game-actions-panel'
 import { GameCardReveal } from '#/components/game/game-card-reveal'
@@ -24,6 +26,7 @@ import {
   TileInfoSheet,
 } from '#/components/game/game-tile-info'
 import { useGamePage } from '#/lib/game/useGamePage'
+import { leaveRoom } from '#/lib/rooms/rooms.service'
 
 type GamePageProps = {
   gameId: string
@@ -32,19 +35,36 @@ type GamePageProps = {
 export function GamePage({ gameId }: GamePageProps) {
   const model = useGamePage(gameId)
   const { game, state } = model
+  const navigate = useNavigate()
   const [activeSidePanel, setActiveSidePanel] = useState<
     'banker' | 'properties' | 'events' | 'results' | null
   >(null)
+  const leaveGame = useMutation({
+    mutationFn: leaveRoom,
+    onSuccess: () => {
+      void navigate({ to: '/' })
+    },
+  })
   const hasResultsPanel = model.shouldLoadGameResult
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
       <section className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[112rem] flex-col gap-5">
-        <GamePageHeader roomCode={state?.roomCode} gameId={gameId} />
+        <GamePageHeader
+          roomCode={state?.roomCode}
+          gameId={gameId}
+          canLeave={Boolean(state?.roomCode)}
+          isLeaving={leaveGame.isPending}
+          onLeave={() => {
+            if (state?.roomCode) {
+              leaveGame.mutate(state.roomCode)
+            }
+          }}
+        />
         <GameMatchTimer remainingMatchTimeMs={model.remainingMatchTimeMs} />
 
         <div className="grid flex-1 gap-4 xl:grid-cols-[17rem_minmax(0,1fr)_17rem] 2xl:grid-cols-[19rem_minmax(58rem,1fr)_18rem]">
-          <aside className="order-2 grid gap-3 md:grid-cols-2 xl:order-1 xl:grid-cols-1 xl:content-start">
+          <aside className="order-3 grid gap-3 md:grid-cols-2 xl:order-1 xl:grid-cols-1 xl:content-start">
             <PlayersPanel state={state} roomPlayerId={game.roomPlayerId} />
             <GameStatePanel
               state={state}
@@ -65,7 +85,7 @@ export function GamePage({ gameId }: GamePageProps) {
             onSelectTile={(tile) => model.selectTile(tile.key)}
           />
 
-          <aside className="order-3 grid gap-3 md:grid-cols-2 xl:order-3 xl:grid-cols-1 xl:content-start">
+          <aside className="order-2 grid gap-3 md:grid-cols-2 xl:order-3 xl:grid-cols-1 xl:content-start">
             <GameActionsPanel
               primaryAction={model.primaryAction}
               commandPending={game.commandPending}
@@ -90,13 +110,7 @@ export function GamePage({ gameId }: GamePageProps) {
               auctionTileName={model.auctionTile?.name ?? null}
               pendingTile={model.pendingTile ?? null}
               pendingProperty={model.pendingProperty}
-              activeTile={model.activeTile}
-              activeProperty={model.activeProperty}
-              activeOwner={model.activeOwner}
-              activeTileLabel={model.activeTileLabel}
-              auctionBidAmount={model.auctionBidAmount}
               minimumAuctionBid={model.minimumAuctionBid}
-              onAuctionBidAmountChange={model.setAuctionBidAmount}
               onRollAndMove={() => void game.rollAndMove()}
               onEndTurn={() => void game.endTurn()}
               onBuyProperty={() => void game.buyProperty()}
@@ -107,6 +121,7 @@ export function GamePage({ gameId }: GamePageProps) {
               onPassAuctionBid={() => void game.passAuctionBid()}
               onPayDebt={() => void game.payDebt()}
               onPayJailFine={() => void game.payJailFine()}
+              onUseGetOutOfJailCard={() => void game.useGetOutOfJailCard()}
               onDeclareBankruptcy={() => void game.declareBankruptcy()}
             />
 
@@ -267,15 +282,9 @@ function GameSidePanelDialog({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 mx-auto grid max-h-[min(84vh,46rem)] w-auto max-w-2xl gap-4 overflow-y-auto rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:inset-x-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+        className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[min(86vh,46rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:bottom-auto md:left-1/2 md:top-1/2 md:max-w-2xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[28px] md:p-4"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="app-kicker">Game view</p>
-            <h3 className="display-title mt-1 truncate text-3xl font-semibold text-[var(--sea-ink)]">
-              {title}
-            </h3>
-          </div>
+        <div className="flex items-center justify-end gap-3">
           <button
             type="button"
             aria-label={`Close ${title}`}

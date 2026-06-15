@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getLatestCardRevealFromEvents, type GameCardMetadata } from './game-cards'
-import {
-  findPlayer,
-  gameTiles,
-  getMinimumAuctionBid,
-} from './game-board'
+import { findPlayer, gameTiles, getMinimumAuctionBid } from './game-board'
 import { getRemainingMatchTimeMs } from './game-time'
 import { getGameTurnConsequence, getPrimaryGameAction } from './game-view'
 import { useGame } from './useGame'
@@ -13,7 +9,6 @@ import { useGameResult } from './useGameResult'
 export function useGamePage(gameId: string) {
   const game = useGame(gameId)
   const state = game.state
-  const [auctionBidAmount, setAuctionBidAmount] = useState(10)
   const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
   const [dismissedCardId, setDismissedCardId] = useState<string | null>(null)
   const [selectedTileKey, setSelectedTileKey] = useState<string | null>(null)
@@ -82,7 +77,9 @@ export function useGamePage(gameId: string) {
     currentTimeMs,
   )
   const remainingTurnTimeMs = getRemainingMatchTimeMs(
-    state?.turnExpiresAt,
+    state?.phase === 'awaiting_auction_bid'
+      ? (state.auction?.bidExpiresAt ?? state.turnExpiresAt)
+      : state?.turnExpiresAt,
     currentTimeMs,
   )
   const gameExpired = Boolean(
@@ -121,12 +118,6 @@ export function useGamePage(gameId: string) {
     isUserTurn &&
     state?.phase === 'awaiting_turn_end' &&
     game.status === 'joined'
-
-  useEffect(() => {
-    if (state?.auction) {
-      setAuctionBidAmount(getMinimumAuctionBid(state.auction))
-    }
-  }, [state?.auction?.currentBid, state?.auction?.tileKey])
 
   useEffect(() => {
     if (gameClosed) {
@@ -183,8 +174,6 @@ export function useGamePage(gameId: string) {
     gameResult,
     showMobilePropertyDecision,
     canManageProperties,
-    auctionBidAmount,
-    setAuctionBidAmount,
     visibleCardReveal,
     selectTile: (tileKey: string) => setSelectedTileKey(tileKey),
     clearSelectedTile: () => setSelectedTileKey(null),

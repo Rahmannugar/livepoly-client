@@ -25,6 +25,7 @@ export type GamePlayer = {
   inJail: boolean
   jailTurnCount: number
   getOutOfJailFreeCards: number
+  getOutOfJailFreeCardKeys?: string[]
   consecutiveMissedTurns?: number
   lastMissedTurnNumber?: number | null
   bankrupt: boolean
@@ -43,6 +44,7 @@ export type GameAuction = {
   currentBid: number
   highestBidderRoomPlayerId: string | null
   currentBidderRoomPlayerId: string | null
+  bidExpiresAt?: number | null
   activeRoomPlayerIds: string[]
   passedRoomPlayerIds: string[]
 }
@@ -160,7 +162,11 @@ export type GameEventLogItem =
       createdAt: string
     }
 
-export type GameResultEndReason = 'bankruptcy' | 'time_elapsed' | 'cancelled'
+export type GameResultEndReason =
+  | 'bankruptcy'
+  | 'time_elapsed'
+  | 'abandoned'
+  | 'cancelled'
 
 export type GameResultPlayer = {
   roomPlayerId: string

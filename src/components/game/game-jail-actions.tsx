@@ -8,13 +8,17 @@ export function JailActions({
   commandPending,
   onRoll,
   onPayFine,
+  onUseCard,
 }: {
   player: GamePlayer | null
   commandPending: boolean
   onRoll: () => void
   onPayFine: () => void
+  onUseCard: () => void
 }) {
   const canPayFine = Boolean(player && player.cash >= 50)
+  const cardCount = player?.getOutOfJailFreeCards ?? 0
+  const canUseCard = cardCount > 0
 
   return (
     <div className="game-jail-panel grid gap-4">
@@ -34,6 +38,7 @@ export function JailActions({
           label="Attempts"
           value={`${player?.jailTurnCount ?? 0}/3`}
         />
+        <StatePill label="Cards" value={`${cardCount}`} />
         <StatePill
           label="Cash"
           value={player ? formatCash(player.cash) : '...'}
@@ -62,6 +67,16 @@ export function JailActions({
         >
           Pay {formatCash(50)} fine
         </button>
+        {canUseCard ? (
+          <button
+            type="button"
+            disabled={commandPending}
+            className="inline-flex h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+            onClick={onUseCard}
+          >
+            Use Get Out of Jail Free
+          </button>
+        ) : null}
       </div>
 
       {!canPayFine ? (

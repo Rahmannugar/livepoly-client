@@ -80,6 +80,7 @@ function formatEndReason(reason: GameResult['endReason']) {
   const labels: Record<GameResult['endReason'], string> = {
     bankruptcy: 'Bankruptcy',
     time_elapsed: 'Time elapsed',
+    abandoned: 'No players left',
     cancelled: 'Cancelled',
   }
 

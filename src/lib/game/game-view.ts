@@ -137,7 +137,7 @@ export function getPrimaryGameAction({
       command: null,
       enabled: false,
       label: 'Reconnecting',
-      copy: 'Trying to restore the live game connection.',
+      copy: 'The live connection is being restored.',
     }
   }
 
@@ -175,8 +175,8 @@ export function getPrimaryGameAction({
     return {
       command: null,
       enabled: false,
-      label: 'Finishing',
-      copy: 'Time is up. Waiting for final results.',
+      label: 'Time up',
+      copy: 'The final count is underway.',
     }
   }
 

@@ -2,7 +2,6 @@ import { CaretDownIcon, SpinnerGapIcon, XIcon } from '@phosphor-icons/react'
 import { useState } from 'react'
 import {
   formatCash,
-  formatMoney,
   getTilePurchasePrice,
   getPlayerName,
   type GameTile,
@@ -168,11 +167,6 @@ export function PropertyDecisionControls({
 export function PropertyDecisionActions(props: PropertyDecisionControlsProps) {
   return (
     <div className="grid gap-3">
-      <TileInfoPanel
-        tile={props.tile}
-        property={props.property}
-        defaultCollapsed
-      />
       <PropertyDecisionControls {...props} />
     </div>
   )
@@ -195,15 +189,10 @@ export function MobilePropertyDecisionSheet({
         role="dialog"
         aria-modal="true"
         aria-label={`Decision for ${props.tile.name}`}
-        className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 grid max-h-[min(82vh,42rem)] gap-3 overflow-y-auto rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)]"
+        className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 grid max-h-[min(86vh,42rem)] gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)]"
       >
         <span className="mx-auto h-1.5 w-12 rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_42%,transparent)]" />
-        <TileInfoPanel
-          tile={props.tile}
-          property={props.property}
-          defaultCollapsed
-        />
-        <PropertyDecisionControls {...props} />
+        <PropertyDecisionActions {...props} />
       </section>
     </div>
   )
@@ -238,7 +227,7 @@ export function TileInfoSheet({
         role="dialog"
         aria-modal="true"
         aria-label={`${tile.name} details`}
-        className="game-decision-sheet fixed inset-x-3 bottom-3 z-50 mx-auto grid max-h-[min(82vh,42rem)] w-auto max-w-xl gap-3 overflow-y-auto rounded-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:inset-x-0 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+        className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[min(86vh,42rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:bottom-auto md:left-1/2 md:top-1/2 md:max-w-xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[28px] md:p-4"
       >
         <div className="flex items-center justify-between gap-3">
           <span className="h-1.5 w-12 rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_42%,transparent)] md:hidden" />
@@ -290,7 +279,7 @@ function getTileInfoCopy(tile: GameTile) {
   }
 
   if (tile.kind === 'utility') {
-    return 'Utilities scale with dice rolls when another player lands here.'
+    return 'Utility rent is calculated from the dice total that brought the player here.'
   }
 
   if (tile.kind === 'tax') {
@@ -354,7 +343,7 @@ function getRentRows(tile: GameTile, property?: GameProperty | null) {
         ? { label: 'Full set rent', value: formatCash(tile.baseRent * 2) }
         : null,
       ...(tile.rentByHouseCount ?? []).map((rent, index) => ({
-        label: `${formatMoney(index + 1)} house${index === 0 ? '' : 's'}`,
+        label: `${index + 1} house${index === 0 ? '' : 's'}`,
         value: formatCash(rent),
       })),
       tile.hotelRent
@@ -367,15 +356,15 @@ function getRentRows(tile: GameTile, property?: GameProperty | null) {
 
   if (tile.kind === 'airport' && tile.rentByOwnedCount?.length) {
     return tile.rentByOwnedCount.map((rent, index) => ({
-      label: `${formatMoney(index + 1)} airport${index === 0 ? '' : 's'}`,
+      label: `${index + 1} airport${index === 0 ? '' : 's'}`,
       value: formatCash(rent),
     }))
   }
 
   if (tile.kind === 'utility' && tile.rentMultiplierByOwnedCount?.length) {
     return tile.rentMultiplierByOwnedCount.map((multiplier, index) => ({
-      label: `${formatMoney(index + 1)} ${index === 0 ? 'utility' : 'utilities'}`,
-      value: `${multiplier}x dice`,
+      label: `${index + 1} ${index === 0 ? 'utility' : 'utilities'}`,
+      value: `${multiplier} x dice total`,
     }))
   }
 

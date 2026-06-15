@@ -520,6 +520,9 @@ export function formatEventSummary(
     case 'jail_fine_paid':
       return `${player} paid ${formatCash(amount ?? 50)} to leave Jail.`
 
+    case 'get_out_of_jail_card_used':
+      return `${player} used a Get Out of Jail Free card.`
+
     case 'player_released_from_jail':
       return `${player} left Jail.`
 
