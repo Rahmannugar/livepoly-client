@@ -49,6 +49,17 @@ export type GameAuction = {
   passedRoomPlayerIds: string[]
 }
 
+export type GameTradeOffer = {
+  id: string
+  fromRoomPlayerId: string
+  toRoomPlayerId: string
+  offeredCash: number
+  requestedCash: number
+  offeredPropertyKeys: string[]
+  requestedPropertyKeys: string[]
+  createdAt: number
+}
+
 export type GameDebt = {
   roomPlayerId: string
   creditorRoomPlayerId: string | null
@@ -74,6 +85,7 @@ export type GameState = {
   lastDiceRoll?: DiceRoll | null
   pendingTileKey?: string | null
   auction?: GameAuction | null
+  tradeOffer?: GameTradeOffer | null
   debt?: GameDebt | null
   decks: {
     chance: { drawPile: string[]; discardPile: string[] }

@@ -7,12 +7,14 @@ import type {
   GamePhase,
   GamePlayer,
   GameProperty,
+  GameTradeOffer,
 } from '#/lib/game/game.types'
 import type { GameTile } from '#/lib/game/game-board'
 import { AuctionActions } from './game-auction-actions'
 import { DebtActions } from './game-debt-actions'
 import { JailActions } from './game-jail-actions'
 import { GamePanel } from './game-primitives'
+import { TradeOfferActions } from './game-trade-actions'
 import {
   PrimaryActionButton,
   PropertyDecisionActions,
@@ -34,6 +36,7 @@ export function GameActionsPanel({
   currentPlayerInJail,
   isCurrentTurn,
   phase,
+  tradeOffer,
   auctionTileName,
   pendingTile,
   pendingProperty,
@@ -48,6 +51,9 @@ export function GameActionsPanel({
   onPayJailFine,
   onUseGetOutOfJailCard,
   onDeclareBankruptcy,
+  onAcceptTrade,
+  onRejectTrade,
+  onCancelTrade,
 }: {
   primaryAction: PrimaryGameAction
   commandPending: boolean
@@ -61,6 +67,7 @@ export function GameActionsPanel({
   currentPlayerInJail: boolean
   isCurrentTurn: boolean
   phase: GamePhase | undefined
+  tradeOffer: GameTradeOffer | null | undefined
   auctionTileName: string | null
   pendingTile: GameTile | null
   pendingProperty: GameProperty | null
@@ -75,9 +82,18 @@ export function GameActionsPanel({
   onPayJailFine: () => void
   onUseGetOutOfJailCard: () => void
   onDeclareBankruptcy: () => void
+  onAcceptTrade: (tradeId: string) => void
+  onRejectTrade: (tradeId: string) => void
+  onCancelTrade: (tradeId: string) => void
 }) {
   const [actionSheetOpen, setActionSheetOpen] = useState(false)
   const gameClosed = phase === 'finished' || phase === 'cancelled'
+  const actionableTradeOffer = Boolean(
+    tradeOffer &&
+      roomPlayerId &&
+      (tradeOffer.fromRoomPlayerId === roomPlayerId ||
+        tradeOffer.toRoomPlayerId === roomPlayerId),
+  )
   const shouldShowJailActions = Boolean(
     !gameClosed &&
     currentPlayerInJail &&
@@ -85,6 +101,7 @@ export function GameActionsPanel({
       (phase === 'awaiting_first_turn' || phase === 'awaiting_roll'),
   )
   const isSpecializedAction =
+    actionableTradeOffer ||
     Boolean(debt) ||
     shouldShowJailActions ||
     Boolean(auction) ||
@@ -95,12 +112,20 @@ export function GameActionsPanel({
       (isSpecializedAction || primaryAction.enabled),
   )
   const actionSheetTitle = useMemo(() => {
+    if (actionableTradeOffer) return 'Trade offer'
     if (debt) return 'Settle payment'
     if (shouldShowJailActions) return 'Jail move'
     if (auction) return 'Auction'
     if (primaryAction.command === 'propertyDecision') return 'Property decision'
     return primaryAction.label
-  }, [auction, debt, primaryAction.command, primaryAction.label, shouldShowJailActions])
+  }, [
+    actionableTradeOffer,
+    auction,
+    debt,
+    primaryAction.command,
+    primaryAction.label,
+    shouldShowJailActions,
+  ])
 
   useEffect(() => {
     if (!canOpenActionSheet) {
@@ -115,7 +140,17 @@ export function GameActionsPanel({
 
   const actionControls = (
     <>
-      {gameClosed || gameExpired ? (
+      {tradeOffer && actionableTradeOffer ? (
+        <TradeOfferActions
+          tradeOffer={tradeOffer}
+          players={players}
+          roomPlayerId={roomPlayerId}
+          commandPending={commandPending}
+          onAccept={(tradeId) => runAndClose(() => onAcceptTrade(tradeId))}
+          onReject={(tradeId) => runAndClose(() => onRejectTrade(tradeId))}
+          onCancel={(tradeId) => runAndClose(() => onCancelTrade(tradeId))}
+        />
+      ) : gameClosed || gameExpired ? (
         <PrimaryActionButton
           primaryAction={primaryAction}
           commandPending={commandPending}

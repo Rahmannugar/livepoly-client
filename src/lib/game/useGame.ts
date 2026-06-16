@@ -666,6 +666,19 @@ export function useGame(gameId: string) {
       runCommand(GAME_SOCKET_EVENTS.mortgageProperty, { tileKey }),
     unmortgageProperty: (tileKey: string) =>
       runCommand(GAME_SOCKET_EVENTS.unmortgageProperty, { tileKey }),
+    proposeTrade: (payload: {
+      toRoomPlayerId: string
+      offeredCash: number
+      requestedCash: number
+      offeredPropertyKeys: string[]
+      requestedPropertyKeys: string[]
+    }) => runCommand(GAME_SOCKET_EVENTS.proposeTrade, payload),
+    acceptTrade: (tradeId: string) =>
+      runCommand(GAME_SOCKET_EVENTS.acceptTrade, { tradeId }),
+    rejectTrade: (tradeId: string) =>
+      runCommand(GAME_SOCKET_EVENTS.rejectTrade, { tradeId }),
+    cancelTrade: (tradeId: string) =>
+      runCommand(GAME_SOCKET_EVENTS.cancelTrade, { tradeId }),
     endTurn: () => runCommand(GAME_SOCKET_EVENTS.endTurn),
   }
 }

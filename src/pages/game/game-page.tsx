@@ -107,6 +107,7 @@ export function GamePage({ gameId }: GamePageProps) {
               currentPlayerInJail={model.currentPlayerInJail}
               isCurrentTurn={model.isUserTurn}
               phase={state?.phase}
+              tradeOffer={state?.tradeOffer}
               auctionTileName={model.auctionTile?.name ?? null}
               pendingTile={model.pendingTile ?? null}
               pendingProperty={model.pendingProperty}
@@ -123,6 +124,9 @@ export function GamePage({ gameId }: GamePageProps) {
               onPayJailFine={() => void game.payJailFine()}
               onUseGetOutOfJailCard={() => void game.useGetOutOfJailCard()}
               onDeclareBankruptcy={() => void game.declareBankruptcy()}
+              onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
+              onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
+              onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
             />
 
             <GameSidePanelLauncher
@@ -210,6 +214,7 @@ export function GamePage({ gameId }: GamePageProps) {
               onSellBuilding={(tileKey) => void game.sellBuilding(tileKey)}
               onMortgage={(tileKey) => void game.mortgageProperty(tileKey)}
               onUnmortgage={(tileKey) => void game.unmortgageProperty(tileKey)}
+              onProposeTrade={(input) => void game.proposeTrade(input)}
             />
           ) : activeSidePanel === 'events' ? (
             <EventsPanel

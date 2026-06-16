@@ -10,6 +10,7 @@ import {
 } from '#/lib/game/game-board'
 import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
 import { GamePanel } from './game-primitives'
+import { TradeProposalForm } from './game-trade-actions'
 
 export function PropertiesPanel({
   properties,
@@ -21,6 +22,7 @@ export function PropertiesPanel({
   onSellBuilding,
   onMortgage,
   onUnmortgage,
+  onProposeTrade,
 }: {
   properties: GameProperty[]
   players: GamePlayer[]
@@ -31,6 +33,13 @@ export function PropertiesPanel({
   onSellBuilding: (tileKey: string) => void
   onMortgage: (tileKey: string) => void
   onUnmortgage: (tileKey: string) => void
+  onProposeTrade: (input: {
+    toRoomPlayerId: string
+    offeredCash: number
+    requestedCash: number
+    offeredPropertyKeys: string[]
+    requestedPropertyKeys: string[]
+  }) => void
 }) {
   const ownerTabs = useMemo(() => {
     const ownerIds = Array.from(
@@ -106,6 +115,14 @@ export function PropertiesPanel({
         onSellBuilding={onSellBuilding}
         onMortgage={onMortgage}
         onUnmortgage={onUnmortgage}
+      />
+      <TradeProposalForm
+        properties={properties}
+        players={players}
+        roomPlayerId={roomPlayerId}
+        commandPending={commandPending}
+        disabled={!canManageProperties}
+        onProposeTrade={onProposeTrade}
       />
     </GamePanel>
   )
