@@ -30,8 +30,8 @@ export function GameStage({
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
 
   return (
-    <section className="order-1 rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-5 xl:order-2">
-      <div className="mb-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <section className="order-1 rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-4 xl:order-2">
+      <div className="mb-3 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <GameStageTitle
           phase={state?.phase}
           player={currentTurnPlayer}
@@ -41,12 +41,10 @@ export function GameStage({
       </div>
 
       <GameTurnSummary
-        player={currentTurnPlayer}
         phase={state?.phase}
         dice={state?.lastDiceRoll}
         tile={activeTile}
         consequence={turnConsequence}
-        isCurrentTurn={isCurrentTurn}
         remainingTurnTimeMs={remainingTurnTimeMs}
       />
 
@@ -73,7 +71,7 @@ function GameStageTitle({
   if (gameClosed) {
     return (
       <div className="min-w-0">
-        <h1 className="display-title max-w-full truncate text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl 2xl:text-4xl">
+        <h1 className="display-title max-w-full truncate text-xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-2xl 2xl:text-3xl">
           {phase === 'cancelled' ? 'Game cancelled.' : 'Game over.'}
         </h1>
       </div>
@@ -83,7 +81,7 @@ function GameStageTitle({
   if (!player) {
     return (
       <div className="min-w-0">
-        <h1 className="display-title max-w-full truncate text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl 2xl:text-4xl">
+        <h1 className="display-title max-w-full truncate text-xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-2xl 2xl:text-3xl">
           Opening the game.
         </h1>
       </div>
@@ -92,7 +90,7 @@ function GameStageTitle({
 
   return (
     <div className="min-w-0">
-      <h1 className="display-title flex max-w-full items-baseline gap-2 text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl 2xl:text-4xl">
+      <h1 className="display-title flex max-w-full items-baseline gap-2 text-xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-2xl 2xl:text-3xl">
         <span className="min-w-0 truncate" title={getPlayerName(player)}>
           {getPlayerName(player)}
         </span>

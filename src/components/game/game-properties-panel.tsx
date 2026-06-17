@@ -41,33 +41,20 @@ export function PropertiesPanel({
     requestedPropertyKeys: string[]
   }) => void
 }) {
-  const ownerTabs = useMemo(() => {
-    const ownerIds = Array.from(
-      new Set(
-        properties
-          .map((property) => property.ownerRoomPlayerId)
-          .filter(Boolean) as string[],
-      ),
-    )
+  const playerTabs = useMemo(() => {
+    return [...players].sort((left, right) => {
+      if (left.roomPlayerId === roomPlayerId) return -1
+      if (right.roomPlayerId === roomPlayerId) return 1
 
-    return ownerIds.sort((left, right) => {
-      if (left === roomPlayerId) return -1
-      if (right === roomPlayerId) return 1
-
-      const leftPlayer = findPlayer(players, left)
-      const rightPlayer = findPlayer(players, right)
-
-      const leftName = leftPlayer ? getPlayerName(leftPlayer) : left
-      const rightName = rightPlayer ? getPlayerName(rightPlayer) : right
-
-      return leftName.localeCompare(rightName)
+      return left.seatNumber - right.seatNumber
     })
-  }, [players, properties, roomPlayerId])
+  }, [players, roomPlayerId])
   const [activeOwnerId, setActiveOwnerId] = useState<string | null>(null)
   const selectedOwnerId =
-    activeOwnerId && ownerTabs.includes(activeOwnerId)
+    activeOwnerId &&
+    playerTabs.some((player) => player.roomPlayerId === activeOwnerId)
       ? activeOwnerId
-      : (ownerTabs[0] ?? null)
+      : (playerTabs[0]?.roomPlayerId ?? null)
   const selectedProperties = selectedOwnerId
     ? properties.filter(
         (property) => property.ownerRoomPlayerId === selectedOwnerId,
@@ -76,23 +63,24 @@ export function PropertiesPanel({
 
   return (
     <GamePanel title="Properties" icon={BuildingsIcon} collapsible={false}>
-      {ownerTabs.length > 1 ? (
+      {playerTabs.length > 0 ? (
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-          {ownerTabs.map((ownerId) => {
-            const owner = findPlayer(players, ownerId)
+          {playerTabs.map((player) => {
+            const ownerId = player.roomPlayerId
             const active = ownerId === selectedOwnerId
             const ownerLabel =
               ownerId === roomPlayerId
                 ? 'You'
-                : owner
-                  ? getPlayerName(owner)
-                  : 'Unknown player'
+                : getPlayerName(player)
+            const propertyCount = properties.filter(
+              (property) => property.ownerRoomPlayerId === ownerId,
+            ).length
 
             return (
               <button
                 key={ownerId}
                 type="button"
-                className={`shrink-0 rounded-full border px-4 py-2 text-xs font-black transition ${
+                className={`shrink-0 rounded-xl border px-4 py-2 text-xs font-black transition ${
                   active
                     ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
                     : 'border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] hover:translate-y-[-1px]'
@@ -100,6 +88,9 @@ export function PropertiesPanel({
                 onClick={() => setActiveOwnerId(ownerId)}
               >
                 {ownerLabel}
+                <span className="ml-2 text-[0.65rem] opacity-70">
+                  {propertyCount}
+                </span>
               </button>
             )
           })}

@@ -67,7 +67,7 @@
 }
 
 .game-tile__tokens .player-token,
-.game-tile__tokens > span {
+.game-tile__owner-marker {
   border: 1px solid color-mix(in oklab, var(--bg-base) 72%, white);
   box-shadow:
     0 10px 24px rgba(4, 12, 15, 0.26),

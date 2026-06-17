@@ -71,7 +71,10 @@ export function GameTileCell({
 
       <div className="game-tile__tokens pointer-events-none absolute bottom-1 right-1 z-40 flex max-w-[calc(100%-0.5rem)] flex-wrap items-end justify-end gap-0.5">
         {owner ? (
-          <span className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-1.5 py-0.5 text-[0.55rem] font-black shadow-sm">
+          <span
+            className="game-tile__owner-marker grid h-3 w-3 place-items-center rounded-full bg-[var(--surface)] text-[0.42rem] font-black text-[var(--sea-ink)] shadow-sm sm:h-3.5 sm:w-3.5 sm:text-[0.48rem] xl:h-4 xl:w-4 xl:text-[0.54rem]"
+            title={`${getOwnerLabel(owner)} owns ${tile.name}`}
+          >
             {owner.seatNumber}
           </span>
         ) : null}
@@ -86,6 +89,10 @@ export function GameTileCell({
       </div>
     </button>
   )
+}
+
+function getOwnerLabel(owner: GamePlayer) {
+  return owner.username ?? owner.botName ?? `Player ${owner.seatNumber}`
 }
 
 function getTileGridStyle(index: number): CSSProperties {

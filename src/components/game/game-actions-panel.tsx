@@ -237,7 +237,7 @@ export function GameActionsPanel({
           tileName={auctionTileName ?? auction.tileKey}
           minimumBid={minimumAuctionBid}
           commandPending={commandPending}
-          onPlaceBid={onPlaceAuctionBid}
+          onPlaceBid={(amount) => runAndClose(() => onPlaceAuctionBid(amount))}
           onPass={() => runAndClose(onPassAuctionBid)}
         />
       ) : primaryAction.command === 'propertyDecision' ? (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getLatestCardRevealFromEvents, type GameCardMetadata } from './game-cards'
 import { findPlayer, gameTiles, getMinimumAuctionBid } from './game-board'
 import { getRemainingMatchTimeMs } from './game-time'
@@ -10,7 +10,11 @@ export function useGamePage(gameId: string) {
   const game = useGame(gameId)
   const state = game.state
   const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
-  const [dismissedCardId, setDismissedCardId] = useState<string | null>(null)
+  const cardRevealReadyRef = useRef(false)
+  const lastCardRevealIdRef = useRef<string | null>(null)
+  const [visibleCardRevealId, setVisibleCardRevealId] = useState<string | null>(
+    null,
+  )
   const [selectedTileKey, setSelectedTileKey] = useState<string | null>(null)
 
   const currentTurnPlayer = state
@@ -129,13 +133,28 @@ export function useGamePage(gameId: string) {
   }, [state?.expiresAt, state?.turnExpiresAt, gameClosed])
 
   useEffect(() => {
-    if (!latestCardReveal) {
-      setDismissedCardId(null)
+    const latestCardRevealId = latestCardReveal?.id ?? null
+
+    if (!cardRevealReadyRef.current) {
+      cardRevealReadyRef.current = true
+      lastCardRevealIdRef.current = latestCardRevealId
+      return
     }
-  }, [latestCardReveal])
+
+    if (!latestCardRevealId) {
+      lastCardRevealIdRef.current = null
+      setVisibleCardRevealId(null)
+      return
+    }
+
+    if (latestCardRevealId !== lastCardRevealIdRef.current) {
+      lastCardRevealIdRef.current = latestCardRevealId
+      setVisibleCardRevealId(latestCardRevealId)
+    }
+  }, [latestCardReveal?.id])
 
   const visibleCardReveal: GameCardMetadata | null =
-    latestCardReveal && latestCardReveal.id !== dismissedCardId
+    latestCardReveal && latestCardReveal.id === visibleCardRevealId
       ? latestCardReveal.card
       : null
 
@@ -171,10 +190,6 @@ export function useGamePage(gameId: string) {
     visibleCardReveal,
     selectTile: (tileKey: string) => setSelectedTileKey(tileKey),
     clearSelectedTile: () => setSelectedTileKey(null),
-    dismissVisibleCardReveal: () => {
-      if (latestCardReveal) {
-        setDismissedCardId(latestCardReveal.id)
-      }
-    },
+    dismissVisibleCardReveal: () => setVisibleCardRevealId(null),
   }
 }
