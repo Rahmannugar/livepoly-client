@@ -51,10 +51,10 @@ export function AuctionActions({
   const statusCopy = canBid
     ? `Enter any whole number from ${formatCash(minimumBid)} upward, or pass.`
     : hasPassed
-      ? 'You have passed. Waiting for the auction to finish.'
+      ? `You passed on ${tileName}.`
       : currentBidder
-        ? `Waiting for ${getPlayerName(currentBidder)}.`
-        : 'Waiting for the auction to settle.'
+        ? `${getPlayerName(currentBidder)} is choosing a bid or pass.`
+        : 'Auction is closing.'
 
   useEffect(() => {
     if (!canBid) {

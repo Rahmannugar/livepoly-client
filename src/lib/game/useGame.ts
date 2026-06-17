@@ -596,9 +596,16 @@ export function useGame(gameId: string) {
     async (event: string, payload: Record<string, unknown> = {}) => {
       const socket = socketRef.current
 
-      if (!socket?.connected) {
-        setStatus('disconnected')
-        setErrorMessage('Trying to restore the live game connection.')
+      if (!socket) {
+        setStatus('connecting')
+        setErrorMessage(null)
+        return
+      }
+
+      if (!socket.connected) {
+        setStatus('connecting')
+        setErrorMessage(null)
+        socket.connect()
         return
       }
 

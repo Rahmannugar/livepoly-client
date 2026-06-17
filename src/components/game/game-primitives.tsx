@@ -96,7 +96,7 @@ export function PlayerToken({
     <span
       className={`player-token ${isActive ? 'player-token--active' : ''} ${
         compact
-          ? 'grid h-3.5 w-3.5 place-items-center rounded-full text-[0.46rem] font-black text-white shadow-sm sm:h-4 sm:w-4 sm:text-[0.54rem] xl:h-5 xl:w-5 xl:text-[0.62rem]'
+          ? 'grid h-3 w-3 place-items-center rounded-full text-[0.42rem] font-black text-white shadow-sm sm:h-3.5 sm:w-3.5 sm:text-[0.48rem] xl:h-4 xl:w-4 xl:text-[0.54rem] 2xl:h-5 2xl:w-5 2xl:text-[0.62rem]'
           : 'grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-black text-white shadow-sm'
       }`}
       style={{ backgroundColor: getPlayerColor(player.seatNumber) }}

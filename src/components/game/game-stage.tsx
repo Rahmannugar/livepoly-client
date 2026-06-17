@@ -73,7 +73,7 @@ function GameStageTitle({
   if (gameClosed) {
     return (
       <div className="min-w-0">
-        <h1 className="display-title max-w-full truncate text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl 2xl:text-5xl">
+        <h1 className="display-title max-w-full truncate text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl 2xl:text-4xl">
           {phase === 'cancelled' ? 'Game cancelled.' : 'Game over.'}
         </h1>
       </div>
@@ -83,7 +83,7 @@ function GameStageTitle({
   if (!player) {
     return (
       <div className="min-w-0">
-        <h1 className="display-title max-w-full truncate text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl 2xl:text-5xl">
+        <h1 className="display-title max-w-full truncate text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl 2xl:text-4xl">
           Opening the game.
         </h1>
       </div>
@@ -92,7 +92,7 @@ function GameStageTitle({
 
   return (
     <div className="min-w-0">
-      <h1 className="display-title flex max-w-full items-baseline gap-2 text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl 2xl:text-5xl">
+      <h1 className="display-title flex max-w-full items-baseline gap-2 text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl 2xl:text-4xl">
         <span className="min-w-0 truncate" title={getPlayerName(player)}>
           {getPlayerName(player)}
         </span>

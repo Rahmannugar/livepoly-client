@@ -7,7 +7,7 @@ import {
   type Icon,
 } from '@phosphor-icons/react'
 import { useState, type ReactNode } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import '#/components/game/game.css'
 import { GameActionsPanel } from '#/components/game/game-actions-panel'
@@ -21,12 +21,10 @@ import { PlayersPanel } from '#/components/game/game-players-panel'
 import { PropertiesPanel } from '#/components/game/game-properties-panel'
 import { GameStatePanel } from '#/components/game/game-state-panel'
 import { GameStage } from '#/components/game/game-stage'
-import {
-  MobilePropertyDecisionSheet,
-  TileInfoSheet,
-} from '#/components/game/game-tile-info'
+import { TileInfoSheet } from '#/components/game/game-tile-info'
 import { useGamePage } from '#/lib/game/useGamePage'
 import { leaveRoom } from '#/lib/rooms/rooms.service'
+import { ROOMS_QUERY_KEYS } from '#/lib/rooms/rooms.constants'
 
 type GamePageProps = {
   gameId: string
@@ -36,12 +34,15 @@ export function GamePage({ gameId }: GamePageProps) {
   const model = useGamePage(gameId)
   const { game, state } = model
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [activeSidePanel, setActiveSidePanel] = useState<
     'banker' | 'properties' | 'events' | 'results' | null
   >(null)
   const leaveGame = useMutation({
     mutationFn: leaveRoom,
     onSuccess: () => {
+      queryClient.setQueryData(ROOMS_QUERY_KEYS.currentRoom, null)
+      queryClient.invalidateQueries({ queryKey: ROOMS_QUERY_KEYS.liveRooms })
       void navigate({ to: '/' })
     },
   })
@@ -110,8 +111,14 @@ export function GamePage({ gameId }: GamePageProps) {
               tradeOffer={state?.tradeOffer}
               auctionTileName={model.auctionTile?.name ?? null}
               pendingTile={model.pendingTile ?? null}
+              activeTile={model.activeTile}
               pendingProperty={model.pendingProperty}
               minimumAuctionBid={model.minimumAuctionBid}
+              onViewActiveTile={() => {
+                if (model.activeTile) {
+                  model.selectTile(model.activeTile.key)
+                }
+              }}
               onRollAndMove={() => void game.rollAndMove()}
               onEndTurn={() => void game.endTurn()}
               onBuyProperty={() => void game.buyProperty()}
@@ -132,42 +139,32 @@ export function GamePage({ gameId }: GamePageProps) {
             <GameSidePanelLauncher
               icon={BankIcon}
               title="Banker"
-              copy="Table calls and latest move."
+              copy="Table calls and latest move"
               onClick={() => setActiveSidePanel('banker')}
             />
             {hasResultsPanel ? (
               <GameSidePanelLauncher
                 icon={TrophyIcon}
                 title="Results"
-                copy="Final places and net worth."
+                copy="Final places and net worth"
                 onClick={() => setActiveSidePanel('results')}
               />
             ) : (
               <GameSidePanelLauncher
                 icon={BuildingsIcon}
                 title="Properties"
-                copy="Owned squares and turn-only management."
+                copy="Owned squares grouped by player"
                 onClick={() => setActiveSidePanel('properties')}
               />
             )}
             <GameSidePanelLauncher
               icon={ListChecksIcon}
               title="Events"
-              copy="Recent rolls, bids, payments, and moves."
+              copy="Recent rolls, bids, payments, and moves"
               onClick={() => setActiveSidePanel('events')}
             />
           </aside>
         </div>
-        <MobilePropertyDecisionSheet
-          open={model.showMobilePropertyDecision}
-          tile={model.pendingTile ?? null}
-          property={model.pendingProperty}
-          commandPending={game.commandPending}
-          onBuyProperty={() => void game.buyProperty()}
-          onDeclinePropertyPurchase={() =>
-            void game.declinePropertyPurchase()
-          }
-        />
         <GameCardReveal
           card={model.visibleCardReveal}
           onClose={model.dismissVisibleCardReveal}

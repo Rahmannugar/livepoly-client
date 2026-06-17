@@ -82,8 +82,8 @@ export function DebtActions({
 
       {!isDebtor ? (
         <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-          Waiting for {debtor ? getPlayerName(debtor) : 'the indebted player'}{' '}
-          to resolve this.
+          {debtor ? getPlayerName(debtor) : 'The indebted player'} must settle
+          this.
         </p>
       ) : !canPay ? (
         <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">

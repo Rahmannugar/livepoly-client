@@ -1,4 +1,4 @@
-import { DiceFiveIcon, XIcon } from '@phosphor-icons/react'
+import { DiceFiveIcon, MapPinIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type {
@@ -39,8 +39,10 @@ export function GameActionsPanel({
   tradeOffer,
   auctionTileName,
   pendingTile,
+  activeTile,
   pendingProperty,
   minimumAuctionBid,
+  onViewActiveTile,
   onRollAndMove,
   onEndTurn,
   onBuyProperty,
@@ -70,8 +72,10 @@ export function GameActionsPanel({
   tradeOffer: GameTradeOffer | null | undefined
   auctionTileName: string | null
   pendingTile: GameTile | null
+  activeTile: GameTile | null
   pendingProperty: GameProperty | null
   minimumAuctionBid: number
+  onViewActiveTile: () => void
   onRollAndMove: () => void
   onEndTurn: () => void
   onBuyProperty: () => void
@@ -87,12 +91,24 @@ export function GameActionsPanel({
   onCancelTrade: (tradeId: string) => void
 }) {
   const [actionSheetOpen, setActionSheetOpen] = useState(false)
+  const [lastAutoOpenedActionKey, setLastAutoOpenedActionKey] = useState<
+    string | null
+  >(null)
   const gameClosed = phase === 'finished' || phase === 'cancelled'
   const actionableTradeOffer = Boolean(
     tradeOffer &&
       roomPlayerId &&
       (tradeOffer.fromRoomPlayerId === roomPlayerId ||
         tradeOffer.toRoomPlayerId === roomPlayerId),
+  )
+  const shouldShowDebtActions = Boolean(
+    debt && roomPlayerId && debt.roomPlayerId === roomPlayerId,
+  )
+  const shouldShowAuctionActions = Boolean(
+    auction &&
+      roomPlayerId &&
+      auction.currentBidderRoomPlayerId === roomPlayerId &&
+      !auction.passedRoomPlayerIds.includes(roomPlayerId),
   )
   const shouldShowJailActions = Boolean(
     !gameClosed &&
@@ -102,9 +118,9 @@ export function GameActionsPanel({
   )
   const isSpecializedAction =
     actionableTradeOffer ||
-    Boolean(debt) ||
+    shouldShowDebtActions ||
     shouldShowJailActions ||
-    Boolean(auction) ||
+    shouldShowAuctionActions ||
     primaryAction.command === 'propertyDecision'
   const canOpenActionSheet = Boolean(
     !gameClosed &&
@@ -113,18 +129,48 @@ export function GameActionsPanel({
   )
   const actionSheetTitle = useMemo(() => {
     if (actionableTradeOffer) return 'Trade offer'
-    if (debt) return 'Settle payment'
+    if (shouldShowDebtActions) return 'Settle payment'
     if (shouldShowJailActions) return 'Jail move'
-    if (auction) return 'Auction'
-    if (primaryAction.command === 'propertyDecision') return 'Property decision'
+    if (shouldShowAuctionActions) return 'Auction'
+    if (primaryAction.command === 'propertyDecision') return 'Buy or auction'
     return primaryAction.label
   }, [
     actionableTradeOffer,
-    auction,
-    debt,
     primaryAction.command,
     primaryAction.label,
+    shouldShowAuctionActions,
+    shouldShowDebtActions,
     shouldShowJailActions,
+  ])
+  const autoActionKey = useMemo(() => {
+    if (!canOpenActionSheet) return null
+
+    return [
+      primaryAction.command,
+      primaryAction.label,
+      phase ?? 'none',
+      tradeOffer?.id ?? 'no-trade',
+      debt?.roomPlayerId ?? 'no-debt',
+      auction
+        ? [
+            auction.tileKey,
+            auction.currentBid,
+            auction.currentBidderRoomPlayerId ?? 'none',
+            auction.highestBidderRoomPlayerId ?? 'none',
+            auction.bidExpiresAt ?? 'none',
+          ].join(':')
+        : 'no-auction',
+      pendingTile?.key ?? 'no-pending-tile',
+    ].join('|')
+  }, [
+    auction,
+    canOpenActionSheet,
+    debt?.roomPlayerId,
+    pendingTile?.key,
+    phase,
+    primaryAction.command,
+    primaryAction.label,
+    tradeOffer?.id,
   ])
 
   useEffect(() => {
@@ -132,6 +178,15 @@ export function GameActionsPanel({
       setActionSheetOpen(false)
     }
   }, [canOpenActionSheet])
+
+  useEffect(() => {
+    if (!autoActionKey || autoActionKey === lastAutoOpenedActionKey) {
+      return
+    }
+
+    setActionSheetOpen(true)
+    setLastAutoOpenedActionKey(autoActionKey)
+  }, [autoActionKey, lastAutoOpenedActionKey])
 
   const runAndClose = (handler: () => void) => {
     handler()
@@ -157,7 +212,7 @@ export function GameActionsPanel({
           onRollAndMove={() => runAndClose(onRollAndMove)}
           onEndTurn={() => runAndClose(onEndTurn)}
         />
-      ) : debt ? (
+      ) : debt && shouldShowDebtActions ? (
         <DebtActions
           debt={debt}
           players={players}
@@ -174,7 +229,7 @@ export function GameActionsPanel({
           onPayFine={() => runAndClose(onPayJailFine)}
           onUseCard={() => runAndClose(onUseGetOutOfJailCard)}
         />
-      ) : auction ? (
+      ) : auction && shouldShowAuctionActions ? (
         <AuctionActions
           auction={auction}
           players={players}
@@ -182,10 +237,7 @@ export function GameActionsPanel({
           tileName={auctionTileName ?? auction.tileKey}
           minimumBid={minimumAuctionBid}
           commandPending={commandPending}
-          onPlaceBid={(amount) => {
-            onPlaceAuctionBid(amount)
-            setActionSheetOpen(false)
-          }}
+          onPlaceBid={onPlaceAuctionBid}
           onPass={() => runAndClose(onPassAuctionBid)}
         />
       ) : primaryAction.command === 'propertyDecision' ? (
@@ -229,6 +281,17 @@ export function GameActionsPanel({
       )}
 
       <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
+        {activeTile ? (
+          <button
+            type="button"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
+            aria-label={`Inspect ${activeTile.name}`}
+            onClick={onViewActiveTile}
+          >
+            <MapPinIcon weight="bold" className="h-4 w-4" />
+            Inspect square
+          </button>
+        ) : null}
         {errorMessage ? <p className="text-red-500">{errorMessage}</p> : null}
       </div>
 
@@ -269,8 +332,7 @@ function GameActionSheet({
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="app-kicker">Action</p>
-            <h3 className="display-title mt-1 truncate text-3xl font-semibold text-[var(--sea-ink)]">
+            <h3 className="display-title truncate text-3xl font-semibold text-[var(--sea-ink)]">
               {title}
             </h3>
           </div>

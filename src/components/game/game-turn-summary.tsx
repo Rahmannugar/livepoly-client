@@ -50,7 +50,7 @@ export function GameTurnSummary({
         <SummaryPill label="Dice" value={formatDice(dice)} />
         <SummaryPill
           label={tile ? 'Square' : 'Square'}
-          value={tile?.name ?? 'Waiting for movement'}
+          value={tile?.name ?? 'No square yet'}
           icon={tile ? <MapPinIcon weight="bold" className="h-4 w-4" /> : null}
         />
       </div>

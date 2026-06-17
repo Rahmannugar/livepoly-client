@@ -37,7 +37,7 @@ export function PrimaryActionButton({
       {commandPending ? (
         <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
       ) : null}
-      {commandPending ? 'Sending...' : primaryAction.label}
+      {commandPending ? 'Playing...' : primaryAction.label}
     </button>
   )
 }

@@ -27,12 +27,12 @@ export function GameBoardCenter({
   const copy = gameClosed
     ? phase === 'cancelled'
       ? 'This game was cancelled.'
-      : 'Final results are being saved.'
+      : 'Final places are being counted.'
     : access === 'spectator'
       ? 'Watching this game live.'
       : isCurrentTurn
         ? 'Your move.'
-        : 'Waiting for the next move.'
+        : 'The table is between moves.'
 
   return (
     <div className="col-start-2 col-end-11 row-start-2 row-end-11 grid place-items-center rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_82%,transparent)] p-5 text-center">

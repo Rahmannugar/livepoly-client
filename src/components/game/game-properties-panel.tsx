@@ -116,14 +116,16 @@ export function PropertiesPanel({
         onMortgage={onMortgage}
         onUnmortgage={onUnmortgage}
       />
-      <TradeProposalForm
-        properties={properties}
-        players={players}
-        roomPlayerId={roomPlayerId}
-        commandPending={commandPending}
-        disabled={!canManageProperties}
-        onProposeTrade={onProposeTrade}
-      />
+      {canManageProperties ? (
+        <TradeProposalForm
+          properties={properties}
+          players={players}
+          roomPlayerId={roomPlayerId}
+          commandPending={commandPending}
+          disabled={false}
+          onProposeTrade={onProposeTrade}
+        />
+      ) : null}
     </GamePanel>
   )
 }
@@ -206,7 +208,7 @@ function PropertyList({
             {canManageProperties && isMine && mortgageValue > 0 ? (
               <div className="grid gap-2">
                 {tile?.kind === 'property' ? (
-                  <div className="grid gap-2 2xl:grid-cols-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
                     <button
                       type="button"
                       disabled={
@@ -214,7 +216,7 @@ function PropertyList({
                         commandPending ||
                         buildingCost <= 0
                       }
-                      className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onBuild(property.tileKey)}
                     >
                       {property.hasHotel
@@ -226,7 +228,7 @@ function PropertyList({
                     <button
                       type="button"
                       disabled={!isMine || !hasBuilding || commandPending}
-                      className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onSellBuilding(property.tileKey)}
                     >
                       Sell +{formatCash(buildingCost / 2)}
@@ -242,7 +244,7 @@ function PropertyList({
                 <button
                   type="button"
                   disabled={!isMine || commandPending}
-                  className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={() => {
                     if (property.mortgaged) {
                       onUnmortgage(property.tileKey)

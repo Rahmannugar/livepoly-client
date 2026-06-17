@@ -32,7 +32,10 @@ export function GameResultsPanel({
               {winner ? getResultPlayerName(winner) : 'No winner'}
             </p>
             <div className="flex flex-wrap gap-2">
-              <StatePill label="Reason" value={formatEndReason(result.endReason)} />
+              <StatePill
+                label="Reason"
+                value={formatEndReason(result.endReason)}
+              />
               <StatePill label="Mode" value={result.mode} />
             </div>
           </div>
@@ -64,8 +67,8 @@ export function GameResultsPanel({
       ) : (
         <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
           {isLoading
-            ? 'Loading final results.'
-            : 'Results are being saved. This should only take a moment.'}
+            ? 'Counting final places.'
+            : 'Final places will appear here.'}
         </p>
       )}
     </GamePanel>

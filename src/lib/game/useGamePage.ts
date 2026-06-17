@@ -63,7 +63,7 @@ export function useGamePage(gameId: string) {
     ? 'Landed square'
     : auctionTile
       ? 'Auction square'
-      : 'Current square'
+      : 'Square'
   const turnConsequence = getGameTurnConsequence({
     phase: state?.phase,
     tile: activeTile,
@@ -107,11 +107,6 @@ export function useGamePage(gameId: string) {
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
   const shouldLoadGameResult = gameClosed || gameExpired
   const gameResult = useGameResult(gameId, shouldLoadGameResult)
-  const showMobilePropertyDecision =
-    !gameClosed &&
-    !gameExpired &&
-    isUserTurn &&
-    state?.phase === 'awaiting_property_decision'
   const canManageProperties =
     !gameClosed &&
     !gameExpired &&
@@ -172,7 +167,6 @@ export function useGamePage(gameId: string) {
     gameClosed,
     shouldLoadGameResult,
     gameResult,
-    showMobilePropertyDecision,
     canManageProperties,
     visibleCardReveal,
     selectTile: (tileKey: string) => setSelectedTileKey(tileKey),

@@ -25,7 +25,7 @@ export function getGameTurnConsequence({
   recentEvent: { type: string; payload: Record<string, unknown> } | undefined
 }) {
   if (phase === 'finished') {
-    return 'The game has ended. Final results are being saved.'
+    return 'The game has ended. Final places are being counted.'
   }
 
   if (phase === 'cancelled') {
@@ -87,7 +87,7 @@ export function getGameTurnConsequence({
     return 'Roll the dice to move around the game.'
   }
 
-  return 'Waiting for the next game update.'
+  return 'The table is between moves.'
 }
 
 export function getPrimaryGameAction({
@@ -127,8 +127,8 @@ export function getPrimaryGameAction({
     return {
       command: null,
       enabled: false,
-      label: 'Joining game',
-      copy: 'Opening the live game connection.',
+      label: 'Joining',
+      copy: 'Taking your seat at the table.',
     }
   }
 
@@ -136,8 +136,8 @@ export function getPrimaryGameAction({
     return {
       command: null,
       enabled: false,
-      label: 'Reconnecting',
-      copy: 'The live connection is being restored.',
+      label: 'Rejoining',
+      copy: 'Bringing you back to the table.',
     }
   }
 
@@ -146,7 +146,7 @@ export function getPrimaryGameAction({
       command: null,
       enabled: false,
       label: 'Unavailable',
-      copy: 'This game could not be opened right now.',
+      copy: 'This table is not available right now.',
     }
   }
 
@@ -155,7 +155,7 @@ export function getPrimaryGameAction({
       command: null,
       enabled: false,
       label: 'Watching game',
-      copy: 'Spectators can watch the game but cannot make moves.',
+      copy: 'You are watching this table.',
     }
   }
 
@@ -167,7 +167,7 @@ export function getPrimaryGameAction({
       copy:
         phase === 'cancelled'
           ? 'This game was cancelled.'
-          : 'Final results are being saved.',
+          : 'Final places are being counted.',
     }
   }
 
@@ -175,8 +175,8 @@ export function getPrimaryGameAction({
     return {
       command: null,
       enabled: false,
-      label: 'Time up',
-      copy: 'The final count is underway.',
+      label: 'Game over',
+      copy: 'Final places are being counted.',
     }
   }
 
@@ -195,10 +195,10 @@ export function getPrimaryGameAction({
       enabled: false,
       label: canBid ? 'Bid or pass' : hasPassed ? 'Passed' : 'Auction live',
       copy: canBid
-        ? 'Raise the bid or pass in the auction controls.'
+        ? 'Raise the bid or pass.'
         : hasPassed
           ? 'You have passed in this auction.'
-          : 'Waiting for the active bidder.',
+          : 'Another player is bidding.',
     }
   }
 
@@ -210,8 +210,8 @@ export function getPrimaryGameAction({
       enabled: false,
       label: isDebtor ? 'Debt due' : 'Debt pending',
       copy: isDebtor
-        ? 'Resolve this payment before the game can continue.'
-        : 'Waiting for the indebted player to resolve payment.',
+        ? 'Settle the payment or declare bankruptcy.'
+        : 'Another player has a payment due.',
     }
   }
 
@@ -221,20 +221,20 @@ export function getPrimaryGameAction({
         command: null,
         enabled: false,
         label: 'Bot turn',
-        copy: `${getPlayerName(currentTurnPlayer)} is making an automated move.`,
+        copy: `${getPlayerName(currentTurnPlayer)} is playing.`,
       }
     }
 
     return {
       command: null,
       enabled: false,
-      label: 'Waiting',
+      label: 'Between moves',
       copy:
         phase === 'awaiting_property_decision'
-          ? 'Waiting for the active player to decide on the property.'
+          ? 'Another player is choosing a property.'
           : phase === 'awaiting_turn_end'
-            ? 'Waiting for the active player to end the turn.'
-            : 'Waiting for the active player.',
+            ? 'Another player is finishing their turn.'
+            : 'Another player is up.',
     }
   }
 
@@ -244,7 +244,7 @@ export function getPrimaryGameAction({
         command: null,
         enabled: false,
         label: 'Jail turn',
-        copy: 'Roll doubles or pay the fine in the jail controls.',
+        copy: 'Roll doubles, pay the fine, or use a card.',
       }
     }
 
@@ -266,7 +266,7 @@ export function getPrimaryGameAction({
       label: 'End turn',
       copy: shouldCurrentPlayerPlayAgain
         ? 'You rolled doubles. End this move to keep your turn.'
-        : 'Your move is settled. Pass play to the next player.',
+        : 'Pass play to the next player.',
     }
   }
 
@@ -284,11 +284,9 @@ export function getPrimaryGameAction({
   return {
     command: null,
     enabled: false,
-    label: isActivePlayer ? 'No action yet' : 'Resolving',
-    copy: phase
-      ? isActivePlayer
-        ? `You are up, but ${phase.replaceAll('_', ' ')} has no direct action yet.`
-        : `Resolving ${phase.replaceAll('_', ' ')}.`
-      : 'Waiting for the next game state.',
+    label: isActivePlayer ? 'No action' : 'Between moves',
+    copy: isActivePlayer
+      ? 'Your next move will appear when this table state is settled.'
+      : 'The table is between moves.',
   }
 }

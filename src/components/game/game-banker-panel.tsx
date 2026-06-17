@@ -85,7 +85,7 @@ function getBankerCall({
   }
 
   if (!currentTurnPlayer) {
-    return 'Opening the game. The first turn is being prepared.'
+    return 'The table is being prepared.'
   }
 
   const playerName = getPlayerName(currentTurnPlayer)
@@ -121,5 +121,5 @@ function getBankerCall({
       : `${actor} needs to end the turn.`
   }
 
-  return 'Waiting for the next game update.'
+  return 'The table is between moves.'
 }

@@ -15,7 +15,7 @@ export function formatRemainingMatchTime(remainingMs: number | null) {
   }
 
   if (remainingMs <= 0) {
-    return 'Finishing'
+    return '0:00'
   }
 
   const totalSeconds = Math.ceil(remainingMs / 1_000)
