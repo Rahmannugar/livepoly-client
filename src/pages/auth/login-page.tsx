@@ -1,6 +1,7 @@
 import { DiscordIcon } from '#/components/icons/discord-icon'
 import { GoogleIcon } from '#/components/icons/google-icon'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { AuthLayout } from '#/components/auth/auth-layout'
 import { PasswordField } from '#/components/auth/password-field'
@@ -10,14 +11,29 @@ import { useAuth } from '#/lib/auth/useAuth'
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const search = useSearch({ strict: false }) as { oauth?: string }
   const auth = useAuth()
   const { showToast } = useToast()
+  const oauthErrorShownRef = useRef(false)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginRequest>()
+
+  useEffect(() => {
+    if (oauthErrorShownRef.current || search.oauth !== 'failed') {
+      return
+    }
+
+    oauthErrorShownRef.current = true
+    showToast({
+      kind: 'error',
+      message: 'OAuth sign in could not be completed.',
+    })
+    navigate({ to: '/auth/login', replace: true })
+  }, [navigate, search.oauth, showToast])
 
   function onSubmit(input: LoginRequest) {
     auth.login.mutate(input, {

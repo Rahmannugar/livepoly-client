@@ -32,11 +32,6 @@ export function AuthHydrator({ children }: { children: React.ReactNode }) {
   }, [queryClient])
 
   useEffect(() => {
-    if (window.location.pathname === '/auth/callback') {
-      queryClient.setQueryData(AUTH_QUERY_KEYS.hydration, true)
-      return
-    }
-
     if (hasHydrated.current) {
       return
     }

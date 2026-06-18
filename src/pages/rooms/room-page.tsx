@@ -13,6 +13,7 @@ import {
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { RoomInviteDialog } from '#/components/rooms/room-invite-dialog'
+import { RouteTransitionOverlay } from '#/components/common/route-transition-overlay'
 import { APP_NAME } from '#/config/app.constants'
 import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useToast } from '#/components/common/toast'
@@ -39,6 +40,9 @@ export function RoomPage({ code }: RoomPageProps) {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [inviteQuery, setInviteQuery] = useState('')
   const [selectedInviteUsername, setSelectedInviteUsername] = useState('')
+  const [routeTransitionLabel, setRouteTransitionLabel] = useState<string | null>(
+    null,
+  )
   const [botDifficulty, setBotDifficulty] = useState<BotDifficulty>(
     DEFAULT_BOT_DIFFICULTY,
   )
@@ -104,6 +108,7 @@ export function RoomPage({ code }: RoomPageProps) {
 
     rooms.leaveRoom.mutate(room.code, {
       onSuccess: (response) => {
+        setRouteTransitionLabel('Opening home...')
         showToast({
           kind: 'success',
           message: response.message ?? 'Left room.',
@@ -127,6 +132,7 @@ export function RoomPage({ code }: RoomPageProps) {
 
     rooms.stopSpectatingRoom.mutate(room.code, {
       onSuccess: (response) => {
+        setRouteTransitionLabel('Opening home...')
         showToast({
           kind: 'success',
           message: response.message ?? 'Stopped spectating room.',
@@ -166,6 +172,7 @@ export function RoomPage({ code }: RoomPageProps) {
       },
       {
         onSuccess: (response) => {
+          setRouteTransitionLabel('Opening game...')
           showToast({
             kind: 'success',
             message: 'Room started.',
@@ -195,6 +202,7 @@ export function RoomPage({ code }: RoomPageProps) {
       return
     }
 
+    setRouteTransitionLabel('Opening game...')
     navigate({
       to: '/games/$gameId',
       params: { gameId: room.activeGameId },
@@ -474,6 +482,9 @@ export function RoomPage({ code }: RoomPageProps) {
           ) : null}
         </div>
       </section>
+      {routeTransitionLabel ? (
+        <RouteTransitionOverlay label={routeTransitionLabel} />
+      ) : null}
     </main>
   )
 }

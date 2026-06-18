@@ -18,6 +18,7 @@ import {
   RoomActionDialog,
 } from '#/components/rooms/room-action-dialog'
 import { LiveRoomsDialog } from '#/components/rooms/live-rooms-dialog'
+import { RouteTransitionOverlay } from '#/components/common/route-transition-overlay'
 import { APP_NAME } from '#/config/app.constants'
 import { useToast } from '#/components/common/toast'
 import { ThemeToggle } from '#/components/common/theme-toggle'
@@ -96,6 +97,9 @@ export function HomePage() {
   const [durationMinutes, setDurationMinutes] =
     useState<RoomDurationMinutes>(getInitialRoomDuration)
   const [roomCode, setRoomCode] = useState('')
+  const [routeTransitionLabel, setRouteTransitionLabel] = useState<string | null>(
+    null,
+  )
   const currentRoom = useCurrentRoom(Boolean(user))
   const liveRooms = useLiveRooms(activeDialog === 'liveRooms')
   const unreadNotifications = useUnreadNotificationCount()
@@ -123,6 +127,7 @@ export function HomePage() {
       { durationMinutes },
       {
         onSuccess: (room) => {
+          setRouteTransitionLabel('Opening room...')
           showToast({ kind: 'success', message: `Room ${room.code} created.` })
           setActiveDialog(null)
           navigate({ to: '/rooms/$code', params: { code: room.code } })
@@ -148,6 +153,7 @@ export function HomePage() {
 
     rooms.joinRoom.mutate(normalizedCode, {
       onSuccess: (room) => {
+        setRouteTransitionLabel('Opening room...')
         showToast({ kind: 'success', message: `Joined room ${room.code}.` })
         setActiveDialog(null)
         navigate({ to: '/rooms/$code', params: { code: room.code } })
@@ -165,6 +171,7 @@ export function HomePage() {
   function handleSpectateRoom(code: string) {
     rooms.spectateRoom.mutate(code, {
       onSuccess: () => {
+        setRouteTransitionLabel('Opening room...')
         showToast({ kind: 'success', message: `Spectating room ${code}.` })
         setActiveDialog(null)
         navigate({ to: '/rooms/$code', params: { code } })
@@ -180,6 +187,7 @@ export function HomePage() {
   }
 
   function openRoom(code: string) {
+    setRouteTransitionLabel('Opening room...')
     setActiveDialog(null)
     navigate({ to: '/rooms/$code', params: { code } })
   }
@@ -192,10 +200,12 @@ export function HomePage() {
     }
 
     if (room.activeGameId) {
+      setRouteTransitionLabel('Opening game...')
       navigate({ to: '/games/$gameId', params: { gameId: room.activeGameId } })
       return
     }
 
+    setRouteTransitionLabel('Opening room...')
     navigate({ to: '/rooms/$code', params: { code: room.code } })
   }
 
@@ -367,6 +377,7 @@ export function HomePage() {
         onJoin={(code) => {
           rooms.joinRoom.mutate(code, {
             onSuccess: (room) => {
+              setRouteTransitionLabel('Opening room...')
               showToast({
                 kind: 'success',
                 message: `Joined room ${room.code}.`,
@@ -388,6 +399,9 @@ export function HomePage() {
         onSpectate={handleSpectateRoom}
         onOpenRoom={openRoom}
       />
+      {routeTransitionLabel ? (
+        <RouteTransitionOverlay label={routeTransitionLabel} />
+      ) : null}
     </main>
   )
 }
