@@ -33,6 +33,8 @@ export type UserProfile = {
   updatedAt: string
 }
 
+export type PublicUserProfile = Omit<UserProfile, 'email'>
+
 export type UpdateUserProfileRequest = {
   username?: string
   bio?: string | null

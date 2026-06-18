@@ -24,6 +24,16 @@ export function useCurrentUserProfile(enabled = true) {
   })
 }
 
+export function useUserProfile(username: string | null | undefined) {
+  const normalizedUsername = username?.trim().toLowerCase() ?? ''
+
+  return useQuery({
+    queryKey: USERS_QUERY_KEYS.profile(normalizedUsername),
+    queryFn: () => usersService.getUserProfile(normalizedUsername),
+    enabled: normalizedUsername.length > 0,
+  })
+}
+
 export function useUserMatches(username: string | null | undefined) {
   const normalizedUsername = username?.trim().toLowerCase() ?? ''
 

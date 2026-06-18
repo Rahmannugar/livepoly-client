@@ -601,15 +601,27 @@ function buildSeats(players: RoomPlayer[], maxPlayers: number) {
 }
 
 function PlayerSeat({ player }: { player: RoomPlayer | null }) {
+  const playerName = player ? player.username ?? player.botName ?? 'Bot' : 'Open seat'
+
   return (
     <div className="flex min-h-20 items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--bg-base)] text-[var(--sea-ink)]">
         <UserIcon weight="bold" className="h-5 w-5" />
       </span>
       <div className="min-w-0">
-        <p className="truncate text-sm font-black text-[var(--sea-ink)]">
-          {player ? player.username ?? player.botName ?? 'Bot' : 'Open seat'}
-        </p>
+        {player?.username ? (
+          <Link
+            to="/users/$username"
+            params={{ username: player.username }}
+            className="block truncate text-sm font-black text-[var(--sea-ink)] outline-none transition hover:text-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+          >
+            {playerName}
+          </Link>
+        ) : (
+          <p className="truncate text-sm font-black text-[var(--sea-ink)]">
+            {playerName}
+          </p>
+        )}
         <p className="mt-0.5 text-xs font-bold capitalize text-[var(--sea-ink-soft)]">
           {player ? player.playerType : 'Waiting'}
         </p>

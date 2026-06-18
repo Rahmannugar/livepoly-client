@@ -3,6 +3,7 @@ import { USER_MATCHES_LIMIT, USER_SEARCH_LIMIT } from './users.constants'
 import type {
   CreateAvatarUploadUrlRequest,
   AvatarUploadUrlResponse,
+  PublicUserProfile,
   SearchUsersInput,
   UpdateUserProfileRequest,
   UserMatchHistoryResponse,
@@ -12,6 +13,10 @@ import type {
 
 export function getCurrentUserProfile() {
   return apiClient<UserProfile>('/users/me')
+}
+
+export function getUserProfile(username: string) {
+  return apiClient<PublicUserProfile>(`/users/${encodeURIComponent(username)}`)
 }
 
 export function updateCurrentUserProfile(input: UpdateUserProfileRequest) {

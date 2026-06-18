@@ -288,14 +288,18 @@ function RequestsList({
 
 function UserSummary({ username }: { username: string }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <Link
+      to="/users/$username"
+      params={{ username }}
+      className="flex min-w-0 items-center gap-3 rounded-2xl outline-none transition hover:translate-y-[-1px] focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+    >
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--surface-strong)] text-[var(--sea-ink)]">
         <UserIcon weight="bold" className="h-5 w-5" />
       </span>
       <p className="truncate text-base font-black text-[var(--sea-ink)]">
         {username}
       </p>
-    </div>
+    </Link>
   )
 }
 

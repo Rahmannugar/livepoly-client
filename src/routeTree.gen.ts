@@ -16,6 +16,7 @@ import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsersUsernameRouteImport } from './routes/users.$username'
 import { Route as RoomsCodeRouteImport } from './routes/rooms/$code'
 import { Route as GamesGameIdRouteImport } from './routes/games/$gameId'
 import { Route as AuthVerifyEmailRouteImport } from './routes/auth/verify-email'
@@ -57,6 +58,11 @@ const FriendsRoute = FriendsRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersUsernameRoute = UsersUsernameRouteImport.update({
+  id: '/users/$username',
+  path: '/users/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RoomsCodeRoute = RoomsCodeRouteImport.update({
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/games/$gameId': typeof GamesGameIdRoute
   '/rooms/$code': typeof RoomsCodeRoute
+  '/users/$username': typeof UsersUsernameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/games/$gameId': typeof GamesGameIdRoute
   '/rooms/$code': typeof RoomsCodeRoute
+  '/users/$username': typeof UsersUsernameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/games/$gameId': typeof GamesGameIdRoute
   '/rooms/$code': typeof RoomsCodeRoute
+  '/users/$username': typeof UsersUsernameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/games/$gameId'
     | '/rooms/$code'
+    | '/users/$username'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/games/$gameId'
     | '/rooms/$code'
+    | '/users/$username'
   id:
     | '__root__'
     | '/'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/games/$gameId'
     | '/rooms/$code'
+    | '/users/$username'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
   GamesGameIdRoute: typeof GamesGameIdRoute
   RoomsCodeRoute: typeof RoomsCodeRoute
+  UsersUsernameRoute: typeof UsersUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users/$username': {
+      id: '/users/$username'
+      path: '/users/$username'
+      fullPath: '/users/$username'
+      preLoaderRoute: typeof UsersUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rooms/$code': {
@@ -330,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
   GamesGameIdRoute: GamesGameIdRoute,
   RoomsCodeRoute: RoomsCodeRoute,
+  UsersUsernameRoute: UsersUsernameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

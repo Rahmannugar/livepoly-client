@@ -15,5 +15,6 @@ export const USER_AVATAR_ALLOWED_TYPES = [
 export const USERS_QUERY_KEYS = {
   me: ['users', 'me'],
   search: (query: string) => ['users', 'search', query],
+  profile: (username: string) => ['users', 'profile', username],
   matches: (username: string) => ['users', 'matches', username],
 } as const
