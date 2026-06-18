@@ -7,10 +7,11 @@ import {
   XIcon,
   type Icon,
 } from '@phosphor-icons/react'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import '#/components/game/game.css'
+import { useToast } from '#/components/common/toast'
 import { GameActionsPanel } from '#/components/game/game-actions-panel'
 import { AuctionStatusPanel } from '#/components/game/game-auction-status-panel'
 import { GameCardReveal } from '#/components/game/game-card-reveal'
@@ -37,6 +38,8 @@ export function GamePage({ gameId }: GamePageProps) {
   const { game, state } = model
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
+  const lastErrorToastRef = useRef<string | null>(null)
   const [activeSidePanel, setActiveSidePanel] = useState<
     'banker' | 'properties' | 'events' | 'results' | null
   >(null)
@@ -53,6 +56,18 @@ export function GamePage({ gameId }: GamePageProps) {
     state?.phase === 'awaiting_auction_bid' && state.auction
       ? state.auction
       : null
+
+  useEffect(() => {
+    if (!game.errorMessage || game.errorMessage === lastErrorToastRef.current) {
+      return
+    }
+
+    lastErrorToastRef.current = game.errorMessage
+    showToast({
+      kind: 'error',
+      message: game.errorMessage,
+    })
+  }, [game.errorMessage, showToast])
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">

@@ -10,6 +10,7 @@ export function AuctionActions({
   roomPlayerId,
   tileName,
   minimumBid,
+  availableCash,
   commandPending,
   onPlaceBid,
   onPass,
@@ -19,6 +20,7 @@ export function AuctionActions({
   roomPlayerId: string | null
   tileName: string
   minimumBid: number
+  availableCash: number | null
   commandPending: boolean
   onPlaceBid: (amount: number) => void
   onPass: () => void
@@ -27,8 +29,12 @@ export function AuctionActions({
   const highestBidder = findPlayer(players, auction.highestBidderRoomPlayerId)
   const currentBidder = findPlayer(players, auction.currentBidderRoomPlayerId)
   const parsedBidAmount = Number.parseInt(bidInputValue, 10)
+  const bidIsAffordable =
+    availableCash === null || parsedBidAmount <= availableCash
   const bidIsValid =
-    Number.isFinite(parsedBidAmount) && parsedBidAmount >= minimumBid
+    Number.isFinite(parsedBidAmount) &&
+    parsedBidAmount >= minimumBid &&
+    bidIsAffordable
   const hasPassed = Boolean(
     roomPlayerId && auction.passedRoomPlayerIds.includes(roomPlayerId),
   )
@@ -49,7 +55,9 @@ export function AuctionActions({
         ? `${getPlayerName(currentBidder)} is deciding on ${tileName}.`
         : `The auction for ${tileName} is settling.`
   const statusCopy = canBid
-    ? `Enter any whole number from ${formatCash(minimumBid)} upward, or pass.`
+    ? availableCash !== null
+      ? `Enter ${formatCash(minimumBid)} to ${formatCash(availableCash)}, or pass.`
+      : `Enter any whole number from ${formatCash(minimumBid)} upward, or pass.`
     : hasPassed
       ? `You passed on ${tileName}.`
       : currentBidder
@@ -126,7 +134,11 @@ export function AuctionActions({
           placeholder={formatCash(minimumBid)}
           className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
         />
-        {canBid && bidInputValue && !bidIsValid ? (
+        {canBid && bidInputValue && Number.isFinite(parsedBidAmount) && !bidIsAffordable ? (
+          <span className="text-xs font-black text-red-500">
+            You only have {formatCash(availableCash ?? 0)}.
+          </span>
+        ) : canBid && bidInputValue && !bidIsValid ? (
           <span className="text-xs font-black text-red-500">
             Enter at least {formatCash(minimumBid)}.
           </span>

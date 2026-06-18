@@ -232,6 +232,7 @@ export function GameActionsPanel({
           roomPlayerId={roomPlayerId}
           tileName={auctionTileName ?? auction.tileKey}
           minimumBid={minimumAuctionBid}
+          availableCash={currentPlayer?.cash ?? null}
           commandPending={commandPending}
           onPlaceBid={(amount) => runAndClose(() => onPlaceAuctionBid(amount))}
           onPass={() => runAndClose(onPassAuctionBid)}
