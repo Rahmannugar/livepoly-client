@@ -630,11 +630,20 @@ export function useGame(gameId: string) {
           )
         }
       } catch (error) {
-        setErrorMessage(
+        const message =
           error instanceof Error
             ? getGameSocketErrorMessage(error.message)
-            : 'Game command failed.',
-        )
+            : 'Game command failed.'
+
+        if (
+          message === 'Game server did not respond in time' &&
+          socketRef.current?.connected
+        ) {
+          setStatus('joined')
+          return
+        }
+
+        setErrorMessage(message)
       } finally {
         setCommandPending(false)
       }

@@ -86,9 +86,6 @@ export function StatsPage() {
                 Latest results.
               </h2>
             </div>
-            <Link to="/matches" className="app-link text-sm">
-              View all matches
-            </Link>
           </div>
 
           <div className="mt-5 grid gap-3">

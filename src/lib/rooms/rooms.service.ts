@@ -21,6 +21,10 @@ export function getRoomByCode(code: string) {
   return apiClient<Room>(`/rooms/${encodeURIComponent(code)}`)
 }
 
+export function getRoomStreamUrl(code: string) {
+  return `/rooms/stream/${encodeURIComponent(code)}`
+}
+
 export function listLiveRooms() {
   return apiClient<Room[]>('/rooms')
 }

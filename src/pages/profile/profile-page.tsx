@@ -398,12 +398,6 @@ export function ProfilePage() {
               >
                 View stats
               </Link>
-              <Link
-                to="/matches"
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] px-5 text-sm font-bold text-[var(--sea-ink)]"
-              >
-                Match history
-              </Link>
             </div>
           </article>
         </section>

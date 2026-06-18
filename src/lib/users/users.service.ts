@@ -14,10 +14,6 @@ export function getCurrentUserProfile() {
   return apiClient<UserProfile>('/users/me')
 }
 
-export function getUserProfile(username: string) {
-  return apiClient<UserProfile>(`/users/${encodeURIComponent(username)}`)
-}
-
 export function updateCurrentUserProfile(input: UpdateUserProfileRequest) {
   return apiClient<UserProfile>('/users/me', {
     method: 'PATCH',

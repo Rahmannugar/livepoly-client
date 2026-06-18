@@ -1,7 +1,6 @@
 import {
   BellIcon,
   ChartLineUpIcon,
-  ClockCounterClockwiseIcon,
   DoorOpenIcon,
   EyeIcon,
   GameControllerIcon,
@@ -36,7 +35,7 @@ type HomeAction = {
   description: string
   icon: ComponentType<{ weight?: 'bold'; className?: string }>
   dialog?: HomeDialogMode
-  to?: '/friends' | '/stats' | '/leaderboard' | '/matches' | '/notifications'
+  to?: '/friends' | '/stats' | '/leaderboard' | '/notifications'
 }
 
 const homeActions: HomeAction[] = [
@@ -75,12 +74,6 @@ const homeActions: HomeAction[] = [
     description: 'See how your current rating stacks up.',
     icon: MedalIcon,
     to: '/leaderboard',
-  },
-  {
-    title: 'Recent matches',
-    description: 'Review finished games and results.',
-    icon: ClockCounterClockwiseIcon,
-    to: '/matches',
   },
 ]
 

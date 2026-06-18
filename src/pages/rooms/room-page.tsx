@@ -23,6 +23,7 @@ import {
   BOT_DIFFICULTIES,
   DEFAULT_BOT_DIFFICULTY,
 } from '#/lib/rooms/rooms.constants'
+import { useRoomStream } from '#/lib/rooms/rooms-stream'
 import { useRoom, useRooms } from '#/lib/rooms/useRooms'
 import { useUserSearch } from '#/lib/users/useUsers'
 import type { BotDifficulty, RoomPlayer } from '#/lib/rooms/rooms.types'
@@ -35,6 +36,7 @@ export function RoomPage({ code }: RoomPageProps) {
   const auth = useAuth()
   const rooms = useRooms()
   const roomQuery = useRoom(code)
+  useRoomStream(code)
   const navigate = useNavigate()
   const { showToast } = useToast()
   const [isInviteOpen, setIsInviteOpen] = useState(false)

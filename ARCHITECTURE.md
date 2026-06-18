@@ -4,6 +4,9 @@
 
 - Room mobile layout must keep the primary room actions visible without pushing
   Start game and related controls below the fold.
+- Room lobby membership/start state updates through the room SSE stream, which
+  invalidates room, current-room, and live-room queries when the backend
+  publishes `room.updated`.
 - Game mobile layout should prioritize the board and action flow; game state
   belongs below the main play surface on small screens.
 - Auction and trade need dedicated flows or panels instead of sharing the roll
