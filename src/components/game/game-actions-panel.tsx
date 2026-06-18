@@ -322,7 +322,7 @@ function GameActionSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="game-decision-sheet relative z-10 grid max-h-[min(86vh,44rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-lg md:rounded-[28px] md:p-4"
+        className="game-decision-sheet relative z-10 grid max-h-[min(86vh,44rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-2xl md:rounded-[28px] md:p-4 xl:max-w-3xl"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">

@@ -36,15 +36,15 @@ export function GameBoardCenter({
         : null
 
   return (
-    <div className="col-start-2 col-end-11 row-start-2 row-end-11 grid place-items-center rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_82%,transparent)] p-5 text-center">
-      <div className="grid w-full place-items-center gap-5">
-        <div className="grid w-full max-w-md grid-cols-2 gap-3">
+    <div className="col-start-2 col-end-11 row-start-2 row-end-11 grid place-items-center rounded-[14px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_82%,transparent)] p-2 text-center sm:rounded-[24px] sm:p-5">
+      <div className="grid w-full place-items-center gap-2 sm:gap-5">
+        <div className="grid w-full max-w-md grid-cols-2 gap-2 sm:gap-3">
           <DeckCard label="Chance" tone="chance" />
           <DeckCard label="World Fund" tone="fund" />
         </div>
 
         <div>
-          <p className="display-title text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl">
+            <p className="display-title text-xl font-semibold text-[var(--sea-ink)] sm:text-4xl">
             {APP_NAME}
           </p>
           <DiceRollDisplay
@@ -52,12 +52,12 @@ export function GameBoardCenter({
             isRolling={!gameClosed && isRollingDice}
           />
           {title ? (
-            <p className="display-title mt-3 text-4xl font-semibold text-[var(--sea-ink)]">
+              <p className="display-title mt-1 text-2xl font-semibold text-[var(--sea-ink)] sm:mt-3 sm:text-4xl">
               {title}
             </p>
           ) : null}
           {copy ? (
-            <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+            <p className="mt-1 text-xs font-semibold leading-5 text-[var(--sea-ink-soft)] sm:mt-3 sm:text-sm sm:leading-6">
               {copy}
             </p>
           ) : null}
@@ -76,9 +76,9 @@ function DeckCard({
 }) {
   return (
     <div
-      className={`game-deck-card game-deck-card--${tone} grid min-h-20 place-items-center rounded-[18px] border border-[var(--line)] px-3 py-4 shadow-[0_18px_44px_rgba(4,12,15,0.16)]`}
+      className={`game-deck-card game-deck-card--${tone} grid min-h-11 place-items-center rounded-lg border border-[var(--line)] px-2 py-2 shadow-[0_18px_44px_rgba(4,12,15,0.16)] sm:min-h-20 sm:rounded-[18px] sm:px-3 sm:py-4`}
     >
-      <span className="text-center text-[0.68rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink)]">
+      <span className="text-center text-[0.46rem] font-black uppercase tracking-[0.1em] text-[var(--sea-ink)] sm:text-[0.68rem] sm:tracking-[0.14em]">
         {label}
       </span>
     </div>

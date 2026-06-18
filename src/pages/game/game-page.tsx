@@ -12,6 +12,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import '#/components/game/game.css'
 import { GameActionsPanel } from '#/components/game/game-actions-panel'
+import { AuctionStatusPanel } from '#/components/game/game-auction-status-panel'
 import { GameCardReveal } from '#/components/game/game-card-reveal'
 import { GameResultsPanel } from '#/components/game/game-results-panel'
 import { BankerPanel } from '#/components/game/game-banker-panel'
@@ -48,6 +49,10 @@ export function GamePage({ gameId }: GamePageProps) {
     },
   })
   const hasResultsPanel = model.shouldLoadGameResult
+  const activeAuction =
+    state?.phase === 'awaiting_auction_bid' && state.auction
+      ? state.auction
+      : null
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
@@ -65,8 +70,22 @@ export function GamePage({ gameId }: GamePageProps) {
         />
         <GameMatchTimer remainingMatchTimeMs={model.remainingMatchTimeMs} />
 
-        <div className="grid flex-1 gap-4 xl:grid-cols-[17rem_minmax(0,1fr)_17rem] 2xl:grid-cols-[19rem_minmax(58rem,1fr)_18rem]">
-          <aside className="order-3 grid gap-3 md:grid-cols-2 xl:order-1 xl:grid-cols-1 xl:content-start">
+        {hasResultsPanel ? (
+          <section className="grid gap-4 xl:hidden">
+            <GameResultsPanel
+              result={model.gameResult.data}
+              isLoading={model.gameResult.isFetching}
+              errorMessage={
+                model.gameResult.error instanceof Error
+                  ? model.gameResult.error.message
+                  : null
+              }
+            />
+          </section>
+        ) : null}
+
+        <div className="grid flex-1 gap-4 xl:grid-cols-[18rem_minmax(0,1fr)_22rem] 2xl:grid-cols-[20rem_minmax(58rem,1fr)_24rem]">
+          <aside className="order-1 grid gap-3 md:grid-cols-2 xl:grid-cols-1 xl:content-start">
             <PlayersPanel state={state} roomPlayerId={game.roomPlayerId} />
             <GameStatePanel
               state={state}
@@ -87,7 +106,31 @@ export function GamePage({ gameId }: GamePageProps) {
             onSelectTile={(tile) => model.selectTile(tile.key)}
           />
 
-          <aside className="order-2 grid gap-3 md:grid-cols-2 xl:order-3 xl:grid-cols-1 xl:content-start">
+          <aside className="order-3 grid gap-3 md:grid-cols-2 xl:grid-cols-1 xl:content-start">
+            {hasResultsPanel ? (
+              <div className="hidden xl:block">
+                <GameResultsPanel
+                  result={model.gameResult.data}
+                  isLoading={model.gameResult.isFetching}
+                  errorMessage={
+                    model.gameResult.error instanceof Error
+                      ? model.gameResult.error.message
+                      : null
+                  }
+                />
+              </div>
+            ) : null}
+
+            {activeAuction ? (
+              <AuctionStatusPanel
+                auction={activeAuction}
+                players={state?.players ?? []}
+                roomPlayerId={game.roomPlayerId}
+                tileName={model.auctionTile?.name ?? activeAuction.tileKey}
+                minimumBid={model.minimumAuctionBid}
+              />
+            ) : null}
+
             <GameActionsPanel
               primaryAction={model.primaryAction}
               commandPending={game.commandPending}
@@ -98,11 +141,7 @@ export function GamePage({ gameId }: GamePageProps) {
                   ? state.debt
                   : null
               }
-              auction={
-                state?.phase === 'awaiting_auction_bid'
-                  ? state.auction
-                  : null
-              }
+              auction={activeAuction}
               players={state?.players ?? []}
               roomPlayerId={game.roomPlayerId}
               currentPlayer={game.currentPlayer}

@@ -37,7 +37,7 @@ export function GameTileCell({
     <button
       type="button"
       aria-label={`View ${tile.name}`}
-      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-md border border-[var(--line)] bg-[var(--bg-base)] p-0.5 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-xl sm:p-1.5 2xl:rounded-2xl 2xl:p-2 ${
+      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-sm border border-[var(--line)] bg-[var(--bg-base)] p-0.5 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-md sm:p-1.5 2xl:p-2 ${
         TileIcon ? 'game-tile--special' : ''
       }`}
       style={getTileGridStyle(tile.index)}
@@ -45,7 +45,7 @@ export function GameTileCell({
     >
       {tile.setKey ? (
         <span
-          className="absolute inset-x-1 top-1 h-0.5 rounded-full sm:h-1"
+          className="absolute inset-x-0 top-0 h-0.5 sm:h-1"
           style={{ backgroundColor: propertySetColors[tile.setKey] }}
         />
       ) : null}
@@ -60,7 +60,7 @@ export function GameTileCell({
           </span>
         ) : null}
         <span
-          className={`game-tile__label line-clamp-4 text-[0.42rem] font-black leading-tight sm:text-[0.58rem] xl:text-[0.64rem] 2xl:text-[0.7rem] ${
+          className={`game-tile__label line-clamp-4 text-[0.38rem] font-black leading-tight sm:text-[0.56rem] xl:text-[0.62rem] 2xl:text-[0.68rem] ${
             TileIcon ? 'game-tile__label--special' : ''
           }`}
           title={tile.name}

@@ -30,7 +30,7 @@ export function GameStage({
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
 
   return (
-    <section className="order-1 rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-4 xl:order-2">
+    <section className="order-2 rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-3 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:p-4">
       <div className="mb-3 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <GameStageTitle
           phase={state?.phase}

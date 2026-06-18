@@ -1,10 +1,12 @@
 import {
   CalendarDotsIcon,
+  CameraIcon,
+  CheckIcon,
   ChartLineUpIcon,
   ClockCounterClockwiseIcon,
-  ImageSquareIcon,
   MedalIcon,
   UserIcon,
+  XIcon,
 } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
@@ -53,6 +55,7 @@ export function ProfilePage() {
   const [bio, setBio] = useState('')
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
+  const [avatarPreviewFile, setAvatarPreviewFile] = useState<File | null>(null)
 
   useEffect(() => {
     if (!user) {
@@ -126,15 +129,24 @@ export function ProfilePage() {
 
       return nextPreviewUrl
     })
+    setAvatarPreviewFile(file)
+  }
 
-    avatarUpload.mutate(file, {
-      onSuccess: () =>
+  function confirmAvatarUpload() {
+    if (!avatarPreviewFile) {
+      return
+    }
+
+    avatarUpload.mutate(avatarPreviewFile, {
+      onSuccess: () => {
+        setAvatarPreviewFile(null)
         showToast({
           kind: 'success',
           message: 'Profile picture updated.',
-        }),
+        })
+      },
       onError: (error) => {
-        setAvatarPreviewUrl(null)
+        clearAvatarPreview()
         showToast({
           kind: 'error',
           message:
@@ -144,7 +156,19 @@ export function ProfilePage() {
     })
   }
 
+  function clearAvatarPreview() {
+    setAvatarPreviewUrl((currentPreviewUrl) => {
+      if (currentPreviewUrl) {
+        URL.revokeObjectURL(currentPreviewUrl)
+      }
+
+      return null
+    })
+    setAvatarPreviewFile(null)
+  }
+
   const displayedAvatarUrl = avatarPreviewUrl ?? user?.avatarUrl
+  const avatarActionLabel = displayedAvatarUrl ? 'Change photo' : 'Add photo'
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
@@ -164,33 +188,75 @@ export function ProfilePage() {
         <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
           <article className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-              <div className="grid w-full justify-items-center gap-3 sm:w-fit">
+              <div className="grid w-full justify-items-center gap-3 sm:w-44">
+                <div className="relative rounded-full bg-[linear-gradient(145deg,color-mix(in_oklab,var(--primary)_68%,white),color-mix(in_oklab,var(--sea-ink)_48%,transparent))] p-1 shadow-[0_18px_45px_rgba(8,28,32,0.18)]">
+                  <div className="rounded-full bg-[var(--surface-strong)] p-1">
+                    <div className="relative grid h-[8.5rem] w-[8.5rem] place-items-center overflow-hidden rounded-full bg-[radial-gradient(circle_at_35%_20%,color-mix(in_oklab,var(--primary)_24%,transparent),transparent_44%),var(--surface)] text-[var(--sea-ink)] sm:h-36 sm:w-36">
+                      {displayedAvatarUrl ? (
+                        <img
+                          src={displayedAvatarUrl}
+                          alt=""
+                          className={`h-full w-full object-cover transition duration-300 ${
+                            avatarUpload.isPending ? 'scale-105 blur-[1px]' : ''
+                          }`}
+                        />
+                      ) : (
+                        <UserIcon weight="bold" className="h-10 w-10" />
+                      )}
+                      {avatarUpload.isPending ? (
+                        <span className="absolute inset-0 grid place-items-center bg-[rgba(8,28,32,0.5)] text-[0.7rem] font-black uppercase tracking-[0.18em] text-white">
+                          Uploading
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={avatarActionLabel}
+                    title={avatarActionLabel}
+                    className="absolute bottom-2 right-2 grid h-11 w-11 place-items-center rounded-full border border-[var(--line)] bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[0_14px_28px_rgba(8,28,32,0.22)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+                    disabled={avatarUpload.isPending}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <CameraIcon weight="bold" className="h-5 w-5" />
+                  </button>
+                </div>
                 <button
                   type="button"
-                  aria-label="Change profile picture"
-                  className="group relative grid h-36 w-36 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[radial-gradient(circle_at_35%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_42%),var(--surface)] text-[var(--sea-ink)] shadow-[0_18px_45px_rgba(8,28,32,0.14)] transition duration-300 hover:translate-y-[-2px] hover:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70 sm:h-40 sm:w-40"
                   disabled={avatarUpload.isPending}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-xs font-black text-[var(--sea-ink)] shadow-[0_10px_24px_rgba(8,28,32,0.08)] transition hover:translate-y-[-1px] hover:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  {displayedAvatarUrl ? (
-                    <img
-                      src={displayedAvatarUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <UserIcon weight="bold" className="h-9 w-9" />
-                  )}
-                  {avatarUpload.isPending ? (
-                    <span className="absolute inset-0 grid place-items-center bg-[rgba(8,28,32,0.48)] text-xs font-black uppercase tracking-[0.18em] text-white">
-                      Uploading
-                    </span>
-                  ) : null}
-                  <span className="absolute inset-x-4 bottom-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--surface-strong)] px-3 py-2 text-[0.7rem] font-black text-[var(--sea-ink)] shadow-[0_12px_26px_rgba(8,28,32,0.14)] transition duration-300 sm:opacity-0 sm:group-hover:opacity-100">
-                    <ImageSquareIcon weight="bold" className="h-4 w-4" />
-                    {displayedAvatarUrl ? 'Change photo' : 'Add photo'}
-                  </span>
+                  <CameraIcon weight="bold" className="h-4 w-4" />
+                  {avatarActionLabel}
                 </button>
+                {avatarPreviewFile ? (
+                  <div className="w-full rounded-[20px] border border-[color-mix(in_oklab,var(--primary)_55%,var(--line))] bg-[color-mix(in_oklab,var(--primary)_12%,var(--surface))] p-3">
+                    <p className="text-center text-[0.7rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink)]">
+                      New photo selected
+                    </p>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        disabled={avatarUpload.isPending}
+                        className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[var(--primary)] px-3 text-xs font-black text-[var(--primary-foreground)] shadow-[0_12px_26px_rgba(8,28,32,0.14)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                        onClick={confirmAvatarUpload}
+                      >
+                        <CheckIcon weight="bold" className="h-4 w-4" />
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        disabled={avatarUpload.isPending}
+                        className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-xs font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                        onClick={clearAvatarPreview}
+                      >
+                        <XIcon weight="bold" className="h-4 w-4" />
+                        Undo
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
               <input
                 ref={fileInputRef}
