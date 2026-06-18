@@ -1,4 +1,4 @@
-import { DiceFiveIcon, MapPinIcon, XIcon } from '@phosphor-icons/react'
+import { DiceFiveIcon, SpinnerGapIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type {
@@ -39,10 +39,8 @@ export function GameActionsPanel({
   tradeOffer,
   auctionTileName,
   pendingTile,
-  activeTile,
   pendingProperty,
   minimumAuctionBid,
-  onViewActiveTile,
   onRollAndMove,
   onEndTurn,
   onBuyProperty,
@@ -72,10 +70,8 @@ export function GameActionsPanel({
   tradeOffer: GameTradeOffer | null | undefined
   auctionTileName: string | null
   pendingTile: GameTile | null
-  activeTile: GameTile | null
   pendingProperty: GameProperty | null
   minimumAuctionBid: number
-  onViewActiveTile: () => void
   onRollAndMove: () => void
   onEndTurn: () => void
   onBuyProperty: () => void
@@ -266,10 +262,16 @@ export function GameActionsPanel({
       {canOpenActionSheet ? (
         <button
           type="button"
-          className="game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px]"
+          disabled={commandPending}
+          className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+            commandPending ? 'game-command-button--active' : ''
+          }`}
           onClick={() => setActionSheetOpen(true)}
         >
-          {actionSheetTitle}
+          {commandPending ? (
+            <SpinnerGapIcon weight="bold" className="h-4 w-4 animate-spin" />
+          ) : null}
+          {commandPending ? 'Playing...' : actionSheetTitle}
         </button>
       ) : (
         <PrimaryActionButton
@@ -281,17 +283,6 @@ export function GameActionsPanel({
       )}
 
       <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
-        {activeTile ? (
-          <button
-            type="button"
-            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
-            aria-label={`Inspect ${activeTile.name}`}
-            onClick={onViewActiveTile}
-          >
-            <MapPinIcon weight="bold" className="h-4 w-4" />
-            Inspect square
-          </button>
-        ) : null}
         {errorMessage ? <p className="text-red-500">{errorMessage}</p> : null}
       </div>
 
@@ -317,18 +308,21 @@ function GameActionSheet({
   onClose: () => void
 }) {
   return (
-    <div aria-live="polite">
+    <div
+      aria-live="polite"
+      className="fixed inset-0 z-40 flex items-end justify-center p-0 md:items-center md:p-6"
+    >
       <button
         type="button"
         aria-label="Close action"
-        className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.46)] backdrop-blur-sm"
+        className="game-decision-backdrop absolute inset-0 bg-[rgba(4,12,15,0.46)] backdrop-blur-sm"
         onClick={onClose}
       />
       <section
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[min(86vh,44rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:bottom-auto md:left-1/2 md:top-1/2 md:max-w-2xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[28px] md:p-4"
+        className="game-decision-sheet relative z-10 grid max-h-[min(86vh,44rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-lg md:rounded-[28px] md:p-4"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">

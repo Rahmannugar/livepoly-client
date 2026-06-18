@@ -164,11 +164,11 @@ export function ProfilePage() {
         <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
           <article className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-              <div className="grid w-fit justify-items-center gap-3">
+              <div className="grid w-full justify-items-center gap-3 sm:w-fit">
                 <button
                   type="button"
-                  aria-label="Upload profile avatar"
-                  className="group relative grid h-32 w-32 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[radial-gradient(circle_at_35%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_42%),var(--surface)] text-[var(--sea-ink)] shadow-[0_18px_45px_rgba(8,28,32,0.14)] transition duration-300 hover:translate-y-[-2px] hover:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70 sm:h-36 sm:w-36"
+                  aria-label="Change profile picture"
+                  className="group relative grid h-36 w-36 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[radial-gradient(circle_at_35%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_42%),var(--surface)] text-[var(--sea-ink)] shadow-[0_18px_45px_rgba(8,28,32,0.14)] transition duration-300 hover:translate-y-[-2px] hover:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70 sm:h-40 sm:w-40"
                   disabled={avatarUpload.isPending}
                   onClick={() => fileInputRef.current?.click()}
                 >
@@ -186,19 +186,10 @@ export function ProfilePage() {
                       Uploading
                     </span>
                   ) : null}
-                  <span className="absolute inset-x-3 bottom-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--surface-strong)] px-3 py-2 text-[0.7rem] font-black text-[var(--sea-ink)] shadow-[0_12px_26px_rgba(8,28,32,0.14)] transition duration-300 sm:opacity-0 sm:group-hover:opacity-100">
+                  <span className="absolute inset-x-4 bottom-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--surface-strong)] px-3 py-2 text-[0.7rem] font-black text-[var(--sea-ink)] shadow-[0_12px_26px_rgba(8,28,32,0.14)] transition duration-300 sm:opacity-0 sm:group-hover:opacity-100">
                     <ImageSquareIcon weight="bold" className="h-4 w-4" />
-                    Choose image
+                    {displayedAvatarUrl ? 'Change photo' : 'Add photo'}
                   </span>
-                </button>
-                <button
-                  type="button"
-                  disabled={avatarUpload.isPending || !user}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-xs font-black text-[var(--sea-ink)] shadow-[0_10px_24px_rgba(8,28,32,0.08)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <ImageSquareIcon weight="bold" className="h-4 w-4" />
-                  {avatarUpload.isPending ? 'Uploading...' : 'Upload avatar'}
                 </button>
               </div>
               <input

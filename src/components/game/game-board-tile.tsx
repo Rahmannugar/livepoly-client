@@ -37,7 +37,7 @@ export function GameTileCell({
     <button
       type="button"
       aria-label={`View ${tile.name}`}
-      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-lg border border-[var(--line)] bg-[var(--bg-base)] p-1 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-xl sm:p-1.5 2xl:rounded-2xl 2xl:p-2 ${
+      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-md border border-[var(--line)] bg-[var(--bg-base)] p-0.5 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-xl sm:p-1.5 2xl:rounded-2xl 2xl:p-2 ${
         TileIcon ? 'game-tile--special' : ''
       }`}
       style={getTileGridStyle(tile.index)}
@@ -45,22 +45,22 @@ export function GameTileCell({
     >
       {tile.setKey ? (
         <span
-          className="absolute inset-x-1 top-1 h-1 rounded-full"
+          className="absolute inset-x-1 top-1 h-0.5 rounded-full sm:h-1"
           style={{ backgroundColor: propertySetColors[tile.setKey] }}
         />
       ) : null}
 
-      <div className="game-tile__body mt-1 min-h-0 pr-1 pb-5">
+      <div className="game-tile__body mt-1 min-h-0 pr-0.5 pb-3 sm:pr-1 sm:pb-5">
         {TileIcon ? (
           <span className="game-tile__icon">
             <TileIcon
               weight="duotone"
-              className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]"
+              className="h-3.5 w-3.5 sm:h-[1.1rem] sm:w-[1.1rem]"
             />
           </span>
         ) : null}
         <span
-          className={`game-tile__label line-clamp-4 text-[0.5rem] font-black leading-tight sm:text-[0.58rem] xl:text-[0.64rem] 2xl:text-[0.7rem] ${
+          className={`game-tile__label line-clamp-4 text-[0.42rem] font-black leading-tight sm:text-[0.58rem] xl:text-[0.64rem] 2xl:text-[0.7rem] ${
             TileIcon ? 'game-tile__label--special' : ''
           }`}
           title={tile.name}
@@ -78,7 +78,7 @@ export function GameTileCell({
             {owner.seatNumber}
           </span>
         ) : null}
-        {players.map((player) => (
+        {players.slice(0, 4).map((player) => (
           <PlayerToken
             key={player.roomPlayerId}
             player={player}

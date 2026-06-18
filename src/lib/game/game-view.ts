@@ -25,7 +25,7 @@ export function getGameTurnConsequence({
   recentEvent: { type: string; payload: Record<string, unknown> } | undefined
 }) {
   if (phase === 'finished') {
-    return 'The game has ended. Final places are being counted.'
+    return 'Game over.'
   }
 
   if (phase === 'cancelled') {
@@ -41,7 +41,7 @@ export function getGameTurnConsequence({
       phase === 'awaiting_auction_bid' ||
       phase === 'awaiting_debt_resolution')
   ) {
-    return `${getPlayerName(currentTurnPlayer)} is making an automated move.`
+    return `${getPlayerName(currentTurnPlayer)} is playing.`
   }
 
   if (phase === 'awaiting_property_decision' && tile) {
@@ -87,7 +87,7 @@ export function getGameTurnConsequence({
     return 'Roll the dice to move around the game.'
   }
 
-  return 'The table is between moves.'
+  return 'Waiting for the next move.'
 }
 
 export function getPrimaryGameAction({
@@ -137,7 +137,7 @@ export function getPrimaryGameAction({
       command: null,
       enabled: false,
       label: 'Rejoining',
-      copy: 'Bringing you back to the table.',
+      copy: 'Reconnecting.',
     }
   }
 
@@ -167,7 +167,7 @@ export function getPrimaryGameAction({
       copy:
         phase === 'cancelled'
           ? 'This game was cancelled.'
-          : 'Final places are being counted.',
+          : 'Results are being saved.',
     }
   }
 
@@ -176,7 +176,7 @@ export function getPrimaryGameAction({
       command: null,
       enabled: false,
       label: 'Game over',
-      copy: 'Final places are being counted.',
+      copy: 'Results are being saved.',
     }
   }
 
@@ -285,8 +285,6 @@ export function getPrimaryGameAction({
     command: null,
     enabled: false,
     label: isActivePlayer ? 'No action' : 'Between moves',
-    copy: isActivePlayer
-      ? 'Your next move will appear when this table state is settled.'
-      : 'The table is between moves.',
+    copy: 'Waiting for the next move.',
   }
 }

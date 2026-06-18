@@ -2,6 +2,7 @@ import {
   BankIcon,
   BuildingsIcon,
   ListChecksIcon,
+  MapPinIcon,
   TrophyIcon,
   XIcon,
   type Icon,
@@ -111,14 +112,8 @@ export function GamePage({ gameId }: GamePageProps) {
               tradeOffer={state?.tradeOffer}
               auctionTileName={model.auctionTile?.name ?? null}
               pendingTile={model.pendingTile ?? null}
-              activeTile={model.activeTile}
               pendingProperty={model.pendingProperty}
               minimumAuctionBid={model.minimumAuctionBid}
-              onViewActiveTile={() => {
-                if (model.activeTile) {
-                  model.selectTile(model.activeTile.key)
-                }
-              }}
               onRollAndMove={() => void game.rollAndMove()}
               onEndTurn={() => void game.endTurn()}
               onBuyProperty={() => void game.buyProperty()}
@@ -135,6 +130,19 @@ export function GamePage({ gameId }: GamePageProps) {
               onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
               onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
             />
+
+            {model.activeTile ? (
+              <GameSidePanelLauncher
+                icon={MapPinIcon}
+                title="Square"
+                copy={model.activeTile.name}
+                onClick={() => {
+                  if (model.activeTile) {
+                    model.selectTile(model.activeTile.key)
+                  }
+                }}
+              />
+            ) : null}
 
             <GameSidePanelLauncher
               icon={BankIcon}

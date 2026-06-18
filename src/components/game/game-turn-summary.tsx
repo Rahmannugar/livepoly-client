@@ -33,7 +33,7 @@ export function GameTurnSummary({
           ariaLabel="Turn time"
           value={formatRemainingMatchTime(remainingTurnTimeMs)}
         />
-        <SummaryPill ariaLabel="Dice" value={formatDice(dice)} />
+        {dice ? <SummaryPill ariaLabel="Dice" value={formatDice(dice)} /> : null}
         <SummaryPill
           ariaLabel="Square"
           value={tile?.name ?? 'No square yet'}

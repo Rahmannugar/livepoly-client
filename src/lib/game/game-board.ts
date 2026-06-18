@@ -427,7 +427,7 @@ export function formatPhase(phase?: string) {
 
 export function formatDice(dice?: readonly [number, number] | null) {
   if (!dice) {
-    return 'Dice ready'
+    return ''
   }
 
   return `${dice[0]} + ${dice[1]}`

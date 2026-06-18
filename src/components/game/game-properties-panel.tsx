@@ -64,7 +64,7 @@ export function PropertiesPanel({
   return (
     <GamePanel title="Properties" icon={BuildingsIcon} collapsible={false}>
       {playerTabs.length > 0 ? (
-        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+        <div className="mb-4 flex gap-5 overflow-x-auto border-b border-[var(--line)]">
           {playerTabs.map((player) => {
             const ownerId = player.roomPlayerId
             const active = ownerId === selectedOwnerId
@@ -80,14 +80,16 @@ export function PropertiesPanel({
               <button
                 key={ownerId}
                 type="button"
-                className={`shrink-0 rounded-xl border px-4 py-2 text-xs font-black transition ${
+                className={`relative shrink-0 px-1 pb-3 text-sm font-black transition ${
                   active
-                    ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
-                    : 'border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] hover:translate-y-[-1px]'
+                    ? 'text-[var(--sea-ink)] after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:rounded-full after:bg-[var(--primary)]'
+                    : 'text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]'
                 }`}
                 onClick={() => setActiveOwnerId(ownerId)}
               >
-                {ownerLabel}
+                <span className="inline-block max-w-28 truncate align-bottom" title={ownerLabel}>
+                  {ownerLabel}
+                </span>
                 <span className="ml-2 text-[0.65rem] opacity-70">
                   {propertyCount}
                 </span>
@@ -207,7 +209,7 @@ function PropertyList({
                         commandPending ||
                         buildingCost <= 0
                       }
-                      className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onBuild(property.tileKey)}
                     >
                       {property.hasHotel
@@ -219,7 +221,7 @@ function PropertyList({
                     <button
                       type="button"
                       disabled={!isMine || !hasBuilding || commandPending}
-                      className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onSellBuilding(property.tileKey)}
                     >
                       Sell +{formatCash(buildingCost / 2)}
@@ -235,7 +237,7 @@ function PropertyList({
                 <button
                   type="button"
                   disabled={!isMine || commandPending}
-                  className="inline-flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={() => {
                     if (property.mortgaged) {
                       onUnmortgage(property.tileKey)

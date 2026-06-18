@@ -95,8 +95,8 @@ function getBankerCall({
 
   if (phase === 'awaiting_first_turn' || phase === 'awaiting_roll') {
     return isYou
-      ? 'Your dice are ready. Roll to move.'
-      : `${actor} ${currentTurnPlayer.playerType === 'bot' ? 'is calculating a roll.' : 'is up to roll.'}`
+      ? 'Roll to move.'
+      : `${actor} ${currentTurnPlayer.playerType === 'bot' ? 'is playing.' : 'is up to roll.'}`
   }
 
   if (phase === 'awaiting_property_decision') {
@@ -121,5 +121,5 @@ function getBankerCall({
       : `${actor} needs to end the turn.`
   }
 
-  return 'The table is between moves.'
+  return 'Waiting for the next move.'
 }

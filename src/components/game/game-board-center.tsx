@@ -1,5 +1,4 @@
 import { DiceRollDisplay } from './game-primitives'
-import { formatDice } from '#/lib/game/game-board'
 import { APP_NAME } from '#/config/app.constants'
 import type { GamePhase } from '#/lib/game/game.types'
 
@@ -23,16 +22,18 @@ export function GameBoardCenter({
       : 'Game over'
     : isRollingDice
       ? 'Rolling...'
-      : formatDice(dice)
+      : dice
+        ? `${dice[0]} + ${dice[1]}`
+        : null
   const copy = gameClosed
     ? phase === 'cancelled'
       ? 'This game was cancelled.'
-      : 'Final places are being counted.'
+      : 'Results are being saved.'
     : access === 'spectator'
-      ? 'Watching this game live.'
+      ? 'Watching live.'
       : isCurrentTurn
         ? 'Your move.'
-        : 'The table is between moves.'
+        : null
 
   return (
     <div className="col-start-2 col-end-11 row-start-2 row-end-11 grid place-items-center rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_82%,transparent)] p-5 text-center">
@@ -50,12 +51,16 @@ export function GameBoardCenter({
             dice={dice}
             isRolling={!gameClosed && isRollingDice}
           />
-          <p className="display-title mt-3 text-4xl font-semibold text-[var(--sea-ink)]">
-            {title}
-          </p>
-          <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-            {copy}
-          </p>
+          {title ? (
+            <p className="display-title mt-3 text-4xl font-semibold text-[var(--sea-ink)]">
+              {title}
+            </p>
+          ) : null}
+          {copy ? (
+            <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+              {copy}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>

@@ -17,8 +17,8 @@ export function GameBoard({
   onSelectTile: (tile: GameTile) => void
 }) {
   return (
-    <div className="mx-auto w-full overflow-x-auto pb-1">
-      <div className="grid aspect-square w-full min-w-[34rem] grid-cols-11 grid-rows-11 gap-1 rounded-[28px] border border-[var(--line)] bg-[var(--surface)] p-2 sm:min-w-[42rem] sm:gap-1.5 sm:p-3 lg:min-w-0 2xl:gap-2 2xl:p-4">
+    <div className="mx-auto w-full overflow-hidden pb-1">
+      <div className="mx-auto grid aspect-square w-full max-w-[46rem] grid-cols-11 grid-rows-11 gap-0.5 rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-1.5 sm:gap-1 sm:rounded-[28px] sm:p-2 lg:max-w-none 2xl:gap-2 2xl:p-4">
         <GameBoardCenter
           dice={state?.lastDiceRoll}
           access={access}
@@ -43,7 +43,11 @@ export function GameBoard({
 }
 
 function getPlayersOnTile(state: GameState | null, position: number) {
-  return state?.players.filter((player) => player.position === position) ?? []
+  return (
+    state?.players.filter(
+      (player) => !player.bankrupt && player.position === position,
+    ) ?? []
+  )
 }
 
 function getTileOwner(state: GameState | null, tileKey: string) {

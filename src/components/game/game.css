@@ -75,6 +75,17 @@
 }
 
 @media (max-width: 640px) {
+  .game-tile__icon {
+    width: 1rem;
+    height: 1rem;
+    top: 0;
+    left: 0;
+  }
+
+  .game-tile__label--special {
+    padding-top: 1.02rem;
+  }
+
   .game-tile__tokens {
     right: 0.2rem;
     bottom: 0.2rem;
