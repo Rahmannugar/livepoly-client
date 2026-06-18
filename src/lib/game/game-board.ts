@@ -438,7 +438,7 @@ export function getMinimumAuctionBid(auction?: GameAuction | null) {
     return 10
   }
 
-  return auction.currentBid + 10
+  return auction.currentBid + 1
 }
 
 export function getUnmortgageCost(mortgageValue: number) {

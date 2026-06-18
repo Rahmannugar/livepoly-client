@@ -2,7 +2,7 @@ export type NotificationType =
   | 'friend_request'
   | 'friend_accepted'
   | 'room_invite'
-  | 'game_started'
+  | 'leaderboard'
   | 'game_finished'
   | 'turn_reminder'
   | 'system'
@@ -18,6 +18,12 @@ export type NotificationData = {
   roomId?: string
   roomCode?: string
   gameId?: string
+  period?: 'weekly' | 'monthly'
+  leaderboardKey?: string
+  rank?: number
+  rating?: number
+  gamesPlayed?: number
+  wins?: number
   link?: string
 }
 
