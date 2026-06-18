@@ -15,12 +15,22 @@ export function LoginPage() {
   const auth = useAuth()
   const { showToast } = useToast()
   const oauthErrorShownRef = useRef(false)
+  const isHydrated = auth.hydration.data
+  const currentUser = auth.currentUser.data
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginRequest>()
+
+  useEffect(() => {
+    if (!isHydrated || !currentUser) {
+      return
+    }
+
+    navigate({ to: '/', replace: true })
+  }, [currentUser, isHydrated, navigate])
 
   useEffect(() => {
     if (oauthErrorShownRef.current || search.oauth !== 'failed') {
@@ -49,6 +59,16 @@ export function LoginPage() {
         })
       },
     })
+  }
+
+  if (!isHydrated || currentUser) {
+    return (
+      <main className="grid min-h-screen place-items-center px-5">
+        <p className="display-title text-3xl font-semibold text-[var(--sea-ink)]">
+          Setting the board...
+        </p>
+      </main>
+    )
   }
 
   return (
