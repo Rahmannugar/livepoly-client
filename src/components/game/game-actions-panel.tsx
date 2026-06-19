@@ -1,6 +1,7 @@
 import { DiceFiveIcon, SpinnerGapIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import type {
   GameDebt,
   GamePhase,
@@ -180,7 +181,7 @@ export function GameActionsPanel({
     setActionSheetOpen(false)
   }
 
-  const actionControls = (
+  const renderActionControls = () => (
     <>
       {tradeOffer && actionableTradeOffer ? (
         <TradeOfferActions
@@ -249,7 +250,7 @@ export function GameActionsPanel({
           disabled={commandPending}
           className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
             commandPending ? 'game-command-button--active' : ''
-          }`}
+          } ${actionSheetOpen ? 'xl:hidden' : ''}`}
           onClick={() => setActionSheetOpen(true)}
         >
           {commandPending ? (
@@ -283,13 +284,22 @@ export function GameActionsPanel({
       ) : null}
 
       {actionSheetOpen ? (
-        <GameActionSheet
-          title={actionSheetTitle}
-          audience={actionAudience}
-          onClose={() => setActionSheetOpen(false)}
-        >
-          {actionControls}
-        </GameActionSheet>
+        <>
+          <GameActionSheet
+            title={actionSheetTitle}
+            audience={actionAudience}
+            onClose={() => setActionSheetOpen(false)}
+          >
+            {renderActionControls()}
+          </GameActionSheet>
+          <GameInlineAction
+            title={actionSheetTitle}
+            audience={actionAudience}
+            onClose={() => setActionSheetOpen(false)}
+          >
+            {renderActionControls()}
+          </GameInlineAction>
+        </>
       ) : null}
     </GamePanel>
   )
@@ -306,10 +316,14 @@ function GameActionSheet({
   children: ReactNode
   onClose: () => void
 }) {
-  return (
+  if (typeof document === 'undefined') {
+    return null
+  }
+
+  return createPortal(
     <div
       aria-live="polite"
-      className="fixed inset-0 z-40 flex items-end justify-center p-0 md:items-center md:p-6"
+      className="fixed inset-0 z-40 flex items-end justify-center p-0 md:items-center md:p-6 xl:hidden"
     >
       <button
         type="button"
@@ -323,24 +337,62 @@ function GameActionSheet({
         aria-label={title}
         className="game-decision-sheet relative z-10 grid max-h-[min(86vh,38rem)] w-full gap-3 overflow-y-auto rounded-t-[24px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-lg md:rounded-2xl md:p-5"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            {audience ? <p className="app-kicker">For {audience}</p> : null}
-            <h3 className="display-title truncate text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">
-              {title}
-            </h3>
-          </div>
-          <button
-            type="button"
-            aria-label="Close action"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
-            onClick={onClose}
-          >
-            <XIcon weight="bold" className="h-4 w-4" />
-          </button>
-        </div>
+        <GameActionHeader title={title} audience={audience} onClose={onClose} />
         {children}
       </section>
+    </div>,
+    document.body,
+  )
+}
+
+function GameInlineAction({
+  title,
+  audience,
+  children,
+  onClose,
+}: {
+  title: string
+  audience: string | null
+  children: ReactNode
+  onClose: () => void
+}) {
+  return (
+    <section
+      aria-live="polite"
+      aria-label={title}
+      className="mt-3 hidden gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 xl:grid"
+    >
+      <GameActionHeader title={title} audience={audience} onClose={onClose} />
+      {children}
+    </section>
+  )
+}
+
+function GameActionHeader({
+  title,
+  audience,
+  onClose,
+}: {
+  title: string
+  audience: string | null
+  onClose: () => void
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="min-w-0">
+        {audience ? <p className="app-kicker">For {audience}</p> : null}
+        <h3 className="display-title text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl xl:text-2xl">
+          {title}
+        </h3>
+      </div>
+      <button
+        type="button"
+        aria-label="Close action"
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--bg-base)] text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
+        onClick={onClose}
+      >
+        <XIcon weight="bold" className="h-4 w-4" />
+      </button>
     </div>
   )
 }
