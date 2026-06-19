@@ -7,6 +7,7 @@ import {
   refreshSession,
 } from '#/lib/auth/auth.service'
 import { AUTH_QUERY_KEYS } from '#/lib/auth/auth.constants'
+import { useAuth } from '#/lib/auth/useAuth'
 import { ROOMS_QUERY_KEYS } from './rooms.constants'
 import { getRoomStreamUrl } from './rooms.service'
 
@@ -131,10 +132,11 @@ export function useRoomStream({
   onRoomUpdated?: (event: RoomStreamEvent) => void
 }) {
   const queryClient = useQueryClient()
+  const auth = useAuth()
   const stoppedRef = useRef(false)
 
   useEffect(() => {
-    if (!enabled || !code) {
+    if (!enabled || !code || !auth.hydration.data || !auth.currentUser.data) {
       return
     }
 
@@ -219,5 +221,12 @@ export function useRoomStream({
       stoppedRef.current = true
       abortController.abort()
     }
-  }, [code, enabled, onRoomUpdated, queryClient])
+  }, [
+    auth.currentUser.data,
+    auth.hydration.data,
+    code,
+    enabled,
+    onRoomUpdated,
+    queryClient,
+  ])
 }
