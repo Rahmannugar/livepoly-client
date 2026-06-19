@@ -99,7 +99,8 @@ export function VerifyEmailPage() {
               type="email"
               autoComplete="email"
               readOnly
-              className="h-10 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_75%,var(--line))] px-4 text-sm font-semibold text-[var(--sea-ink)] outline-none"
+              aria-disabled="true"
+              className="h-10 cursor-not-allowed rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--line)_38%,var(--bg-base))] px-4 text-sm font-semibold text-[var(--sea-ink-soft)] opacity-75 outline-none"
               {...register('email', { required: 'Email is required' })}
             />
             {errors.email ? (
@@ -118,7 +119,8 @@ export function VerifyEmailPage() {
               inputMode="numeric"
               autoComplete="one-time-code"
               maxLength={6}
-              className="h-10 rounded-2xl border border-[var(--line)] bg-[var(--bg-base)] px-4 text-center text-lg font-bold tracking-[0.28em] text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
+              placeholder="------"
+              className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--bg-base)] px-4 text-center text-2xl font-black tabular-nums tracking-[0.45em] text-[var(--sea-ink)] outline-none transition placeholder:text-[color-mix(in_oklab,var(--sea-ink-soft)_45%,transparent)] focus:border-[var(--primary)]"
               {...register('otpCode', {
                 required: 'Verification code is required',
               })}

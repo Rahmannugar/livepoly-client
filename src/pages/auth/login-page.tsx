@@ -76,16 +76,19 @@ export function LoginPage() {
       title="Welcome back."
       subtitle="Sign in and get back to your rooms, friends, and matches."
       footer={
-        <>
-          New here?{' '}
-          <Link to="/auth/register" className="app-link">
-            Create account
-          </Link>
-          <span className="mx-2 text-[var(--sea-ink-soft)]">·</span>
-          <Link to="/auth/forgot-password" className="app-link">
-            Forgot password?
-          </Link>
-        </>
+        <div className="grid gap-1.5">
+          <p>
+            New here?{' '}
+            <Link to="/auth/register" className="app-link">
+              Create account
+            </Link>
+          </p>
+          <p>
+            <Link to="/auth/forgot-password" className="app-link">
+              Forgot password?
+            </Link>
+          </p>
+        </div>
       }
     >
       <div className="rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-4 shadow-[0_22px_60px_rgba(8,28,32,0.14)] backdrop-blur-xl">
