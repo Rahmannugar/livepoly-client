@@ -52,7 +52,7 @@ export function RoomInviteDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center px-4 pb-4 pt-16 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[70] flex items-end justify-center pt-16 sm:items-center sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="room-invite-title"
@@ -64,13 +64,13 @@ export function RoomInviteDialog({
         onClick={onClose}
       />
 
-      <section className="dialog-panel-enter relative w-full max-w-md rounded-[30px] border border-[var(--line)] bg-[var(--bg-base)] p-5 shadow-[0_28px_90px_rgba(4,12,15,0.32)] sm:p-6">
+      <section className="dialog-panel-enter relative w-full max-w-md rounded-t-[26px] border border-[var(--line)] bg-[var(--bg-base)] p-4 shadow-[0_24px_72px_rgba(4,12,15,0.32)] sm:rounded-[26px] sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="app-kicker">Invite player</p>
             <h2
               id="room-invite-title"
-              className="display-title mt-3 text-3xl font-semibold text-[var(--sea-ink)]"
+              className="display-title mt-2 text-2xl font-semibold text-[var(--sea-ink)]"
             >
               Bring a friend in.
             </h2>
@@ -79,20 +79,20 @@ export function RoomInviteDialog({
           <button
             type="button"
             aria-label="Close"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
             onClick={onClose}
           >
-            <XIcon weight="bold" className="h-5 w-5" />
+            <XIcon weight="bold" className="h-4.5 w-4.5" />
           </button>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1">
+        <div className="mt-4 grid grid-cols-2 gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1">
           {(['friends', 'search'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               className={[
-                'h-10 rounded-full text-sm font-black capitalize transition',
+                'h-9 rounded-full text-sm font-black capitalize transition',
                 activeTab === tab
                   ? 'bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[0_10px_24px_rgba(23,58,64,0.16)]'
                   : 'text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]',
@@ -105,7 +105,7 @@ export function RoomInviteDialog({
         </div>
 
         {activeTab === 'search' ? (
-          <label className="mt-4 grid gap-2">
+          <label className="mt-3 grid gap-2">
             <span className="text-sm font-bold text-[var(--sea-ink)]">
               Username
             </span>
@@ -120,7 +120,7 @@ export function RoomInviteDialog({
                 autoCapitalize="none"
                 autoComplete="off"
                 spellCheck={false}
-                className="h-12 w-full rounded-2xl border border-[var(--line)] bg-[var(--surface)] pl-12 pr-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
+                className="h-10 w-full rounded-2xl border border-[var(--line)] bg-[var(--surface)] pl-12 pr-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
                 placeholder="Search username"
                 onChange={(event) => onQueryChange(event.target.value)}
               />
@@ -128,7 +128,7 @@ export function RoomInviteDialog({
           </label>
         ) : null}
 
-        <div className="mt-4 max-h-56 overflow-y-auto rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-2">
+        <div className="mt-3 max-h-44 overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-2">
           {activeTab === 'friends' && friends.length === 0 ? (
             <p className="px-3 py-4 text-sm font-semibold text-[var(--sea-ink-soft)]">
               No inviteable friends.
@@ -161,12 +161,12 @@ export function RoomInviteDialog({
                 key={user.id}
                 type="button"
                 className={[
-                  'flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-[var(--bg-base)]',
+                  'flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left transition hover:bg-[var(--bg-base)]',
                   isSelected ? 'bg-[var(--bg-base)]' : '',
                 ].join(' ')}
                 onClick={() => onSelectUser(user.username)}
               >
-                <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--bg-base)] text-[var(--sea-ink)]">
+                <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--bg-base)] text-[var(--sea-ink)]">
                   {user.avatarUrl ? (
                     <img
                       src={user.avatarUrl}
@@ -193,7 +193,7 @@ export function RoomInviteDialog({
         <button
           type="button"
           disabled={!selectedUsername || isSending}
-          className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
           onClick={onInvite}
         >
           <PaperPlaneTiltIcon weight="bold" className="h-4.5 w-4.5" />

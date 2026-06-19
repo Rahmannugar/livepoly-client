@@ -362,80 +362,64 @@ export function RoomPage({ code }: RoomPageProps) {
 
           {room ? (
             <>
-              <section className="grid gap-4 lg:grid-cols-[1fr_0.8fr]">
-                <div className="rounded-[34px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-6 shadow-[0_24px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-7">
+              <section className="grid gap-4 lg:grid-cols-[1fr_22rem]">
+                <div className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-4 shadow-[0_20px_56px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-5">
                   <p className="app-kicker">Room lobby</p>
-                  <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <h1 className="display-title text-5xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
+                      <h1 className="display-title text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
                         Room {room.code}
                       </h1>
-                      <p className="mt-3 max-w-xl text-base font-semibold leading-7 text-[var(--sea-ink-soft)]">
-                        Share the code, wait for seats to fill, then start the
-                        match when the table is ready.
+                      <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+                        Share the code, fill the seats, and start when ready.
                       </p>
                     </div>
 
                     <button
                       type="button"
-                      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.1)] transition hover:translate-y-[-1px]"
+                      className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-bold text-[var(--sea-ink)] shadow-[0_10px_24px_rgba(8,28,32,0.1)] transition hover:translate-y-[-1px]"
                       onClick={copyRoomCode}
                     >
                       <CopyIcon weight="bold" className="h-4.5 w-4.5" />
                       Copy code
                     </button>
                   </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <RoomStat
+                      icon={UsersIcon}
+                      label="Seats"
+                      value={`${playersAtTable.length}/${room.maxPlayers}`}
+                    />
+                    <RoomStat
+                      icon={ClockIcon}
+                      label="Time"
+                      value={`${room.durationMinutes}m`}
+                    />
+                    <RoomStat
+                      icon={UserIcon}
+                      label="Watching"
+                      value={String(room.spectatorCount)}
+                    />
+                  </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <RoomStat
-                    icon={UsersIcon}
-                    label="Seats"
-                    value={`${playersAtTable.length}/${room.maxPlayers}`}
-                  />
-                  <RoomStat
-                    icon={ClockIcon}
-                    label="Duration"
-                    value={`${room.durationMinutes}m`}
-                  />
-                  <RoomStat
-                    icon={UserIcon}
-                    label="Spectators"
-                    value={String(room.spectatorCount)}
-                  />
-                </div>
-              </section>
-
-              <section className="grid gap-4 lg:grid-cols-[1fr_0.8fr]">
-                <div className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-5 shadow-[0_24px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-6">
+                <aside className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-4 shadow-[0_20px_56px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-5">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="app-kicker">Players</p>
-                      <h2 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)]">
-                        Seats at the table.
+                      <p className="app-kicker">Status</p>
+                      <h2 className="display-title mt-1 text-2xl font-semibold capitalize text-[var(--sea-ink)]">
+                        {room.status}
                       </h2>
                     </div>
                     {isHost ? (
-                      <span className="inline-flex h-9 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-xs font-black text-[var(--sea-ink)]">
+                      <span className="inline-flex h-8 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-xs font-black text-[var(--sea-ink)]">
                         <CrownIcon weight="bold" className="h-4 w-4" />
                         Host
                       </span>
                     ) : null}
                   </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    {buildSeats(room.players, room.maxPlayers).map((player) => (
-                      <PlayerSeat key={player.key} player={player.player} />
-                    ))}
-                  </div>
-                </div>
-
-                <aside className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-5 shadow-[0_24px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-6">
-                  <p className="app-kicker">Status</p>
-                  <h2 className="display-title mt-2 text-3xl font-semibold capitalize text-[var(--sea-ink)]">
-                    {room.status}
-                  </h2>
-                  <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+                  <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
                     {getRoomStatusCopy({
                       access: room.currentUserAccess,
                       isHost,
@@ -447,18 +431,15 @@ export function RoomPage({ code }: RoomPageProps) {
                   {isHost && room.status === 'waiting' ? (
                     <>
                       {willFillOpenSeats ? (
-                        <div className="mt-5 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-3">
+                        <div className="mt-4 rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-3">
                           <div className="flex items-center justify-between gap-3">
                             <div>
                               <p className="text-xs font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
                                 Bot fill
                               </p>
-                              <p className="mt-1 text-sm font-bold text-[var(--sea-ink)]">
-                                Choose the bot level for open seats.
-                              </p>
                             </div>
                           </div>
-                          <div className="mt-3 grid grid-cols-3 gap-2">
+                          <div className="mt-2 grid grid-cols-3 gap-2">
                             {BOT_DIFFICULTIES.map((difficulty) => (
                               <button
                                 key={difficulty}
@@ -480,7 +461,7 @@ export function RoomPage({ code }: RoomPageProps) {
                       <button
                         type="button"
                         disabled={!canStartRoom || rooms.startRoom.isPending}
-                        className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                         onClick={startRoom}
                       >
                         <PlayIcon weight="bold" className="h-4.5 w-4.5" />
@@ -542,6 +523,26 @@ export function RoomPage({ code }: RoomPageProps) {
                     </button>
                   ) : null}
                 </aside>
+              </section>
+
+              <section className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-4 shadow-[0_20px_56px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="app-kicker">Players</p>
+                    <h2 className="display-title mt-1 text-2xl font-semibold text-[var(--sea-ink)]">
+                      Seats
+                    </h2>
+                  </div>
+                  <span className="text-sm font-black text-[var(--sea-ink-soft)]">
+                    {playersAtTable.length}/{room.maxPlayers}
+                  </span>
+                </div>
+
+                <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                  {buildSeats(room.players, room.maxPlayers).map((player) => (
+                    <PlayerSeat key={player.key} player={player.player} />
+                  ))}
+                </div>
               </section>
 
               <RoomInviteDialog
@@ -693,25 +694,25 @@ function PlayerSeat({ player }: { player: RoomPlayer | null }) {
   const playerName = player ? player.username ?? player.botName ?? 'Bot' : 'Open seat'
 
   return (
-    <div className="flex min-h-20 items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--bg-base)] text-[var(--sea-ink)]">
-        <UserIcon weight="bold" className="h-5 w-5" />
+    <div className="flex min-h-14 items-center gap-2.5 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--bg-base)] text-[var(--sea-ink)]">
+        <UserIcon weight="bold" className="h-4 w-4" />
       </span>
       <div className="min-w-0">
         {player?.username ? (
           <Link
             to="/users/$username"
             params={{ username: player.username }}
-            className="block truncate text-sm font-black text-[var(--sea-ink)] outline-none transition hover:text-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+            className="block truncate text-sm font-black leading-5 text-[var(--sea-ink)] outline-none transition hover:text-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
           >
             {playerName}
           </Link>
         ) : (
-          <p className="truncate text-sm font-black text-[var(--sea-ink)]">
+          <p className="truncate text-sm font-black leading-5 text-[var(--sea-ink)]">
             {playerName}
           </p>
         )}
-        <p className="mt-0.5 text-xs font-bold capitalize text-[var(--sea-ink-soft)]">
+        <p className="text-xs font-bold capitalize leading-4 text-[var(--sea-ink-soft)]">
           {player ? player.playerType : 'Waiting'}
         </p>
       </div>
@@ -729,14 +730,14 @@ function RoomStat({
   value: string
 }) {
   return (
-    <div className="rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-5 shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
-      <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
-        <Icon weight="bold" className="h-5 w-5" />
+    <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+      <span className="grid h-8 w-8 place-items-center rounded-xl bg-[var(--bg-base)] text-[var(--sea-ink)]">
+        <Icon weight="bold" className="h-4 w-4" />
       </span>
-      <p className="mt-4 text-xs font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
+      <p className="mt-2 truncate text-[0.65rem] font-black uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
         {label}
       </p>
-      <p className="display-title mt-1 text-3xl font-semibold text-[var(--sea-ink)]">
+      <p className="mt-0.5 truncate text-base font-black text-[var(--sea-ink)]">
         {value}
       </p>
     </div>
