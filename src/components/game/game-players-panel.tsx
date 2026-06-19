@@ -40,7 +40,11 @@ function PlayerRow({
   isYou: boolean
 }) {
   return (
-    <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)_4.6rem] items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:grid-cols-[auto_minmax(0,1fr)_5.2rem] sm:gap-3 sm:p-3.5">
+    <div
+      className={`grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-2 sm:rounded-2xl sm:p-2.5 ${
+        player.bankrupt ? 'opacity-65' : ''
+      }`}
+    >
       <PlayerToken player={player} isActive={isCurrentTurn} />
       <div className="grid min-w-0 gap-1">
         <p
@@ -50,20 +54,24 @@ function PlayerRow({
           {getPlayerName(player)}
           {isYou ? ' (you)' : ''}
         </p>
-        <p className="truncate text-xs font-bold text-[var(--sea-ink-soft)]">
-          {isCurrentTurn
-            ? player.playerType === 'bot'
-              ? 'Bot thinking'
-              : 'Taking turn'
-            : `Tile ${player.position}`}
+        <p className="truncate text-[0.7rem] font-bold text-[var(--sea-ink-soft)] sm:text-xs">
+          {getPlayerStatus(player, isCurrentTurn)}
         </p>
       </div>
       <span
-        className="block min-w-0 justify-self-stretch truncate rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2 py-1 text-right text-[0.64rem] font-black leading-none text-[var(--sea-ink)] [font-variant-numeric:tabular-nums] sm:px-2.5 sm:text-[0.66rem]"
+        className="block min-w-0 max-w-20 truncate rounded-full bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-2 py-1 text-right text-[0.62rem] font-black leading-none text-[var(--sea-ink)] [font-variant-numeric:tabular-nums] sm:text-[0.66rem]"
         title={formatCash(player.cash)}
       >
         {formatCash(player.cash)}
       </span>
     </div>
   )
+}
+
+function getPlayerStatus(player: GamePlayer, isCurrentTurn: boolean) {
+  if (player.bankrupt) return 'Bankrupt'
+  if (player.inJail) return isCurrentTurn ? 'Playing from jail' : 'In jail'
+  if (isCurrentTurn) return 'Playing'
+
+  return `Tile ${player.position}`
 }

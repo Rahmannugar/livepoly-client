@@ -32,6 +32,10 @@ export function getGameTurnConsequence({
     return 'This game was cancelled and no more moves can be made.'
   }
 
+  if (phase === 'awaiting_debt_resolution' && currentTurnPlayer) {
+    return `${getPlayerName(currentTurnPlayer)} is resolving a payment.`
+  }
+
   if (
     currentTurnPlayer?.playerType === 'bot' &&
     (phase === 'awaiting_first_turn' ||
@@ -167,7 +171,7 @@ export function getPrimaryGameAction({
       copy:
         phase === 'cancelled'
           ? 'This game was cancelled.'
-          : 'Results are being saved.',
+          : 'Open results to review the final table.',
     }
   }
 
@@ -176,7 +180,7 @@ export function getPrimaryGameAction({
       command: null,
       enabled: false,
       label: 'Game over',
-      copy: 'Results are being saved.',
+      copy: 'Open results to review the final table.',
     }
   }
 
@@ -186,8 +190,8 @@ export function getPrimaryGameAction({
     )
     const canBid = Boolean(
       roomPlayerId &&
-        auction.currentBidderRoomPlayerId === roomPlayerId &&
-        !hasPassed,
+      auction.currentBidderRoomPlayerId === roomPlayerId &&
+      !hasPassed,
     )
 
     return {
@@ -211,7 +215,9 @@ export function getPrimaryGameAction({
       label: isDebtor ? 'Debt due' : 'Debt pending',
       copy: isDebtor
         ? 'Settle the payment or declare bankruptcy.'
-        : 'Another player has a payment due.',
+        : currentTurnPlayer
+          ? `${getPlayerName(currentTurnPlayer)} is resolving a payment.`
+          : 'A player is resolving a payment.',
     }
   }
 

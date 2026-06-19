@@ -48,6 +48,7 @@ export function GameActionsPanel({
   onPlaceAuctionBid,
   onPassAuctionBid,
   onPayDebt,
+  onManageProperties,
   onPayJailFine,
   onUseGetOutOfJailCard,
   onDeclareBankruptcy,
@@ -79,6 +80,7 @@ export function GameActionsPanel({
   onPlaceAuctionBid: (amount: number) => void
   onPassAuctionBid: () => void
   onPayDebt: () => void
+  onManageProperties: () => void
   onPayJailFine: () => void
   onUseGetOutOfJailCard: () => void
   onDeclareBankruptcy: () => void
@@ -93,24 +95,24 @@ export function GameActionsPanel({
   const gameClosed = phase === 'finished' || phase === 'cancelled'
   const actionableTradeOffer = Boolean(
     tradeOffer &&
-      roomPlayerId &&
-      (tradeOffer.fromRoomPlayerId === roomPlayerId ||
-        tradeOffer.toRoomPlayerId === roomPlayerId),
+    roomPlayerId &&
+    (tradeOffer.fromRoomPlayerId === roomPlayerId ||
+      tradeOffer.toRoomPlayerId === roomPlayerId),
   )
   const shouldShowDebtActions = Boolean(
     debt && roomPlayerId && debt.roomPlayerId === roomPlayerId,
   )
   const shouldShowAuctionActions = Boolean(
     auction &&
-      roomPlayerId &&
-      auction.currentBidderRoomPlayerId === roomPlayerId &&
-      !auction.passedRoomPlayerIds.includes(roomPlayerId),
+    roomPlayerId &&
+    auction.currentBidderRoomPlayerId === roomPlayerId &&
+    !auction.passedRoomPlayerIds.includes(roomPlayerId),
   )
   const shouldShowJailActions = Boolean(
     !gameClosed &&
     currentPlayerInJail &&
-      isCurrentTurn &&
-      (phase === 'awaiting_first_turn' || phase === 'awaiting_roll'),
+    isCurrentTurn &&
+    (phase === 'awaiting_first_turn' || phase === 'awaiting_roll'),
   )
   const isSpecializedAction =
     actionableTradeOffer ||
@@ -120,14 +122,14 @@ export function GameActionsPanel({
     primaryAction.command === 'propertyDecision'
   const canOpenActionSheet = Boolean(
     !gameClosed &&
-      !gameExpired &&
-      (isSpecializedAction || primaryAction.enabled),
+    !gameExpired &&
+    (isSpecializedAction || primaryAction.enabled),
   )
   const actionSheetTitle = useMemo(() => {
     if (actionableTradeOffer) return 'Trade offer'
     if (shouldShowDebtActions) return 'Settle payment'
     if (shouldShowJailActions) return 'Jail move'
-    if (shouldShowAuctionActions) return 'Auction'
+    if (shouldShowAuctionActions) return 'Bid or pass'
     if (primaryAction.command === 'propertyDecision') return 'Buy or auction'
     return primaryAction.label
   }, [
@@ -137,6 +139,22 @@ export function GameActionsPanel({
     shouldShowAuctionActions,
     shouldShowDebtActions,
     shouldShowJailActions,
+  ])
+  const panelTitle = useMemo(() => {
+    if (auction && phase === 'awaiting_auction_bid') return 'Auction'
+    if (tradeOffer && actionableTradeOffer) return 'Trade'
+    if (debt && phase === 'awaiting_debt_resolution') return 'Debt'
+    if (primaryAction.command === 'propertyDecision') return 'Property'
+    if (shouldShowJailActions) return 'Jail'
+    return 'Actions'
+  }, [
+    actionableTradeOffer,
+    auction,
+    debt,
+    phase,
+    primaryAction.command,
+    shouldShowJailActions,
+    tradeOffer,
   ])
   const autoActionKey = useMemo(() => {
     if (!canOpenActionSheet) return null
@@ -215,6 +233,10 @@ export function GameActionsPanel({
           roomPlayerId={roomPlayerId}
           commandPending={commandPending}
           onPayDebt={() => runAndClose(onPayDebt)}
+          onManageProperties={() => {
+            setActionSheetOpen(false)
+            onManageProperties()
+          }}
           onDeclareBankruptcy={() => runAndClose(onDeclareBankruptcy)}
         />
       ) : shouldShowJailActions ? (
@@ -259,7 +281,7 @@ export function GameActionsPanel({
   )
 
   return (
-    <GamePanel title="Actions" icon={DiceFiveIcon} collapsible={false}>
+    <GamePanel title={panelTitle} icon={DiceFiveIcon} collapsible={false}>
       {canOpenActionSheet ? (
         <button
           type="button"
@@ -283,9 +305,14 @@ export function GameActionsPanel({
         />
       )}
 
-      <div className="mt-3 grid gap-2 text-sm font-bold text-[var(--sea-ink-soft)]">
-        {errorMessage ? <p className="text-red-500">{errorMessage}</p> : null}
-      </div>
+      {errorMessage ? (
+        <div
+          role="alert"
+          className="mt-3 rounded-xl border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm font-bold leading-5 text-red-200"
+        >
+          {errorMessage}
+        </div>
+      ) : null}
 
       {actionSheetOpen ? (
         <GameActionSheet
@@ -327,7 +354,7 @@ function GameActionSheet({
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="display-title truncate text-3xl font-semibold text-[var(--sea-ink)]">
+            <h3 className="display-title truncate text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">
               {title}
             </h3>
           </div>

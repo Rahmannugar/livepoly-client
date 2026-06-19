@@ -111,6 +111,10 @@
     padding-bottom: 0.45rem;
   }
 
+  .game-tile__label {
+    letter-spacing: 0;
+  }
+
   .game-tile__icon {
     display: none;
   }

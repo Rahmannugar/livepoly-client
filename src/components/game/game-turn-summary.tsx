@@ -18,7 +18,7 @@ export function GameTurnSummary({
   remainingTurnTimeMs: number | null
 }) {
   return (
-    <section className="game-turn-summary mb-3 grid gap-3 rounded-[22px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface)_72%,transparent)] p-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+    <section className="game-turn-summary mb-3 grid gap-2 rounded-lg border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface)_72%,transparent)] p-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-3 sm:rounded-xl sm:p-3">
       <div className="min-w-0">
         <p className="text-[0.68rem] font-black uppercase tracking-[0.16em] text-[var(--sea-ink-soft)]">
           {formatPhase(phase)}

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { getLatestCardRevealFromEvents, type GameCardMetadata } from './game-cards'
+import {
+  getLatestCardRevealFromEvents,
+  type GameCardMetadata,
+} from './game-cards'
 import { findPlayer, gameTiles, getMinimumAuctionBid } from './game-board'
 import { getRemainingMatchTimeMs } from './game-time'
 import { getGameTurnConsequence, getPrimaryGameAction } from './game-view'
@@ -22,8 +25,8 @@ export function useGamePage(gameId: string) {
     : null
   const isUserTurn = Boolean(
     state &&
-      game.roomPlayerId &&
-      state.currentTurnRoomPlayerId === game.roomPlayerId,
+    game.roomPlayerId &&
+    state.currentTurnRoomPlayerId === game.roomPlayerId,
   )
   const ownedProperties = state
     ? state.properties.filter((property) => property.ownerRoomPlayerId)
@@ -42,8 +45,9 @@ export function useGamePage(gameId: string) {
       : null
   const activeTile = pendingTile ?? auctionTile ?? currentPlayerTile ?? null
   const activeProperty = activeTile
-    ? (state?.properties.find((property) => property.tileKey === activeTile.key) ??
-      null)
+    ? (state?.properties.find(
+        (property) => property.tileKey === activeTile.key,
+      ) ?? null)
     : null
   const activeOwner = activeProperty?.ownerRoomPlayerId
     ? findPlayer(state?.players ?? [], activeProperty.ownerRoomPlayerId)
@@ -60,8 +64,9 @@ export function useGamePage(gameId: string) {
     ? findPlayer(state?.players ?? [], selectedTileProperty.ownerRoomPlayerId)
     : null
   const pendingProperty = pendingTile
-    ? (state?.properties.find((property) => property.tileKey === pendingTile.key) ??
-      null)
+    ? (state?.properties.find(
+        (property) => property.tileKey === pendingTile.key,
+      ) ?? null)
     : null
   const activeTileLabel = pendingTile
     ? 'Landed square'
@@ -88,8 +93,8 @@ export function useGamePage(gameId: string) {
   )
   const gameExpired = Boolean(
     state?.expiresAt &&
-      remainingMatchTimeMs !== null &&
-      remainingMatchTimeMs <= 0,
+    remainingMatchTimeMs !== null &&
+    remainingMatchTimeMs <= 0,
   )
   const primaryAction = getPrimaryGameAction({
     access: game.access,
@@ -106,8 +111,7 @@ export function useGamePage(gameId: string) {
     debt: state?.debt,
     gameExpired,
   })
-  const isRollingDice =
-    game.commandPending && primaryAction.command === 'roll'
+  const isRollingDice = game.commandPending && primaryAction.command === 'roll'
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
   const shouldLoadGameResult = gameClosed || gameExpired
   const gameResult = useGameResult(gameId, shouldLoadGameResult)
@@ -117,6 +121,15 @@ export function useGamePage(gameId: string) {
     isUserTurn &&
     state?.phase === 'awaiting_turn_end' &&
     game.status === 'joined'
+  const canLiquidateProperties = Boolean(
+    canManageProperties ||
+    (!gameClosed &&
+      !gameExpired &&
+      isUserTurn &&
+      state?.phase === 'awaiting_debt_resolution' &&
+      state.debt?.roomPlayerId === game.roomPlayerId &&
+      game.status === 'joined'),
+  )
 
   useEffect(() => {
     if (gameClosed) {
@@ -187,6 +200,7 @@ export function useGamePage(gameId: string) {
     shouldLoadGameResult,
     gameResult,
     canManageProperties,
+    canLiquidateProperties,
     visibleCardReveal,
     selectTile: (tileKey: string) => setSelectedTileKey(tileKey),
     clearSelectedTile: () => setSelectedTileKey(null),

@@ -1,9 +1,11 @@
 import {
   AirplaneTiltIcon,
   BankIcon,
+  BuildingsIcon,
   CarIcon,
   CoinsIcon,
   DropIcon,
+  HouseIcon,
   LightningIcon,
   PoliceCarIcon,
   QuestionIcon,
@@ -12,32 +14,32 @@ import {
 } from '@phosphor-icons/react'
 import type { CSSProperties } from 'react'
 import { PlayerToken } from './game-primitives'
-import type { GamePlayer } from '#/lib/game/game.types'
-import {
-  propertySetColors,
-  type GameTile,
-} from '#/lib/game/game-board'
+import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
+import { propertySetColors, type GameTile } from '#/lib/game/game-board'
 
 export function GameTileCell({
   tile,
   players,
+  property,
   owner,
   currentTurnRoomPlayerId,
   onSelect,
 }: {
   tile: GameTile
   players: GamePlayer[]
+  property: GameProperty | null
   owner: GamePlayer | null
   currentTurnRoomPlayerId: string | null
   onSelect: (tile: GameTile) => void
 }) {
   const TileIcon = getTileIcon(tile)
+  const buildingLabel = getBuildingLabel(property)
 
   return (
     <button
       type="button"
-      aria-label={`View ${tile.name}`}
-      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-sm border border-[var(--line)] bg-[var(--bg-base)] p-0.5 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-md sm:p-1.5 2xl:p-2 ${
+      aria-label={`View ${tile.name}${buildingLabel ? `, ${buildingLabel}` : ''}`}
+      className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-[0.18rem] border border-[var(--line)] bg-[var(--bg-base)] p-0.5 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-sm sm:p-1.5 2xl:p-2 ${
         TileIcon ? 'game-tile--special' : ''
       }`}
       style={getTileGridStyle(tile.index)}
@@ -60,7 +62,7 @@ export function GameTileCell({
           </span>
         ) : null}
         <span
-          className={`game-tile__label line-clamp-4 text-[0.38rem] font-black leading-tight sm:text-[0.56rem] xl:text-[0.62rem] 2xl:text-[0.68rem] ${
+          className={`game-tile__label line-clamp-4 text-[0.44rem] font-black leading-[0.9] sm:text-[0.56rem] sm:leading-tight xl:text-[0.62rem] 2xl:text-[0.68rem] ${
             TileIcon ? 'game-tile__label--special' : ''
           }`}
           title={tile.name}
@@ -68,6 +70,10 @@ export function GameTileCell({
           {getTileLabel(tile)}
         </span>
       </div>
+
+      {buildingLabel ? (
+        <BuildingMarker property={property} label={buildingLabel} />
+      ) : null}
 
       <div className="game-tile__tokens pointer-events-none absolute bottom-1 right-1 z-40 flex max-w-[calc(100%-0.5rem)] flex-wrap items-end justify-end gap-0.5">
         {owner ? (
@@ -89,6 +95,40 @@ export function GameTileCell({
       </div>
     </button>
   )
+}
+
+function BuildingMarker({
+  property,
+  label,
+}: {
+  property: GameProperty | null
+  label: string
+}) {
+  const isHotel = Boolean(property?.hasHotel)
+  const BuildingIcon = isHotel ? BuildingsIcon : HouseIcon
+
+  return (
+    <span
+      aria-hidden="true"
+      title={label}
+      className="game-tile__building pointer-events-none absolute bottom-0.5 left-0.5 z-30 inline-flex h-3 min-w-3 items-center justify-center gap-px rounded-[0.18rem] border border-[var(--line)] bg-[var(--surface-strong)] px-px text-[0.36rem] font-black text-[var(--sea-ink)] shadow-sm sm:bottom-1 sm:left-1 sm:h-4 sm:min-w-4 sm:gap-0.5 sm:px-1 sm:text-[0.48rem]"
+    >
+      <BuildingIcon weight="fill" className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+      {isHotel ? null : <span>{property?.houseCount}</span>}
+    </span>
+  )
+}
+
+function getBuildingLabel(property: GameProperty | null) {
+  if (property?.hasHotel) {
+    return 'Hotel'
+  }
+
+  if (property && property.houseCount > 0) {
+    return `${property.houseCount} house${property.houseCount === 1 ? '' : 's'}`
+  }
+
+  return null
 }
 
 function getOwnerLabel(owner: GamePlayer) {

@@ -18,7 +18,7 @@ export function GameBoard({
 }) {
   return (
     <div className="mx-auto w-full overflow-hidden pb-1">
-      <div className="mx-auto grid aspect-square w-full max-w-[46rem] grid-cols-11 grid-rows-11 gap-0.5 rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-1.5 sm:gap-1 sm:rounded-[28px] sm:p-2 lg:max-w-none 2xl:gap-2 2xl:p-4">
+      <div className="mx-auto grid aspect-square w-full max-w-[46rem] grid-cols-11 grid-rows-11 gap-0.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-1 sm:gap-1 sm:rounded-xl sm:p-2 lg:max-w-none 2xl:gap-2 2xl:p-4">
         <GameBoardCenter
           dice={state?.lastDiceRoll}
           access={access}
@@ -32,6 +32,7 @@ export function GameBoard({
             key={tile.key}
             tile={tile}
             players={getPlayersOnTile(state, tile.index)}
+            property={getTileProperty(state, tile.key)}
             owner={getTileOwner(state, tile.key)}
             currentTurnRoomPlayerId={state?.currentTurnRoomPlayerId ?? null}
             onSelect={onSelectTile}
@@ -50,12 +51,16 @@ function getPlayersOnTile(state: GameState | null, position: number) {
   )
 }
 
+function getTileProperty(state: GameState | null, tileKey: string) {
+  return state?.properties.find((item) => item.tileKey === tileKey) ?? null
+}
+
 function getTileOwner(state: GameState | null, tileKey: string) {
   if (!state) {
     return null
   }
 
-  const property = state.properties.find((item) => item.tileKey === tileKey)
+  const property = getTileProperty(state, tileKey)
 
   return findPlayer(state.players, property?.ownerRoomPlayerId)
 }

@@ -70,8 +70,8 @@ export function TradeOfferActions({
       </div>
 
       <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-        Houses and hotels are sold before traded properties move. Mortgages
-        stay with the property.
+        Houses and hotels are sold before traded properties move. Mortgages stay
+        with the property.
       </p>
 
       {isTarget ? (
@@ -113,6 +113,7 @@ export function TradeProposalForm({
   roomPlayerId,
   commandPending,
   disabled,
+  disabledReason,
   onProposeTrade,
 }: {
   properties: GameProperty[]
@@ -120,19 +121,16 @@ export function TradeProposalForm({
   roomPlayerId: string | null
   commandPending: boolean
   disabled: boolean
+  disabledReason?: string
   onProposeTrade: (input: ProposeTradeInput) => void
 }) {
   const tradablePlayers = players.filter(
-    (player) =>
-      player.roomPlayerId !== roomPlayerId &&
-      !player.bankrupt &&
-      properties.some(
-        (property) => property.ownerRoomPlayerId === player.roomPlayerId,
-      ),
+    (player) => player.roomPlayerId !== roomPlayerId && !player.bankrupt,
   )
   const ownProperties = properties.filter(
     (property) => property.ownerRoomPlayerId === roomPlayerId,
   )
+  const currentPlayer = findPlayer(players, roomPlayerId)
   const [targetRoomPlayerId, setTargetRoomPlayerId] = useState(
     tradablePlayers[0]?.roomPlayerId ?? '',
   )
@@ -142,29 +140,49 @@ export function TradeProposalForm({
   const [requestedPropertyKeys, setRequestedPropertyKeys] = useState<string[]>(
     [],
   )
+  const selectedTargetRoomPlayerId = tradablePlayers.some(
+    (player) => player.roomPlayerId === targetRoomPlayerId,
+  )
+    ? targetRoomPlayerId
+    : (tradablePlayers[0]?.roomPlayerId ?? '')
+  const targetPlayer = findPlayer(players, selectedTargetRoomPlayerId)
   const targetProperties = useMemo(
     () =>
       properties.filter(
-        (property) => property.ownerRoomPlayerId === targetRoomPlayerId,
+        (property) => property.ownerRoomPlayerId === selectedTargetRoomPlayerId,
       ),
-    [properties, targetRoomPlayerId],
+    [properties, selectedTargetRoomPlayerId],
   )
+  const offeredCashAmount = normalizeCash(offeredCash)
+  const requestedCashAmount = normalizeCash(requestedCash)
+  const cashWithinLimits =
+    offeredCashAmount <= (currentPlayer?.cash ?? 0) &&
+    requestedCashAmount <= (targetPlayer?.cash ?? 0)
   const canSubmit =
     !disabled &&
     !commandPending &&
-    targetRoomPlayerId &&
+    selectedTargetRoomPlayerId &&
+    cashWithinLimits &&
     (offeredPropertyKeys.length > 0 ||
       requestedPropertyKeys.length > 0 ||
-      normalizeCash(offeredCash) > 0 ||
-      normalizeCash(requestedCash) > 0)
+      offeredCashAmount > 0 ||
+      requestedCashAmount > 0)
 
-  if (!roomPlayerId || ownProperties.length === 0 || tradablePlayers.length === 0) {
+  if (!roomPlayerId) {
     return null
+  }
+
+  if (tradablePlayers.length === 0) {
+    return (
+      <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+        No other active players can trade.
+      </p>
+    )
   }
 
   return (
     <form
-      className="mt-4 grid gap-4 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3"
+      className="grid gap-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-2xl"
       onSubmit={(event) => {
         event.preventDefault()
 
@@ -173,25 +191,30 @@ export function TradeProposalForm({
         }
 
         onProposeTrade({
-          toRoomPlayerId: targetRoomPlayerId,
-          offeredCash: normalizeCash(offeredCash),
-          requestedCash: normalizeCash(requestedCash),
+          toRoomPlayerId: selectedTargetRoomPlayerId,
+          offeredCash: offeredCashAmount,
+          requestedCash: requestedCashAmount,
           offeredPropertyKeys,
           requestedPropertyKeys,
         })
       }}
     >
       <div>
-        <p className="app-kicker">Trade</p>
+        <p className="app-kicker">New offer</p>
         <h3 className="display-title mt-1 text-2xl font-semibold text-[var(--sea-ink)]">
           Make an offer
         </h3>
+        {disabledReason ? (
+          <p className="mt-1 text-sm font-bold leading-5 text-[var(--sea-ink-soft)]">
+            {disabledReason}
+          </p>
+        ) : null}
       </div>
 
       <label className="grid gap-2 text-sm font-black text-[var(--sea-ink)]">
         Player
         <select
-          value={targetRoomPlayerId}
+          value={selectedTargetRoomPlayerId}
           disabled={disabled || commandPending}
           className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 text-sm font-bold outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
           onChange={(event) => {
@@ -211,6 +234,7 @@ export function TradeProposalForm({
         <TradePropertyPicker
           title="You give"
           cashValue={offeredCash}
+          availableCash={currentPlayer?.cash ?? 0}
           properties={ownProperties}
           selectedPropertyKeys={offeredPropertyKeys}
           disabled={disabled || commandPending}
@@ -222,6 +246,7 @@ export function TradeProposalForm({
         <TradePropertyPicker
           title="You want"
           cashValue={requestedCash}
+          availableCash={targetPlayer?.cash ?? 0}
           properties={targetProperties}
           selectedPropertyKeys={requestedPropertyKeys}
           disabled={disabled || commandPending}
@@ -231,6 +256,12 @@ export function TradeProposalForm({
           }
         />
       </div>
+
+      {!cashWithinLimits ? (
+        <p role="alert" className="text-sm font-bold text-red-400">
+          A trade cannot use more cash than either player has.
+        </p>
+      ) : null}
 
       <button
         type="submit"
@@ -278,6 +309,7 @@ function TradeSide({
 function TradePropertyPicker({
   title,
   cashValue,
+  availableCash,
   properties,
   selectedPropertyKeys,
   disabled,
@@ -286,6 +318,7 @@ function TradePropertyPicker({
 }: {
   title: string
   cashValue: string
+  availableCash: number
   properties: GameProperty[]
   selectedPropertyKeys: string[]
   disabled: boolean
@@ -296,36 +329,47 @@ function TradePropertyPicker({
     <div className="grid gap-3 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_72%,transparent)] p-3">
       <p className="text-sm font-black text-[var(--sea-ink)]">{title}</p>
       <label className="grid gap-1 text-xs font-black uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
-        Cash
+        Cash · {formatCash(availableCash)} available
         <input
           inputMode="numeric"
           pattern="[0-9]*"
+          max={availableCash}
           disabled={disabled}
           value={cashValue}
-          onChange={(event) => onCashChange(event.target.value.replace(/\D/g, ''))}
+          onChange={(event) =>
+            onCashChange(event.target.value.replace(/\D/g, ''))
+          }
           className="h-11 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-3 text-sm font-black text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
           placeholder="0"
         />
       </label>
       <div className="grid max-h-36 gap-2 overflow-y-auto pr-1">
-        {properties.map((property) => {
-          const checked = selectedPropertyKeys.includes(property.tileKey)
+        {properties.length === 0 ? (
+          <p className="rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-bold text-[var(--sea-ink-soft)]">
+            No properties available.
+          </p>
+        ) : (
+          properties.map((property) => {
+            const checked = selectedPropertyKeys.includes(property.tileKey)
 
-          return (
-            <label
-              key={property.tileKey}
-              className="flex min-w-0 items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm font-black text-[var(--sea-ink)]"
-            >
-              <input
-                type="checkbox"
-                checked={checked}
-                disabled={disabled}
-                onChange={() => onToggleProperty(property.tileKey)}
-              />
-              <span className="min-w-0 truncate">{getTileName(property.tileKey)}</span>
-            </label>
-          )
-        })}
+            return (
+              <label
+                key={property.tileKey}
+                className="flex min-w-0 items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm font-black text-[var(--sea-ink)]"
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  disabled={disabled}
+                  onChange={() => onToggleProperty(property.tileKey)}
+                />
+                <span className="min-w-0 truncate">
+                  {getTileName(property.tileKey)}
+                </span>
+              </label>
+            )
+          })
+        )}
       </div>
     </div>
   )

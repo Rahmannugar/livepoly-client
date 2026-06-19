@@ -23,13 +23,16 @@ export function GameResultsPanel({
           {errorMessage}
         </p>
       ) : result ? (
-        <div className="grid gap-4">
-          <div className="grid gap-2 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4">
+        <div className="grid gap-3">
+          <div className="grid gap-2 rounded-xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--primary)_10%,var(--surface))] p-3 sm:rounded-2xl sm:p-4">
             <span className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-[var(--sea-ink-soft)]">
-              Winner
+              Game complete
             </span>
-            <p className="truncate text-2xl font-black text-[var(--sea-ink)]">
-              {winner ? getResultPlayerName(winner) : 'No winner'}
+            <p className="truncate text-2xl font-black text-[var(--sea-ink)] sm:text-3xl">
+              {winner ? `${getResultPlayerName(winner)} wins` : 'No winner'}
+            </p>
+            <p className="text-sm font-bold leading-5 text-[var(--sea-ink-soft)]">
+              Final placements and net worth are saved.
             </p>
             <div className="flex flex-wrap gap-2">
               <StatePill
@@ -44,7 +47,7 @@ export function GameResultsPanel({
             {result.players.map((player) => (
               <li
                 key={player.roomPlayerId}
-                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-3 py-3"
+                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 sm:rounded-2xl sm:py-3"
               >
                 <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--accent)] text-sm font-black text-[var(--accent-ink)]">
                   {player.placement}
@@ -65,11 +68,14 @@ export function GameResultsPanel({
           </ol>
         </div>
       ) : (
-        <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-          {isLoading
-            ? 'Counting final places.'
-            : 'Final places will appear here.'}
-        </p>
+        <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-2xl sm:p-4">
+          <p className="text-sm font-black leading-6 text-[var(--sea-ink)]">
+            {isLoading ? 'Saving final results.' : 'Final results are pending.'}
+          </p>
+          <p className="mt-1 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
+            This usually appears immediately after the game ends.
+          </p>
+        </div>
       )}
     </GamePanel>
   )

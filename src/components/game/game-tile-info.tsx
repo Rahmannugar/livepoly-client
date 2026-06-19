@@ -39,6 +39,8 @@ export function TileInfoPanel({
 
   const purchasePrice = getTilePurchasePrice(tile)
   const rentRows = getRentRows(tile, property)
+  const ownershipSummary = getOwnershipSummary(tile, property, owner)
+  const buildingSummary = getBuildingSummary(property)
   const details = [
     { label: 'Type', value: getTileKindLabel(tile) },
     purchasePrice === null
@@ -49,12 +51,13 @@ export function TileInfoPanel({
       : null,
     tile.houseCost ? { label: 'Build', value: formatCash(tile.houseCost) } : null,
     owner ? { label: 'Owner', value: getPlayerName(owner) } : null,
+    buildingSummary ? { label: 'Buildings', value: buildingSummary } : null,
     getTileStatus(tile, property, owner),
     tile.amount ? { label: 'Charge', value: formatCash(tile.amount) } : null,
   ].filter(Boolean) as Array<{ label: string; value: string }>
 
   return (
-    <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4">
+    <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-2xl sm:p-4">
       <button
         type="button"
         aria-expanded={!collapsed}
@@ -83,12 +86,23 @@ export function TileInfoPanel({
             {getTileInfoCopy(tile)}
           </p>
 
+          {ownershipSummary ? (
+            <div className="mt-3 grid gap-2 rounded-xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--primary)_8%,var(--surface))] p-3">
+              <span className="text-[0.62rem] font-black uppercase tracking-[0.14em] text-[var(--sea-ink-soft)]">
+                Ownership
+              </span>
+              <span className="text-sm font-black leading-5 text-[var(--sea-ink)]">
+                {ownershipSummary}
+              </span>
+            </div>
+          ) : null}
+
           {details.length ? (
             <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-[var(--sea-ink)] sm:grid-cols-3 xl:grid-cols-2">
               {details.map((detail) => (
                 <span
                   key={detail.label}
-                  className="min-w-0 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-3 py-2"
+                  className="min-w-0 rounded-xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_78%,transparent)] px-3 py-2 sm:rounded-2xl"
                 >
                   <span className="block text-[0.62rem] uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
                     {detail.label}
@@ -319,7 +333,7 @@ function getTileStatus(
   }
 
   if (property?.mortgaged) {
-    return { label: 'Status', value: 'Mortgaged' }
+    return { label: 'Status', value: 'Owned, mortgaged' }
   }
 
   if (owner) {
@@ -327,6 +341,42 @@ function getTileStatus(
   }
 
   return { label: 'Status', value: 'Unowned' }
+}
+
+function getOwnershipSummary(
+  tile: GameTile,
+  property?: GameProperty | null,
+  owner?: GamePlayer | null,
+) {
+  if (!getTilePurchasePrice(tile)) {
+    return null
+  }
+
+  const buildingSummary = getBuildingSummary(property)
+  const mortgageCopy = property?.mortgaged ? ' Mortgaged.' : ''
+  const buildingCopy = buildingSummary ? ` Built up: ${buildingSummary}.` : ''
+
+  if (owner) {
+    return `Owned by ${getPlayerName(owner)}.${buildingCopy}${mortgageCopy}`
+  }
+
+  return 'Unowned. Buy it when you land here or win it in auction.'
+}
+
+function getBuildingSummary(property?: GameProperty | null) {
+  if (!property) {
+    return null
+  }
+
+  if (property.hasHotel) {
+    return 'Hotel'
+  }
+
+  if (property.houseCount > 0) {
+    return `${property.houseCount} house${property.houseCount === 1 ? '' : 's'}`
+  }
+
+  return null
 }
 
 function getRentRows(tile: GameTile, property?: GameProperty | null) {

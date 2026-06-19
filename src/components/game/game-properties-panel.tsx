@@ -10,36 +10,29 @@ import {
 } from '#/lib/game/game-board'
 import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
 import { GamePanel } from './game-primitives'
-import { TradeProposalForm } from './game-trade-actions'
 
 export function PropertiesPanel({
   properties,
   players,
   roomPlayerId,
   canManageProperties,
+  canLiquidateProperties,
   commandPending,
   onBuild,
   onSellBuilding,
   onMortgage,
   onUnmortgage,
-  onProposeTrade,
 }: {
   properties: GameProperty[]
   players: GamePlayer[]
   roomPlayerId: string | null
   canManageProperties: boolean
+  canLiquidateProperties: boolean
   commandPending: boolean
   onBuild: (tileKey: string) => void
   onSellBuilding: (tileKey: string) => void
   onMortgage: (tileKey: string) => void
   onUnmortgage: (tileKey: string) => void
-  onProposeTrade: (input: {
-    toRoomPlayerId: string
-    offeredCash: number
-    requestedCash: number
-    offeredPropertyKeys: string[]
-    requestedPropertyKeys: string[]
-  }) => void
 }) {
   const playerTabs = useMemo(() => {
     return [...players].sort((left, right) => {
@@ -69,9 +62,7 @@ export function PropertiesPanel({
             const ownerId = player.roomPlayerId
             const active = ownerId === selectedOwnerId
             const ownerLabel =
-              ownerId === roomPlayerId
-                ? 'You'
-                : getPlayerName(player)
+              ownerId === roomPlayerId ? 'You' : getPlayerName(player)
             const propertyCount = properties.filter(
               (property) => property.ownerRoomPlayerId === ownerId,
             ).length
@@ -87,7 +78,10 @@ export function PropertiesPanel({
                 }`}
                 onClick={() => setActiveOwnerId(ownerId)}
               >
-                <span className="inline-block max-w-28 truncate align-bottom" title={ownerLabel}>
+                <span
+                  className="inline-block max-w-28 truncate align-bottom"
+                  title={ownerLabel}
+                >
                   {ownerLabel}
                 </span>
                 <span className="ml-2 text-[0.65rem] opacity-70">
@@ -103,22 +97,13 @@ export function PropertiesPanel({
         players={players}
         roomPlayerId={roomPlayerId}
         canManageProperties={canManageProperties}
+        canLiquidateProperties={canLiquidateProperties}
         commandPending={commandPending}
         onBuild={onBuild}
         onSellBuilding={onSellBuilding}
         onMortgage={onMortgage}
         onUnmortgage={onUnmortgage}
       />
-      {canManageProperties ? (
-        <TradeProposalForm
-          properties={properties}
-          players={players}
-          roomPlayerId={roomPlayerId}
-          commandPending={commandPending}
-          disabled={false}
-          onProposeTrade={onProposeTrade}
-        />
-      ) : null}
     </GamePanel>
   )
 }
@@ -128,6 +113,7 @@ function PropertyList({
   players,
   roomPlayerId,
   canManageProperties,
+  canLiquidateProperties,
   commandPending,
   onBuild,
   onSellBuilding,
@@ -138,6 +124,7 @@ function PropertyList({
   players: GamePlayer[]
   roomPlayerId: string | null
   canManageProperties: boolean
+  canLiquidateProperties: boolean
   commandPending: boolean
   onBuild: (tileKey: string) => void
   onSellBuilding: (tileKey: string) => void
@@ -164,11 +151,11 @@ function PropertyList({
         const unmortgageCost = getUnmortgageCost(mortgageValue)
         const canManageBuilding = Boolean(
           canManageProperties &&
-            isMine &&
-            tile?.kind === 'property' &&
-            ownsFullPropertySet(properties, tile, property.ownerRoomPlayerId) &&
-            !property.mortgaged &&
-            !property.hasHotel,
+          isMine &&
+          tile?.kind === 'property' &&
+          ownsFullPropertySet(properties, tile, property.ownerRoomPlayerId) &&
+          !property.mortgaged &&
+          !property.hasHotel,
         )
         const hasBuilding = property.hasHotel || property.houseCount > 0
         const buildingCost = tile?.houseCost ?? 0
@@ -198,7 +185,7 @@ function PropertyList({
               </span>
             </div>
 
-            {canManageProperties && isMine && mortgageValue > 0 ? (
+            {canLiquidateProperties && isMine && mortgageValue > 0 ? (
               <div className="grid gap-2">
                 {tile?.kind === 'property' ? (
                   <div className="grid gap-2 sm:grid-cols-2">
@@ -228,7 +215,10 @@ function PropertyList({
                     </button>
                   </div>
                 ) : null}
-                {tile?.kind === 'property' && isMine && !canManageBuilding ? (
+                {canManageProperties &&
+                tile?.kind === 'property' &&
+                isMine &&
+                !canManageBuilding ? (
                   <p className="text-xs font-bold leading-5 text-[var(--sea-ink-soft)]">
                     Own the full color set before building here.
                   </p>
@@ -236,7 +226,11 @@ function PropertyList({
 
                 <button
                   type="button"
-                  disabled={!isMine || commandPending}
+                  disabled={
+                    !isMine ||
+                    commandPending ||
+                    (property.mortgaged && !canManageProperties)
+                  }
                   className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={() => {
                     if (property.mortgaged) {
@@ -248,7 +242,9 @@ function PropertyList({
                   }}
                 >
                   {property.mortgaged
-                    ? `Unmortgage ${formatCash(unmortgageCost)}`
+                    ? canManageProperties
+                      ? `Unmortgage ${formatCash(unmortgageCost)}`
+                      : 'Mortgaged'
                     : `Mortgage +${formatCash(mortgageValue)}`}
                 </button>
               </div>

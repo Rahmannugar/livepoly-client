@@ -21,10 +21,10 @@ export function GamePanel({
   const isCollapsed = collapsible && collapsed
   const headerContent = (
     <>
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
-        <IconComponent weight="bold" className="h-5 w-5" />
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] sm:h-9 sm:w-9 sm:rounded-2xl">
+        <IconComponent weight="bold" className="h-4 w-4 sm:h-5 sm:w-5" />
       </span>
-      <h2 className="display-title min-w-0 flex-1 truncate text-2xl font-semibold text-[var(--sea-ink)]">
+      <h2 className="display-title min-w-0 flex-1 truncate text-xl font-semibold text-[var(--sea-ink)] sm:text-2xl">
         {title}
       </h2>
       {collapsible ? (
@@ -39,7 +39,7 @@ export function GamePanel({
   )
 
   return (
-    <section className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-4 shadow-[0_18px_55px_rgba(4,12,15,0.12)] backdrop-blur-xl">
+    <section className="rounded-xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-3 shadow-[0_18px_55px_rgba(4,12,15,0.12)] backdrop-blur-xl sm:rounded-2xl sm:p-4">
       {collapsible ? (
         <button
           type="button"
@@ -54,7 +54,9 @@ export function GamePanel({
           {headerContent}
         </div>
       )}
-      <div className={`game-collapsible ${isCollapsed ? '' : 'game-collapsible--open'}`}>
+      <div
+        className={`game-collapsible ${isCollapsed ? '' : 'game-collapsible--open'}`}
+      >
         <div className="pt-4">{children}</div>
       </div>
     </section>
@@ -63,11 +65,11 @@ export function GamePanel({
 
 export function StatePill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
+    <div className="min-w-0 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-2.5 sm:rounded-2xl sm:p-3">
       <p className="text-[0.65rem] font-black uppercase tracking-[0.14em]">
         {label}
       </p>
-      <p className="mt-1 truncate text-sm font-black capitalize text-[var(--sea-ink)]">
+      <p className="mt-1 truncate text-xs font-black capitalize text-[var(--sea-ink)] sm:text-sm">
         {value}
       </p>
     </div>
@@ -97,7 +99,7 @@ export function PlayerToken({
       className={`player-token ${isActive ? 'player-token--active' : ''} ${
         compact
           ? 'grid h-2 w-2 place-items-center rounded-full text-[0.28rem] font-black text-white shadow-sm sm:h-3.5 sm:w-3.5 sm:text-[0.48rem] xl:h-4 xl:w-4 xl:text-[0.54rem] 2xl:h-5 2xl:w-5 2xl:text-[0.62rem]'
-          : 'grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-black text-white shadow-sm'
+          : 'grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-black text-white shadow-sm sm:h-9 sm:w-9 sm:text-sm'
       }`}
       style={{ backgroundColor: getPlayerColor(player.seatNumber) }}
     >

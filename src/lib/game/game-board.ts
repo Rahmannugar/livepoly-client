@@ -1,4 +1,9 @@
-import type { GameAuction, GameDebt, GameEventLogItem, GamePlayer } from './game.types'
+import type {
+  GameAuction,
+  GameDebt,
+  GameEventLogItem,
+  GamePlayer,
+} from './game.types'
 
 export type GameTile = {
   index: number
@@ -196,7 +201,12 @@ export const gameTiles: GameTile[] = [
     mortgageValue: 100,
     houseCost: 100,
   },
-  { index: 20, key: 'free_parking', name: 'Free Parking', kind: 'free_parking' },
+  {
+    index: 20,
+    key: 'free_parking',
+    name: 'Free Parking',
+    kind: 'free_parking',
+  },
   {
     index: 21,
     key: 'uk',
@@ -361,7 +371,13 @@ export const gameTiles: GameTile[] = [
     mortgageValue: 175,
     houseCost: 200,
   },
-  { index: 38, key: 'luxury_tax', name: 'Luxury Tax', kind: 'tax', amount: 100 },
+  {
+    index: 38,
+    key: 'luxury_tax',
+    name: 'Luxury Tax',
+    kind: 'tax',
+    amount: 100,
+  },
   {
     index: 39,
     key: 'australia',
@@ -388,7 +404,10 @@ export const propertySetColors: Record<string, string> = {
   dark_blue: '#3154a3',
 }
 
-export function findPlayer(players: GamePlayer[], roomPlayerId?: string | null) {
+export function findPlayer(
+  players: GamePlayer[],
+  roomPlayerId?: string | null,
+) {
   if (!roomPlayerId) {
     return null
   }
@@ -464,6 +483,8 @@ export function formatEventSummary(
   const player = getEventPlayerName(players, payload, 'roomPlayerId')
   const payer = getEventPlayerName(players, payload, 'payerRoomPlayerId')
   const owner = getEventPlayerName(players, payload, 'ownerRoomPlayerId')
+  const tradeSender = getEventPlayerName(players, payload, 'fromRoomPlayerId')
+  const tradeRecipient = getEventPlayerName(players, payload, 'toRoomPlayerId')
   const tile = getEventTileName(payload)
   const amount = getEventNumber(payload, 'amount')
   const dice = getEventDice(payload)
@@ -582,6 +603,18 @@ export function formatEventSummary(
 
     case 'property_unmortgaged':
       return `${player} unmortgaged ${tile}.`
+
+    case 'trade_proposed':
+      return `${tradeSender} offered ${tradeRecipient} a trade.`
+
+    case 'trade_accepted':
+      return `${tradeSender} and ${tradeRecipient} completed a trade.`
+
+    case 'trade_rejected':
+      return `${tradeRecipient} rejected ${tradeSender}'s trade.`
+
+    case 'trade_cancelled':
+      return `${tradeSender} cancelled the trade with ${tradeRecipient}.`
 
     case 'player_bankrupt':
       return `${player} went bankrupt.`
