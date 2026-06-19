@@ -1,8 +1,14 @@
 import { SpinnerGapIcon } from '@phosphor-icons/react'
 import { GameBoard } from './game-board'
 import { GameTurnSummary } from './game-turn-summary'
-import { getPlayerName, type GameTile } from '#/lib/game/game-board'
-import type { GamePhase, GamePlayer, GameState } from '#/lib/game/game.types'
+import { findPlayer, getPlayerName } from '#/lib/game/game-board'
+import type { GameTile } from '#/lib/game/game-board'
+import type {
+  GameAuction,
+  GamePhase,
+  GamePlayer,
+  GameState,
+} from '#/lib/game/game.types'
 
 export function GameStage({
   state,
@@ -28,6 +34,9 @@ export function GameStage({
   onSelectTile: (tile: GameTile) => void
 }) {
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
+  const auctionBidder = state?.auction?.currentBidderRoomPlayerId
+    ? findPlayer(state.players, state.auction.currentBidderRoomPlayerId)
+    : null
 
   return (
     <section className="order-1 rounded-lg border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_78%,transparent)] p-2.5 shadow-[0_28px_90px_rgba(4,12,15,0.18)] backdrop-blur-xl sm:rounded-xl sm:p-3 xl:order-2 xl:p-4">
@@ -35,6 +44,8 @@ export function GameStage({
         <GameStageTitle
           phase={state?.phase}
           player={currentTurnPlayer}
+          auction={state?.auction ?? null}
+          auctionBidder={auctionBidder}
           gameClosed={gameClosed}
         />
         <GameStatusBadge status={status} />
@@ -62,10 +73,14 @@ export function GameStage({
 function GameStageTitle({
   phase,
   player,
+  auction,
+  auctionBidder,
   gameClosed,
 }: {
   phase: GamePhase | undefined
   player: GamePlayer | null
+  auction: GameAuction | null
+  auctionBidder: GamePlayer | null
   gameClosed: boolean
 }) {
   if (gameClosed) {
@@ -83,6 +98,21 @@ function GameStageTitle({
       <div className="min-w-0">
         <h1 className="display-title max-w-full truncate text-xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-2xl 2xl:text-3xl">
           Opening the game.
+        </h1>
+      </div>
+    )
+  }
+
+  if (phase === 'awaiting_auction_bid' && auction) {
+    const bidder = auctionBidder ?? player
+
+    return (
+      <div className="min-w-0">
+        <h1 className="display-title flex max-w-full items-baseline gap-2 text-xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-2xl 2xl:text-3xl">
+          <span className="min-w-0 truncate" title={getPlayerName(bidder)}>
+            {getPlayerName(bidder)}
+          </span>
+          <span className="shrink-0">is bidding.</span>
         </h1>
       </div>
     )

@@ -274,6 +274,7 @@ export function GamePage({ gameId }: GamePageProps) {
         </div>
         <GameCardReveal
           card={model.visibleCardReveal}
+          playerName={model.visibleCardRevealPlayerName}
           onClose={model.dismissVisibleCardReveal}
         />
         <TileInfoSheet

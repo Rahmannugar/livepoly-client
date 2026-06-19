@@ -10,12 +10,13 @@ import {
   PoliceCarIcon,
   QuestionIcon,
   ReceiptIcon,
-  type Icon,
 } from '@phosphor-icons/react'
 import type { CSSProperties } from 'react'
+import type { Icon } from '@phosphor-icons/react'
 import { PlayerToken } from './game-primitives'
 import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
-import { propertySetColors, type GameTile } from '#/lib/game/game-board'
+import { propertySetColors } from '#/lib/game/game-board'
+import type { GameTile } from '#/lib/game/game-board'
 
 export function GameTileCell({
   tile,
@@ -62,7 +63,7 @@ export function GameTileCell({
           </span>
         ) : null}
         <span
-          className={`game-tile__label line-clamp-4 text-[0.44rem] font-black leading-[0.9] sm:text-[0.56rem] sm:leading-tight xl:text-[0.62rem] 2xl:text-[0.68rem] ${
+          className={`game-tile__label line-clamp-4 text-[0.38rem] font-black leading-[0.88] sm:text-[0.5rem] sm:leading-[0.95] xl:text-[0.55rem] 2xl:text-[0.6rem] ${
             TileIcon ? 'game-tile__label--special' : ''
           }`}
           title={tile.name}

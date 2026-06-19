@@ -35,8 +35,10 @@ export function AuctionBidControls({
     bidIsAffordable
 
   useEffect(() => {
-    setBidInputValue(canBid ? String(minimumBid) : '')
-  }, [canBid, minimumBid])
+    if (!canBid) {
+      setBidInputValue('')
+    }
+  }, [canBid])
 
   return (
     <div className="grid gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-2xl">
@@ -55,7 +57,7 @@ export function AuctionBidControls({
           onChange={(event) =>
             setBidInputValue(event.target.value.replace(/\D/g, ''))
           }
-          placeholder={formatCash(minimumBid)}
+          placeholder={`Min ${formatCash(minimumBid)}`}
           className="h-11 rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-3 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
         />
         {bidInputValue &&

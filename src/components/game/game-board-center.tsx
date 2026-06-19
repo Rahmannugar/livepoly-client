@@ -69,12 +69,22 @@ export function GameBoardCenter({
 
 function DeckCard({ label, tone }: { label: string; tone: 'chance' | 'fund' }) {
   return (
-    <div
-      className={`game-deck-card game-deck-card--${tone} grid min-h-11 place-items-center rounded-lg border border-[var(--line)] px-2 py-2 shadow-[0_18px_44px_rgba(4,12,15,0.16)] sm:min-h-20 sm:rounded-[18px] sm:px-3 sm:py-4`}
-    >
-      <span className="text-center text-[0.46rem] font-black uppercase tracking-[0.1em] text-[var(--sea-ink)] sm:text-[0.68rem] sm:tracking-[0.14em]">
-        {label}
-      </span>
+    <div className="game-deck-card-stack relative min-h-11 sm:min-h-20">
+      <span
+        aria-hidden="true"
+        className="game-deck-card-layer game-deck-card-layer--back"
+      />
+      <span
+        aria-hidden="true"
+        className="game-deck-card-layer game-deck-card-layer--middle"
+      />
+      <div
+        className={`game-deck-card game-deck-card--${tone} relative z-10 grid h-full min-h-11 place-items-center rounded-lg border border-[var(--line)] px-2 py-2 shadow-[0_18px_44px_rgba(4,12,15,0.16)] sm:min-h-20 sm:rounded-xl sm:px-3 sm:py-4`}
+      >
+        <span className="text-center text-[0.42rem] font-black uppercase tracking-[0.08em] text-[var(--sea-ink)] sm:text-[0.62rem] sm:tracking-[0.12em]">
+          {label}
+        </span>
+      </div>
     </div>
   )
 }

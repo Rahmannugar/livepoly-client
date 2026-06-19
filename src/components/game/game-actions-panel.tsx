@@ -314,14 +314,14 @@ function GameActionSheet({
       <button
         type="button"
         aria-label="Close action"
-        className="game-decision-backdrop absolute inset-0 bg-[rgba(4,12,15,0.46)] backdrop-blur-sm"
+        className="game-decision-backdrop absolute inset-0 bg-[rgba(4,12,15,0.62)] backdrop-blur-md"
         onClick={onClose}
       />
       <section
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="game-decision-sheet relative z-10 grid max-h-[min(86vh,44rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-2xl md:rounded-[28px] md:p-4 xl:max-w-3xl"
+        className="game-decision-sheet relative z-10 grid max-h-[min(86vh,38rem)] w-full gap-3 overflow-y-auto rounded-t-[24px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-lg md:rounded-2xl md:p-5"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">

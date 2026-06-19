@@ -3,9 +3,11 @@ import type { GameCardMetadata } from '#/lib/game/game-cards'
 
 export function GameCardReveal({
   card,
+  playerName,
   onClose,
 }: {
   card: GameCardMetadata | null
+  playerName: string | null
   onClose: () => void
 }) {
   if (!card) {
@@ -47,7 +49,9 @@ export function GameCardReveal({
           </div>
 
           <div>
-            <p className="app-kicker">{deckName}</p>
+            <p className="app-kicker">
+              {playerName ? `For ${playerName} · ${deckName}` : deckName}
+            </p>
             <h2 className="display-title mt-2 text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl">
               {card.title}
             </h2>

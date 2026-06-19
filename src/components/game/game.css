@@ -260,6 +260,29 @@
     var(--surface);
 }
 
+.game-deck-card-stack {
+  perspective: 720px;
+}
+
+.game-deck-card-layer {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--surface-strong);
+  pointer-events: none;
+}
+
+.game-deck-card-layer--back {
+  opacity: 0.48;
+  transform: translate(-0.28rem, 0.22rem) rotate(-3deg);
+}
+
+.game-deck-card-layer--middle {
+  opacity: 0.64;
+  transform: translate(0.28rem, 0.16rem) rotate(2.4deg);
+}
+
 .game-deck-card::after {
   content: '';
   position: absolute;
@@ -324,6 +347,10 @@
 }
 
 @media (min-width: 640px) {
+  .game-deck-card-layer {
+    border-radius: 0.75rem;
+  }
+
   .game-card-reveal__layer {
     border-radius: 0.75rem;
   }

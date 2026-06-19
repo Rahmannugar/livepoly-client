@@ -10,9 +10,11 @@ export type GameCardMetadata = {
 export type GameCardReveal = {
   id: string
   card: GameCardMetadata
+  roomPlayerId: string | null
+  createdAt: string
 }
 
-export const gameCardsByKey: Record<string, GameCardMetadata> = {
+export const gameCardsByKey: Partial<Record<string, GameCardMetadata>> = {
   chance_bank_dividend: {
     key: 'chance_bank_dividend',
     deck: 'chance',
@@ -242,6 +244,8 @@ function getCardRevealFromEvent(event?: GameEventLogItem | null) {
         ? `${event.type}:${cardKey}:${event.createdAt}`
         : `event:${event.sequence}`,
     card,
+    roomPlayerId: getEventString(event, 'roomPlayerId'),
+    createdAt: event.createdAt,
   }
 }
 

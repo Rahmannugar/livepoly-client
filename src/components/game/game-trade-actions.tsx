@@ -131,9 +131,7 @@ export function TradeProposalForm({
     (property) => property.ownerRoomPlayerId === roomPlayerId,
   )
   const currentPlayer = findPlayer(players, roomPlayerId)
-  const [targetRoomPlayerId, setTargetRoomPlayerId] = useState(
-    tradablePlayers[0]?.roomPlayerId ?? '',
-  )
+  const [targetRoomPlayerId, setTargetRoomPlayerId] = useState('')
   const [offeredCash, setOfferedCash] = useState('')
   const [requestedCash, setRequestedCash] = useState('')
   const [offeredPropertyKeys, setOfferedPropertyKeys] = useState<string[]>([])
@@ -211,24 +209,38 @@ export function TradeProposalForm({
         ) : null}
       </div>
 
-      <label className="grid gap-2 text-sm font-black text-[var(--sea-ink)]">
-        Player
-        <select
-          value={selectedTargetRoomPlayerId}
-          disabled={disabled || commandPending}
-          className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 text-sm font-bold outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
-          onChange={(event) => {
-            setTargetRoomPlayerId(event.target.value)
-            setRequestedPropertyKeys([])
-          }}
-        >
-          {tradablePlayers.map((player) => (
-            <option key={player.roomPlayerId} value={player.roomPlayerId}>
-              {getPlayerName(player)}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="grid gap-2">
+        <p className="text-sm font-black text-[var(--sea-ink)]">Player</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {tradablePlayers.map((player) => {
+            const selected = selectedTargetRoomPlayerId === player.roomPlayerId
+
+            return (
+              <button
+                key={player.roomPlayerId}
+                type="button"
+                disabled={disabled || commandPending}
+                className={`flex min-w-0 items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+                  selected
+                    ? 'border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary)_14%,var(--surface))]'
+                    : 'border-[var(--line)] bg-[var(--surface-strong)]'
+                }`}
+                onClick={() => {
+                  setTargetRoomPlayerId(player.roomPlayerId)
+                  setRequestedPropertyKeys([])
+                }}
+              >
+                <span className="min-w-0 truncate text-sm font-black text-[var(--sea-ink)]">
+                  {getPlayerName(player)}
+                </span>
+                <span className="shrink-0 text-xs font-bold text-[var(--sea-ink-soft)]">
+                  {formatCash(player.cash)}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       <div className="grid gap-3 md:grid-cols-2">
         <TradePropertyPicker
@@ -353,20 +365,24 @@ function TradePropertyPicker({
             const checked = selectedPropertyKeys.includes(property.tileKey)
 
             return (
-              <label
+              <button
                 key={property.tileKey}
-                className="flex min-w-0 items-center gap-2 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm font-black text-[var(--sea-ink)]"
+                type="button"
+                disabled={disabled}
+                className={`flex min-w-0 items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+                  checked
+                    ? 'border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary)_14%,var(--surface))]'
+                    : 'border-[var(--line)] bg-[var(--surface)]'
+                }`}
+                onClick={() => onToggleProperty(property.tileKey)}
               >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  disabled={disabled}
-                  onChange={() => onToggleProperty(property.tileKey)}
-                />
-                <span className="min-w-0 truncate">
+                <span className="min-w-0 truncate text-sm font-black text-[var(--sea-ink)]">
                   {getTileName(property.tileKey)}
                 </span>
-              </label>
+                <span className="shrink-0 text-xs font-black text-[var(--sea-ink-soft)]">
+                  {checked ? 'Added' : 'Add'}
+                </span>
+              </button>
             )
           })
         )}

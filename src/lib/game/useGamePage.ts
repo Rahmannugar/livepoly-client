@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { getLatestCardRevealFromEvents } from './game-cards'
+import type { GameCardMetadata } from './game-cards'
 import {
-  getLatestCardRevealFromEvents,
-  type GameCardMetadata,
-} from './game-cards'
-import { findPlayer, gameTiles, getMinimumAuctionBid } from './game-board'
+  findPlayer,
+  gameTiles,
+  getMinimumAuctionBid,
+  getPlayerName,
+} from './game-board'
 import { getRemainingMatchTimeMs } from './game-time'
 import { getGameTurnConsequence, getPrimaryGameAction } from './game-view'
 import { useGame } from './useGame'
@@ -13,6 +16,7 @@ export function useGamePage(gameId: string) {
   const game = useGame(gameId)
   const state = game.state
   const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now())
+  const gameOpenedAtRef = useRef(Date.now())
   const cardRevealReadyRef = useRef(false)
   const lastCardRevealIdRef = useRef<string | null>(null)
   const [visibleCardRevealId, setVisibleCardRevealId] = useState<string | null>(
@@ -160,15 +164,27 @@ export function useGamePage(gameId: string) {
       return
     }
 
+    if (
+      new Date(latestCardReveal.createdAt).getTime() <= gameOpenedAtRef.current
+    ) {
+      lastCardRevealIdRef.current = latestCardRevealId
+      setVisibleCardRevealId(null)
+      return
+    }
+
     if (latestCardRevealId !== lastCardRevealIdRef.current) {
       lastCardRevealIdRef.current = latestCardRevealId
       setVisibleCardRevealId(latestCardRevealId)
     }
-  }, [latestCardReveal?.id])
+  }, [latestCardReveal?.createdAt, latestCardReveal?.id])
 
   const visibleCardReveal: GameCardMetadata | null =
     latestCardReveal && latestCardReveal.id === visibleCardRevealId
       ? latestCardReveal.card
+      : null
+  const visibleCardRevealPlayer =
+    latestCardReveal && latestCardReveal.id === visibleCardRevealId
+      ? findPlayer(state?.players ?? [], latestCardReveal.roomPlayerId)
       : null
 
   return {
@@ -202,6 +218,9 @@ export function useGamePage(gameId: string) {
     canManageProperties,
     canLiquidateProperties,
     visibleCardReveal,
+    visibleCardRevealPlayerName: visibleCardRevealPlayer
+      ? getPlayerName(visibleCardRevealPlayer)
+      : null,
     selectTile: (tileKey: string) => setSelectedTileKey(tileKey),
     clearSelectedTile: () => setSelectedTileKey(null),
     dismissVisibleCardReveal: () => setVisibleCardRevealId(null),
