@@ -1,12 +1,27 @@
 import {
   CalendarDotsIcon,
+  CheckIcon,
   ChartLineUpIcon,
   ClockCounterClockwiseIcon,
   MedalIcon,
   UserIcon,
+  UserMinusIcon,
+  UserPlusIcon,
+  XIcon,
 } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
 import { APP_NAME } from '#/config/app.constants'
+import { useToast } from '#/components/common/toast'
+import {
+  useFriendMutations,
+  useFriendRequests,
+  useFriends,
+} from '#/lib/friends/useFriends'
+import type {
+  FriendRequestSummary,
+  FriendSummary,
+} from '#/lib/friends/friends.types'
+import { useAuth } from '#/lib/auth/useAuth'
 import { useUserMatches, useUserProfile } from '#/lib/users/useUsers'
 
 type PublicUserProfilePageProps = {
@@ -36,10 +51,46 @@ function formatDelta(value: number | null) {
 }
 
 export function PublicUserProfilePage({ username }: PublicUserProfilePageProps) {
+  const auth = useAuth()
+  const { showToast } = useToast()
   const profile = useUserProfile(username)
+  const friends = useFriends()
+  const requests = useFriendRequests()
+  const mutations = useFriendMutations()
   const user = profile.data
   const matches = useUserMatches(user?.username)
   const recentMatches = matches.data?.items ?? []
+  const relationship = user
+    ? getRelationshipForUsername({
+        username: user.username,
+        friends: friends.data?.items ?? [],
+        incoming: requests.data?.incoming.items ?? [],
+        outgoing: requests.data?.outgoing.items ?? [],
+      })
+    : null
+  const isOwnProfile = Boolean(
+    auth.currentUser.data?.username.toLowerCase() === username.toLowerCase(),
+  )
+
+  function handleMutation<T>(
+    mutation: {
+      mutate: (
+        input: T,
+        options: { onSuccess: () => void; onError: (error: Error) => void },
+      ) => void
+    },
+    input: T,
+    successMessage: string,
+  ) {
+    mutation.mutate(input, {
+      onSuccess: () => showToast({ kind: 'success', message: successMessage }),
+      onError: (error) =>
+        showToast({
+          kind: 'error',
+          message: error.message,
+        }),
+    })
+  }
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
@@ -94,6 +145,48 @@ export function PublicUserProfilePage({ username }: PublicUserProfilePageProps) 
                   <p className="mt-3 text-base font-semibold leading-7 text-[var(--sea-ink-soft)]">
                     {user.bio ?? 'Ready to roll, buy, build, and climb.'}
                   </p>
+                  {!isOwnProfile ? (
+                    <ProfileFriendActions
+                      username={user.username}
+                      relationship={relationship}
+                      mutations={mutations}
+                      onSendRequest={() =>
+                        handleMutation(
+                          mutations.sendRequest,
+                          user.username,
+                          `Request sent to ${user.username}.`,
+                        )
+                      }
+                      onAcceptRequest={(friendshipId) =>
+                        handleMutation(
+                          mutations.acceptRequest,
+                          friendshipId,
+                          'Friend request accepted.',
+                        )
+                      }
+                      onRejectRequest={(friendshipId) =>
+                        handleMutation(
+                          mutations.rejectRequest,
+                          friendshipId,
+                          'Friend request rejected.',
+                        )
+                      }
+                      onCancelRequest={(friendshipId) =>
+                        handleMutation(
+                          mutations.cancelRequest,
+                          friendshipId,
+                          'Friend request canceled.',
+                        )
+                      }
+                      onRemoveFriend={(friendshipId) =>
+                        handleMutation(
+                          mutations.removeFriend,
+                          friendshipId,
+                          'Friend removed.',
+                        )
+                      }
+                    />
+                  ) : null}
                 </div>
               </div>
 
@@ -204,4 +297,173 @@ function StatePanel({ title, detail }: { title: string; detail?: string }) {
       ) : null}
     </section>
   )
+}
+
+type UserRelationshipState =
+  | { status: 'friends'; friendshipId: string }
+  | { status: 'incoming'; friendshipId: string }
+  | { status: 'outgoing'; friendshipId: string }
+
+type FriendMutations = ReturnType<typeof useFriendMutations>
+
+function ProfileFriendActions({
+  username,
+  relationship,
+  mutations,
+  onSendRequest,
+  onAcceptRequest,
+  onRejectRequest,
+  onCancelRequest,
+  onRemoveFriend,
+}: {
+  username: string
+  relationship: UserRelationshipState | null
+  mutations: FriendMutations
+  onSendRequest: () => void
+  onAcceptRequest: (friendshipId: string) => void
+  onRejectRequest: (friendshipId: string) => void
+  onCancelRequest: (friendshipId: string) => void
+  onRemoveFriend: (friendshipId: string) => void
+}) {
+  if (relationship?.status === 'friends') {
+    const isRemoving =
+      mutations.removeFriend.isPending &&
+      mutations.removeFriend.variables === relationship.friendshipId
+
+    return (
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <span className="inline-flex h-10 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-4 text-sm font-black text-[var(--sea-ink)]">
+          Friends
+        </span>
+        <button
+          type="button"
+          aria-label={`Remove ${username}`}
+          disabled={mutations.removeFriend.isPending}
+          className="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={() => onRemoveFriend(relationship.friendshipId)}
+        >
+          {isRemoving ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--sea-ink)]" />
+          ) : (
+            <UserMinusIcon weight="bold" className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+    )
+  }
+
+  if (relationship?.status === 'outgoing') {
+    const isCancelling =
+      mutations.cancelRequest.isPending &&
+      mutations.cancelRequest.variables === relationship.friendshipId
+
+    return (
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <span className="inline-flex h-10 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-4 text-sm font-black text-[var(--sea-ink-soft)]">
+          Requested
+        </span>
+        <button
+          type="button"
+          disabled={mutations.cancelRequest.isPending}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={() => onCancelRequest(relationship.friendshipId)}
+        >
+          <XIcon weight="bold" className="h-4 w-4" />
+          {isCancelling ? 'Cancelling...' : 'Cancel'}
+        </button>
+      </div>
+    )
+  }
+
+  if (relationship?.status === 'incoming') {
+    const isAccepting =
+      mutations.acceptRequest.isPending &&
+      mutations.acceptRequest.variables === relationship.friendshipId
+    const isRejecting =
+      mutations.rejectRequest.isPending &&
+      mutations.rejectRequest.variables === relationship.friendshipId
+
+    return (
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={
+            mutations.acceptRequest.isPending ||
+            mutations.rejectRequest.isPending
+          }
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={() => onAcceptRequest(relationship.friendshipId)}
+        >
+          <CheckIcon weight="bold" className="h-4 w-4" />
+          {isAccepting ? 'Accepting...' : 'Accept'}
+        </button>
+        <button
+          type="button"
+          disabled={
+            mutations.acceptRequest.isPending ||
+            mutations.rejectRequest.isPending
+          }
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={() => onRejectRequest(relationship.friendshipId)}
+        >
+          <XIcon weight="bold" className="h-4 w-4" />
+          {isRejecting ? 'Rejecting...' : 'Reject'}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={mutations.sendRequest.isPending}
+      className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+      onClick={onSendRequest}
+    >
+      <UserPlusIcon weight="bold" className="h-4 w-4" />
+      {mutations.sendRequest.isPending &&
+      mutations.sendRequest.variables === username
+        ? 'Adding...'
+        : 'Add'}
+    </button>
+  )
+}
+
+function getRelationshipForUsername({
+  username,
+  friends,
+  incoming,
+  outgoing,
+}: {
+  username: string
+  friends: FriendSummary[]
+  incoming: FriendRequestSummary[]
+  outgoing: FriendRequestSummary[]
+}): UserRelationshipState | null {
+  const normalizedUsername = username.toLowerCase()
+  const friend = friends.find(
+    (item) => item.username.toLowerCase() === normalizedUsername,
+  )
+
+  if (friend) {
+    return { status: 'friends', friendshipId: friend.friendshipId }
+  }
+
+  const incomingRequest = incoming.find(
+    (request) => request.requesterUsername.toLowerCase() === normalizedUsername,
+  )
+
+  if (incomingRequest) {
+    return { status: 'incoming', friendshipId: incomingRequest.friendshipId }
+  }
+
+  const outgoingRequest = outgoing.find(
+    (request) => request.addresseeUsername.toLowerCase() === normalizedUsername,
+  )
+
+  if (outgoingRequest) {
+    return { status: 'outgoing', friendshipId: outgoingRequest.friendshipId }
+  }
+
+  return null
 }

@@ -1,9 +1,9 @@
 import {
   CheckIcon,
   MagnifyingGlassIcon,
-  PaperPlaneTiltIcon,
   UserIcon,
   UserMinusIcon,
+  UserPlusIcon,
   XIcon,
 } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
@@ -30,6 +30,11 @@ export function FriendsPage() {
   const requests = useFriendRequests()
   const mutations = useFriendMutations()
   const { showToast } = useToast()
+  const relationshipByUsername = buildRelationshipByUsername({
+    friends: friends.data?.items ?? [],
+    incoming: requests.data?.incoming.items ?? [],
+    outgoing: requests.data?.outgoing.items ?? [],
+  })
 
   function handleMutation<T>(
     mutation: {
@@ -96,6 +101,9 @@ export function FriendsPage() {
                 <SearchResultRow
                   key={user.id}
                   username={user.username}
+                  relationship={relationshipByUsername.get(
+                    user.username.toLowerCase(),
+                  )}
                   isPending={
                     mutations.sendRequest.isPending &&
                     mutations.sendRequest.variables === user.username
@@ -223,27 +231,37 @@ export function FriendsPage() {
 
 function SearchResultRow({
   username,
+  relationship,
   isPending,
   isDisabled,
   onAdd,
 }: {
   username: string
+  relationship?: UserRelationshipState
   isPending: boolean
   isDisabled: boolean
   onAdd: () => void
 }) {
+  const relationshipLabel = getRelationshipLabel(relationship)
+
   return (
     <article className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4">
       <UserSummary username={username} />
-      <button
-        type="button"
-        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={isDisabled}
-        onClick={onAdd}
-      >
-        <PaperPlaneTiltIcon weight="bold" className="h-4 w-4" />
-        {isPending ? 'Adding...' : 'Add'}
-      </button>
+      {relationshipLabel ? (
+        <span className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-4 text-sm font-black text-[var(--sea-ink-soft)]">
+          {relationshipLabel}
+        </span>
+      ) : (
+        <button
+          type="button"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={isDisabled}
+          onClick={onAdd}
+        >
+          <UserPlusIcon weight="bold" className="h-4 w-4" />
+          {isPending ? 'Adding...' : 'Add'}
+        </button>
+      )}
     </article>
   )
 }
@@ -357,4 +375,60 @@ function EmptyState({ text }: { text: string }) {
       {text}
     </p>
   )
+}
+
+type UserRelationshipState =
+  | { status: 'friends'; friendshipId: string }
+  | { status: 'incoming'; friendshipId: string }
+  | { status: 'outgoing'; friendshipId: string }
+
+function buildRelationshipByUsername({
+  friends,
+  incoming,
+  outgoing,
+}: {
+  friends: FriendSummary[]
+  incoming: FriendRequestSummary[]
+  outgoing: FriendRequestSummary[]
+}) {
+  const relationships = new Map<string, UserRelationshipState>()
+
+  for (const friend of friends) {
+    relationships.set(friend.username.toLowerCase(), {
+      status: 'friends',
+      friendshipId: friend.friendshipId,
+    })
+  }
+
+  for (const request of incoming) {
+    relationships.set(request.requesterUsername.toLowerCase(), {
+      status: 'incoming',
+      friendshipId: request.friendshipId,
+    })
+  }
+
+  for (const request of outgoing) {
+    relationships.set(request.addresseeUsername.toLowerCase(), {
+      status: 'outgoing',
+      friendshipId: request.friendshipId,
+    })
+  }
+
+  return relationships
+}
+
+function getRelationshipLabel(relationship?: UserRelationshipState) {
+  if (!relationship) {
+    return null
+  }
+
+  if (relationship.status === 'friends') {
+    return 'Friends'
+  }
+
+  if (relationship.status === 'incoming') {
+    return 'Respond'
+  }
+
+  return 'Requested'
 }
