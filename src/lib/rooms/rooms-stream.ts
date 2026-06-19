@@ -12,13 +12,63 @@ import { getRoomStreamUrl } from './rooms.service'
 
 const ROOM_STREAM_RECONNECT_DELAYS_MS = [1_000, 2_000, 5_000, 10_000] as const
 
+type RoomStreamPayload = {
+  event?: string
+  data?: {
+    roomId?: string
+    roomCode?: string
+    changedAt?: string
+  }
+}
+
+export type RoomStreamEvent = {
+  event: string
+  data: RoomStreamPayload | null
+}
+
 function getReconnectDelay(attempt: number) {
   return ROOM_STREAM_RECONNECT_DELAYS_MS[
     Math.min(attempt, ROOM_STREAM_RECONNECT_DELAYS_MS.length - 1)
   ]
 }
 
-async function readRoomStream(response: Response, onRoomChanged: () => void) {
+function parseStreamMessage(message: string): RoomStreamEvent | null {
+  const lines = message.split('\n')
+  let event = 'message'
+  const dataLines: string[] = []
+
+  for (const line of lines) {
+    if (line.startsWith('event:')) {
+      event = line.slice('event:'.length).trim()
+      continue
+    }
+
+    if (line.startsWith('data:')) {
+      dataLines.push(line.slice('data:'.length).trimStart())
+    }
+  }
+
+  if (!dataLines.length) {
+    return null
+  }
+
+  try {
+    return {
+      event,
+      data: JSON.parse(dataLines.join('\n')) as RoomStreamPayload,
+    }
+  } catch {
+    return {
+      event,
+      data: null,
+    }
+  }
+}
+
+async function readRoomStream(
+  response: Response,
+  onRoomChanged: (event: RoomStreamEvent) => void,
+) {
   const reader = response.body?.getReader()
 
   if (!reader) {
@@ -43,8 +93,10 @@ async function readRoomStream(response: Response, onRoomChanged: () => void) {
       const message = buffer.slice(0, messageEndIndex)
       buffer = buffer.slice(messageEndIndex + 2)
 
-      if (message.includes('event: room.updated')) {
-        onRoomChanged()
+      const event = parseStreamMessage(message)
+
+      if (event?.event === 'room.updated') {
+        onRoomChanged(event)
       }
 
       messageEndIndex = buffer.indexOf('\n\n')
@@ -52,7 +104,15 @@ async function readRoomStream(response: Response, onRoomChanged: () => void) {
   }
 }
 
-export function useRoomStream(code: string, enabled = true) {
+export function useRoomStream({
+  code,
+  enabled = true,
+  onRoomUpdated,
+}: {
+  code: string
+  enabled?: boolean
+  onRoomUpdated?: (event: RoomStreamEvent) => void
+}) {
   const queryClient = useQueryClient()
   const stoppedRef = useRef(false)
 
@@ -107,7 +167,7 @@ export function useRoomStream(code: string, enabled = true) {
 
           reconnectAttempt = 0
 
-          await readRoomStream(response, () => {
+          await readRoomStream(response, (event) => {
             void queryClient.invalidateQueries({
               queryKey: ROOMS_QUERY_KEYS.room(code),
             })
@@ -117,6 +177,7 @@ export function useRoomStream(code: string, enabled = true) {
             void queryClient.invalidateQueries({
               queryKey: ROOMS_QUERY_KEYS.liveRooms,
             })
+            onRoomUpdated?.(event)
           })
         } catch (error) {
           if (stoppedRef.current || abortController.signal.aborted) {
@@ -141,5 +202,5 @@ export function useRoomStream(code: string, enabled = true) {
       stoppedRef.current = true
       abortController.abort()
     }
-  }, [code, enabled, queryClient])
+  }, [code, enabled, onRoomUpdated, queryClient])
 }

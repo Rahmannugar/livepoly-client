@@ -49,7 +49,7 @@ function getNotificationTarget(notification: NotificationItem) {
     return {
       to: '/rooms/$code' as const,
       params: { code: notification.data.roomCode },
-      label: 'Open room',
+      label: notification.type === 'room_invite' ? 'Join room' : 'Open room',
     }
   }
 

@@ -93,27 +93,22 @@ export function FriendsPage() {
 
             <div className="mt-5 grid gap-3">
               {search.data?.items.map((user) => (
-                <article
+                <SearchResultRow
                   key={user.id}
-                  className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4"
-                >
-                  <UserSummary username={user.username} />
-                  <button
-                    type="button"
-                    className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)]"
-                    disabled={mutations.sendRequest.isPending}
-                    onClick={() =>
-                      handleMutation(
-                        mutations.sendRequest,
-                        user.username,
-                        `Request sent to ${user.username}.`,
-                      )
-                    }
-                  >
-                    <PaperPlaneTiltIcon weight="bold" className="h-4 w-4" />
-                    Add
-                  </button>
-                </article>
+                  username={user.username}
+                  isPending={
+                    mutations.sendRequest.isPending &&
+                    mutations.sendRequest.variables === user.username
+                  }
+                  isDisabled={mutations.sendRequest.isPending}
+                  onAdd={() =>
+                    handleMutation(
+                      mutations.sendRequest,
+                      user.username,
+                      `Request sent to ${user.username}.`,
+                    )
+                  }
+                />
               ))}
 
               {debouncedQuery.length >= 2 && !search.data?.items.length ? (
@@ -138,6 +133,7 @@ export function FriendsPage() {
                 )
               }
               isMutating={mutations.removeFriend.isPending}
+              mutatingFriendshipId={mutations.removeFriend.variables}
             />
 
             <RequestsList
@@ -149,8 +145,11 @@ export function FriendsPage() {
                 <>
                   <button
                     type="button"
-                    className="grid h-10 w-10 place-items-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)]"
-                    disabled={mutations.acceptRequest.isPending}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={
+                      mutations.acceptRequest.isPending ||
+                      mutations.rejectRequest.isPending
+                    }
                     onClick={() =>
                       handleMutation(
                         mutations.acceptRequest,
@@ -160,11 +159,18 @@ export function FriendsPage() {
                     }
                   >
                     <CheckIcon weight="bold" className="h-4 w-4" />
+                    {mutations.acceptRequest.isPending &&
+                    mutations.acceptRequest.variables === request.friendshipId
+                      ? 'Accepting...'
+                      : 'Accept'}
                   </button>
                   <button
                     type="button"
-                    className="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] text-[var(--sea-ink)]"
-                    disabled={mutations.rejectRequest.isPending}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[var(--line)] px-4 text-sm font-black text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={
+                      mutations.acceptRequest.isPending ||
+                      mutations.rejectRequest.isPending
+                    }
                     onClick={() =>
                       handleMutation(
                         mutations.rejectRequest,
@@ -174,6 +180,10 @@ export function FriendsPage() {
                     }
                   >
                     <XIcon weight="bold" className="h-4 w-4" />
+                    {mutations.rejectRequest.isPending &&
+                    mutations.rejectRequest.variables === request.friendshipId
+                      ? 'Rejecting...'
+                      : 'Reject'}
                   </button>
                 </>
               )}
@@ -197,7 +207,10 @@ export function FriendsPage() {
                     )
                   }
                 >
-                  Cancel
+                  {mutations.cancelRequest.isPending &&
+                  mutations.cancelRequest.variables === request.friendshipId
+                    ? 'Cancelling...'
+                    : 'Cancel'}
                 </button>
               )}
             />
@@ -208,38 +221,73 @@ export function FriendsPage() {
   )
 }
 
+function SearchResultRow({
+  username,
+  isPending,
+  isDisabled,
+  onAdd,
+}: {
+  username: string
+  isPending: boolean
+  isDisabled: boolean
+  onAdd: () => void
+}) {
+  return (
+    <article className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4">
+      <UserSummary username={username} />
+      <button
+        type="button"
+        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isDisabled}
+        onClick={onAdd}
+      >
+        <PaperPlaneTiltIcon weight="bold" className="h-4 w-4" />
+        {isPending ? 'Adding...' : 'Add'}
+      </button>
+    </article>
+  )
+}
+
 function FriendsList({
   friends,
   isLoading,
   isMutating,
+  mutatingFriendshipId,
   onRemove,
 }: {
   friends: FriendSummary[]
   isLoading: boolean
   isMutating: boolean
+  mutatingFriendshipId?: string
   onRemove: (friendshipId: string) => void
 }) {
   return (
     <article className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-6">
       <p className="app-kicker">Your friends</p>
       <div className="mt-4 grid gap-3">
-        {friends.map((friend) => (
-          <article
-            key={friend.friendshipId}
-            className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4"
-          >
-            <UserSummary username={friend.username} />
-            <button
-              type="button"
-              aria-label={`Remove ${friend.username}`}
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] text-[var(--sea-ink)]"
-              disabled={isMutating}
-              onClick={() => onRemove(friend.friendshipId)}
+        {friends.map((friend) => {
+          const isRemoving =
+            isMutating && mutatingFriendshipId === friend.friendshipId
+
+          return (
+            <article
+              key={friend.friendshipId}
+              className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4"
             >
-              <UserMinusIcon weight="bold" className="h-4 w-4" />
-            </button>
-          </article>
-        ))}
+              <UserSummary username={friend.username} />
+              <button
+                type="button"
+                aria-label={`Remove ${friend.username}`}
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-[var(--line)] px-4 text-sm font-black text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isMutating}
+                onClick={() => onRemove(friend.friendshipId)}
+              >
+                <UserMinusIcon weight="bold" className="h-4 w-4" />
+                {isRemoving ? 'Removing...' : 'Remove'}
+              </button>
+            </article>
+          )
+        })}
 
         {!friends.length ? (
           <EmptyState

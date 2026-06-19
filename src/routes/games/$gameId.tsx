@@ -1,4 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { ProtectedRoute } from '#/components/auth/protected-route'
+import { authenticatedRail } from '#/lib/auth/auth.rail'
 import { GamePage } from '#/pages/game/game-page'
 
 export const Route = createFileRoute('/games/$gameId')({
@@ -8,5 +10,9 @@ export const Route = createFileRoute('/games/$gameId')({
 function GameRoute() {
   const { gameId } = Route.useParams()
 
-  return <GamePage gameId={gameId} />
+  return (
+    <ProtectedRoute rail={authenticatedRail}>
+      <GamePage gameId={gameId} />
+    </ProtectedRoute>
+  )
 }

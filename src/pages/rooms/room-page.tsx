@@ -11,7 +11,7 @@ import {
   UsersIcon,
 } from '@phosphor-icons/react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { RoomInviteDialog } from '#/components/rooms/room-invite-dialog'
 import { RouteTransitionOverlay } from '#/components/common/route-transition-overlay'
 import { APP_NAME } from '#/config/app.constants'
@@ -23,7 +23,7 @@ import {
   BOT_DIFFICULTIES,
   DEFAULT_BOT_DIFFICULTY,
 } from '#/lib/rooms/rooms.constants'
-import { useRoomStream } from '#/lib/rooms/rooms-stream'
+import { useRoomStream, type RoomStreamEvent } from '#/lib/rooms/rooms-stream'
 import { useRoom, useRooms } from '#/lib/rooms/useRooms'
 import { useUserSearch } from '#/lib/users/useUsers'
 import type { BotDifficulty, RoomPlayer } from '#/lib/rooms/rooms.types'
@@ -36,7 +36,7 @@ export function RoomPage({ code }: RoomPageProps) {
   const auth = useAuth()
   const rooms = useRooms()
   const roomQuery = useRoom(code)
-  useRoomStream(code)
+  const refetchRoom = roomQuery.refetch
   const navigate = useNavigate()
   const { showToast } = useToast()
   const [isInviteOpen, setIsInviteOpen] = useState(false)
@@ -70,6 +70,12 @@ export function RoomPage({ code }: RoomPageProps) {
   const canStartRoom = Boolean(
     room && isHost && room.status === 'waiting' && playersAtTable.length > 0,
   )
+  const canJoinRoom = Boolean(
+    room &&
+      room.status === 'waiting' &&
+      room.currentUserAccess === 'none' &&
+      playersAtTable.length < room.maxPlayers,
+  )
   const willFillOpenSeats = Boolean(
     room &&
       isHost &&
@@ -89,6 +95,32 @@ export function RoomPage({ code }: RoomPageProps) {
   })
   const exitIsPending =
     rooms.leaveRoom.isPending || rooms.stopSpectatingRoom.isPending
+
+  const handleRoomUpdated = useCallback(
+    async (event: RoomStreamEvent) => {
+      const result = await refetchRoom()
+      const nextRoom = result.data
+
+      if (
+        event.data?.event === 'room.started' &&
+        nextRoom?.activeGameId &&
+        nextRoom.currentUserAccess !== 'none'
+      ) {
+        setRouteTransitionLabel('Opening game...')
+        navigate({
+          to: '/games/$gameId',
+          params: { gameId: nextRoom.activeGameId },
+        })
+      }
+    },
+    [navigate, refetchRoom],
+  )
+
+  useRoomStream({
+    code,
+    enabled: Boolean(user),
+    onRoomUpdated: handleRoomUpdated,
+  })
 
   function copyRoomCode() {
     if (!room?.code) {
@@ -148,6 +180,28 @@ export function RoomPage({ code }: RoomPageProps) {
             error instanceof Error
               ? error.message
               : 'Could not stop spectating.',
+        })
+      },
+    })
+  }
+
+  function joinRoom() {
+    if (!room?.code) {
+      return
+    }
+
+    rooms.joinRoom.mutate(room.code, {
+      onSuccess: (response) => {
+        showToast({
+          kind: 'success',
+          message: `Joined room ${response.code}.`,
+        })
+      },
+      onError: (error) => {
+        showToast({
+          kind: 'error',
+          message:
+            error instanceof Error ? error.message : 'Could not join room.',
         })
       },
     })
@@ -441,6 +495,18 @@ export function RoomPage({ code }: RoomPageProps) {
                     </button>
                   ) : null}
 
+                  {canJoinRoom ? (
+                    <button
+                      type="button"
+                      disabled={rooms.joinRoom.isPending}
+                      className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={joinRoom}
+                    >
+                      <UsersIcon weight="bold" className="h-4.5 w-4.5" />
+                      {rooms.joinRoom.isPending ? 'Joining...' : 'Join room'}
+                    </button>
+                  ) : null}
+
                   {room.status === 'active' && room.activeGameId ? (
                     <button
                       type="button"
@@ -552,6 +618,10 @@ function getRoomStatusCopy({
     return playersAtTable > 0
       ? 'Start when the table is ready. Empty seats can be filled by bots.'
       : 'Waiting for at least one player to take a seat.'
+  }
+
+  if (access === 'none') {
+    return 'Join the room to take an open seat.'
   }
 
   return 'Waiting for the host to start the room.'
