@@ -27,12 +27,12 @@ export function StatsPage() {
       : 0
 
   return (
-    <main className="min-h-screen px-5 py-6 sm:px-8">
-      <section className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-6xl content-center gap-7">
+    <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
+      <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
         <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
-            className="display-title text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl"
+            className="display-title text-2xl font-semibold text-[var(--sea-ink)] sm:text-4xl"
           >
             {APP_NAME}
           </Link>
@@ -43,15 +43,15 @@ export function StatsPage() {
 
         <div className="max-w-3xl">
           <p className="app-kicker">Stats</p>
-          <h1 className="display-title mt-2 text-5xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
+          <h1 className="display-title mt-1 text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:mt-2 sm:text-6xl">
             Track your run.
           </h1>
-          <p className="mt-4 text-lg leading-8 text-[var(--sea-ink-soft)]">
+          <p className="mt-1.5 text-sm font-semibold leading-5 text-[var(--sea-ink-soft)] sm:mt-4 sm:text-lg sm:leading-8">
             Wins, placements, rating movement, and the games behind them.
           </p>
         </div>
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
           <StatCard
             label="Rating"
             value={user ? String(user.stats.rating) : '...'}
@@ -78,11 +78,11 @@ export function StatsPage() {
           />
         </section>
 
-        <section className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-7">
+        <section className="rounded-[20px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-3 shadow-[0_16px_40px_rgba(8,28,32,0.09)] backdrop-blur-xl sm:rounded-[30px] sm:p-7">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="app-kicker">Recent form</p>
-              <h2 className="display-title mt-1 text-4xl font-semibold text-[var(--sea-ink)]">
+              <h2 className="display-title mt-1 text-2xl font-semibold text-[var(--sea-ink)] sm:text-4xl">
                 Latest results.
               </h2>
             </div>
@@ -92,7 +92,7 @@ export function StatsPage() {
             {recentMatches.slice(0, 5).map((match) => (
               <article
                 key={match.gameId}
-                className="grid gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4 sm:grid-cols-[1fr_auto_auto]"
+                className="grid gap-2 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:grid-cols-[1fr_auto_auto] sm:gap-3 sm:rounded-[22px] sm:p-4"
               >
                 <div className="min-w-0">
                   <p className="truncate text-base font-black text-[var(--sea-ink)]">
@@ -118,7 +118,7 @@ export function StatsPage() {
             ))}
 
             {!recentMatches.length ? (
-              <p className="rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm font-bold text-[var(--sea-ink-soft)]">
+              <p className="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 text-sm font-bold text-[var(--sea-ink-soft)] sm:rounded-[22px] sm:p-4">
                 Complete a game and your results will appear here.
               </p>
             ) : null}
@@ -137,12 +137,12 @@ type StatCardProps = {
 
 function StatCard({ label, value, icon: Icon }: StatCardProps) {
   return (
-    <article className="rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
-      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
-        <Icon weight="bold" className="h-5 w-5" />
+    <article className="rounded-[18px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-2.5 shadow-[0_12px_28px_rgba(8,28,32,0.08)] backdrop-blur-xl sm:rounded-[26px] sm:p-5">
+      <span className="grid h-8 w-8 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] sm:h-11 sm:w-11 sm:rounded-2xl">
+        <Icon weight="bold" className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
       </span>
-      <p className="app-kicker mt-5">{label}</p>
-      <p className="mt-1 truncate text-3xl font-black text-[var(--sea-ink)]">
+      <p className="app-kicker mt-2 sm:mt-5">{label}</p>
+      <p className="mt-0.5 truncate text-xl font-black text-[var(--sea-ink)] sm:mt-1 sm:text-3xl">
         {value}
       </p>
     </article>

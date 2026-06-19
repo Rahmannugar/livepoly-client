@@ -25,8 +25,8 @@ export function MatchesPage() {
   const items = matches.data?.items ?? []
 
   return (
-    <main className="min-h-screen px-5 py-6 sm:px-8">
-      <section className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-5xl content-center gap-7">
+    <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
+      <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-5xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
         <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
@@ -41,10 +41,10 @@ export function MatchesPage() {
 
         <div className="max-w-3xl">
           <p className="app-kicker">Recent matches</p>
-          <h1 className="display-title mt-2 text-5xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
+          <h1 className="display-title mt-2 text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
             Games you finished.
           </h1>
-          <p className="mt-4 text-lg leading-8 text-[var(--sea-ink-soft)]">
+          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)] sm:mt-4 sm:text-lg sm:leading-8">
             Review placements, net worth, rating changes, and match length.
           </p>
         </div>
@@ -53,12 +53,12 @@ export function MatchesPage() {
           {items.map((match) => (
             <article
               key={match.gameId}
-              className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl"
+              className="rounded-[22px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-3 shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl sm:rounded-[28px] sm:p-5"
             >
-              <div className="grid gap-4 lg:grid-cols-[1fr_auto_auto_auto] lg:items-center">
+              <div className="grid gap-3 lg:grid-cols-[1fr_auto_auto_auto] lg:items-center lg:gap-4">
                 <div className="min-w-0">
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] sm:h-11 sm:w-11 sm:rounded-2xl">
                       {match.won ? (
                         <CrownIcon weight="bold" className="h-5 w-5" />
                       ) : (
@@ -96,7 +96,7 @@ export function MatchesPage() {
                 />
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-black text-[var(--sea-ink-soft)]">
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-black text-[var(--sea-ink-soft)] sm:mt-4">
                 <span className="rounded-full border border-[var(--line)] px-3 py-1.5">
                   {match.mode}
                 </span>
@@ -111,7 +111,7 @@ export function MatchesPage() {
           ))}
 
           {!items.length ? (
-            <article className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 text-center shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
+            <article className="rounded-[22px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 text-center shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl sm:rounded-[28px] sm:p-6">
               <ClockCounterClockwiseIcon
                 weight="bold"
                 className="mx-auto h-8 w-8 text-[var(--sea-ink-soft)]"
@@ -132,7 +132,7 @@ export function MatchesPage() {
 
 function MatchValue({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-28 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3">
+    <div className="min-w-0 rounded-[16px] border border-[var(--line)] bg-[var(--surface)] p-2.5 sm:min-w-28 sm:rounded-[18px] sm:p-3">
       <p className="app-kicker">{label}</p>
       <p className="mt-1 truncate text-base font-black text-[var(--sea-ink)]">
         {value}

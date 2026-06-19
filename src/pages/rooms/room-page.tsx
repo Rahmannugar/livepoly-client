@@ -313,12 +313,12 @@ export function RoomPage({ code }: RoomPageProps) {
   }
 
   return (
-    <main className="min-h-screen px-5 py-6 sm:px-8">
+    <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
         <header className="flex items-center justify-between gap-3">
           <Link
             to="/"
-            className="display-title min-w-0 text-[clamp(1.55rem,8vw,2.25rem)] font-semibold leading-none text-[var(--sea-ink)] sm:text-4xl"
+            className="display-title min-w-0 text-2xl font-semibold leading-none text-[var(--sea-ink)] min-[420px]:text-3xl sm:text-4xl"
           >
             {APP_NAME}
           </Link>
@@ -327,7 +327,7 @@ export function RoomPage({ code }: RoomPageProps) {
             <Link
               to="/"
               aria-label="Back home"
-              className="grid h-9 w-9 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] transition hover:translate-y-[-1px] sm:h-10 sm:w-10"
+              className="grid h-8 w-8 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] transition hover:translate-y-[-1px] min-[420px]:h-9 min-[420px]:w-9 sm:h-10 sm:w-10"
             >
               <ArrowLeftIcon weight="bold" className="h-5 w-5" />
             </Link>
@@ -335,7 +335,7 @@ export function RoomPage({ code }: RoomPageProps) {
           </div>
         </header>
 
-        <div className="grid flex-1 content-center gap-5 py-10 sm:py-14">
+        <div className="grid flex-1 content-center gap-5 py-6 sm:py-14">
           {roomQuery.isLoading ? (
             <p className="display-title text-3xl font-semibold text-[var(--sea-ink)]">
               Opening room...
@@ -345,7 +345,7 @@ export function RoomPage({ code }: RoomPageProps) {
           {roomQuery.isError ? (
             <section className="max-w-xl rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-6 shadow-[0_24px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl">
               <p className="app-kicker">Room not found</p>
-              <h1 className="display-title mt-3 text-4xl font-semibold text-[var(--sea-ink)]">
+              <h1 className="display-title mt-3 text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl">
                 This table is not available.
               </h1>
               <p className="mt-3 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
@@ -367,7 +367,7 @@ export function RoomPage({ code }: RoomPageProps) {
                   <p className="app-kicker">Room lobby</p>
                   <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <h1 className="display-title text-4xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-5xl">
+                      <h1 className="display-title text-3xl font-semibold leading-tight text-[var(--sea-ink)] min-[420px]:text-4xl sm:text-5xl">
                         Room {room.code}
                       </h1>
                       <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">

@@ -16,8 +16,8 @@ export function LeaderboardPage() {
   const entries = leaderboard.data?.entries ?? []
 
   return (
-    <main className="min-h-screen px-5 py-6 sm:px-8">
-      <section className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-5xl content-center gap-7">
+    <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
+      <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-5xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
         <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
@@ -30,13 +30,13 @@ export function LeaderboardPage() {
           </Link>
         </header>
 
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-5">
           <div className="max-w-3xl">
             <p className="app-kicker">Leaderboard</p>
-            <h1 className="display-title mt-2 text-5xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
+            <h1 className="display-title mt-2 text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
               The current table.
             </h1>
-            <p className="mt-4 text-lg leading-8 text-[var(--sea-ink-soft)]">
+            <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)] sm:mt-4 sm:text-lg sm:leading-8">
               Ratings, wins, and placements across LivePoly games.
             </p>
           </div>
@@ -48,8 +48,8 @@ export function LeaderboardPage() {
                 type="button"
                 className={
                   item.value === period
-                    ? 'h-10 rounded-full bg-[var(--primary)] px-5 text-sm font-black text-[var(--primary-foreground)]'
-                    : 'h-10 rounded-full px-5 text-sm font-black text-[var(--sea-ink-soft)]'
+                    ? 'h-9 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] sm:h-10 sm:px-5'
+                    : 'h-9 rounded-full px-4 text-sm font-black text-[var(--sea-ink-soft)] sm:h-10 sm:px-5'
                 }
                 onClick={() => setPeriod(item.value)}
               >
@@ -59,14 +59,14 @@ export function LeaderboardPage() {
           </div>
         </div>
 
-        <section className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-6">
-          <div className="grid gap-3">
+        <section className="rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-3 shadow-[0_18px_48px_rgba(8,28,32,0.1)] backdrop-blur-xl sm:rounded-[30px] sm:p-6">
+          <div className="grid gap-2 sm:gap-3">
             {entries.map((entry) => (
               <article
                 key={entry.userId}
-                className="grid gap-4 rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-4 sm:grid-cols-[auto_1fr_auto_auto]"
+                className="grid grid-cols-[auto_1fr] gap-3 rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:grid-cols-[auto_1fr_auto_auto] sm:gap-4 sm:rounded-[24px] sm:p-4"
               >
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[color-mix(in_oklab,var(--primary)_18%,transparent)] text-lg font-black text-[var(--sea-ink)]">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-[color-mix(in_oklab,var(--primary)_18%,transparent)] text-base font-black text-[var(--sea-ink)] sm:h-12 sm:w-12 sm:rounded-2xl sm:text-lg">
                   {entry.rank <= 3 ? (
                     <TrophyIcon weight="bold" className="h-6 w-6" />
                   ) : (
@@ -75,7 +75,7 @@ export function LeaderboardPage() {
                 </span>
 
                 <div className="min-w-0">
-                  <p className="truncate text-lg font-black text-[var(--sea-ink)]">
+                  <p className="truncate text-base font-black text-[var(--sea-ink)] sm:text-lg">
                     {entry.username}
                   </p>
                   <p className="text-sm font-semibold text-[var(--sea-ink-soft)]">
@@ -102,7 +102,7 @@ export function LeaderboardPage() {
             ))}
 
             {!entries.length ? (
-              <p className="rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-5 text-sm font-bold text-[var(--sea-ink-soft)]">
+              <p className="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 text-sm font-bold text-[var(--sea-ink-soft)] sm:rounded-[22px] sm:p-5">
                 No leaderboard entries yet.
               </p>
             ) : null}

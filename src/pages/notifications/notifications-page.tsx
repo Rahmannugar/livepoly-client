@@ -129,8 +129,8 @@ export function NotificationsPage() {
   }
 
   return (
-    <main className="min-h-screen px-5 py-6 sm:px-8">
-      <section className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-5xl content-center gap-7">
+    <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
+      <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-5xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
         <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
@@ -146,10 +146,10 @@ export function NotificationsPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-3xl">
             <p className="app-kicker">Notifications</p>
-            <h1 className="display-title mt-2 text-5xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
+            <h1 className="display-title mt-2 text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
               What needs your attention.
             </h1>
-            <p className="mt-4 text-lg leading-8 text-[var(--sea-ink-soft)]">
+            <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)] sm:mt-4 sm:text-lg sm:leading-8">
               Friend requests, room invites, game starts, and match updates.
             </p>
           </div>
@@ -157,7 +157,7 @@ export function NotificationsPage() {
           <button
             type="button"
             disabled={!unreadCount || mutations.markAllAsRead.isPending}
-            className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-black text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:h-11 sm:px-5"
             onClick={markAllAsRead}
           >
             Mark all read
@@ -174,7 +174,7 @@ export function NotificationsPage() {
           ) : null}
 
           {notifications.isError ? (
-            <article className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
+            <article className="rounded-[22px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl sm:rounded-[28px] sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-base font-black text-[var(--sea-ink)]">
@@ -209,7 +209,7 @@ export function NotificationsPage() {
           ))}
 
           {!notifications.isLoading && !notifications.isError && !items.length ? (
-            <article className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 text-center shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
+            <article className="rounded-[22px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 text-center shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl sm:rounded-[28px] sm:p-6">
               <BellIcon
                 weight="bold"
                 className="mx-auto h-8 w-8 text-[var(--sea-ink-soft)]"
@@ -241,9 +241,9 @@ export function NotificationsPage() {
 
 function NotificationSkeleton() {
   return (
-    <article className="rounded-[28px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl">
+    <article className="rounded-[22px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl sm:rounded-[28px] sm:p-5">
       <div className="flex items-start gap-4">
-        <div className="h-12 w-12 shrink-0 animate-pulse rounded-2xl bg-[color-mix(in_oklab,var(--sea-ink-soft)_20%,transparent)]" />
+        <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-[color-mix(in_oklab,var(--sea-ink-soft)_20%,transparent)] sm:h-12 sm:w-12 sm:rounded-2xl" />
         <div className="grid flex-1 gap-3">
           <div className="h-5 w-2/5 animate-pulse rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_20%,transparent)]" />
           <div className="h-4 w-4/5 animate-pulse rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_16%,transparent)]" />
@@ -271,24 +271,24 @@ function NotificationCard({
   return (
     <article
       className={[
-        'rounded-[28px] border p-5 shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl transition',
+        'rounded-[22px] border p-3 shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl transition sm:rounded-[28px] sm:p-5',
         notification.read
           ? 'border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)]'
           : 'border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary)_12%,var(--bg-base))]',
       ].join(' ')}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <button
           type="button"
-          className="flex min-w-0 flex-1 items-start gap-4 text-left"
+          className="flex min-w-0 flex-1 items-start gap-3 text-left sm:gap-4"
           onClick={onOpen}
         >
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
-            <Icon weight="bold" className="h-6 w-6" />
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] sm:h-12 sm:w-12 sm:rounded-2xl">
+            <Icon weight="bold" className="h-5 w-5 sm:h-6 sm:w-6" />
           </span>
           <span className="min-w-0">
             <span className="flex flex-wrap items-center gap-2">
-              <span className="truncate text-lg font-black text-[var(--sea-ink)]">
+              <span className="truncate text-base font-black text-[var(--sea-ink)] sm:text-lg">
                 {notification.title}
               </span>
               {!notification.read ? (
@@ -297,7 +297,7 @@ function NotificationCard({
                 </span>
               ) : null}
             </span>
-            <span className="mt-1 block text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+            <span className="mt-1 block text-sm font-semibold leading-5 text-[var(--sea-ink-soft)] sm:leading-6">
               {notification.body}
             </span>
             <span className="mt-2 block text-xs font-bold text-[var(--sea-ink-soft)]">
@@ -310,7 +310,7 @@ function NotificationCard({
           {target ? (
             <button
               type="button"
-              className="inline-flex h-10 items-center justify-center rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)]"
+            className="inline-flex h-9 items-center justify-center rounded-full bg-[var(--primary)] px-3 text-xs font-black text-[var(--primary-foreground)] sm:h-10 sm:px-4 sm:text-sm"
               onClick={onOpen}
             >
               {target.label}
@@ -320,7 +320,7 @@ function NotificationCard({
             <button
               type="button"
               disabled={isMarkingRead}
-              className="inline-flex h-10 items-center justify-center rounded-full border border-[var(--line)] px-4 text-sm font-black text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-9 items-center justify-center rounded-full border border-[var(--line)] px-3 text-xs font-black text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-4 sm:text-sm"
               onClick={onMarkRead}
             >
               Mark read

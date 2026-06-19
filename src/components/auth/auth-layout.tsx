@@ -17,8 +17,8 @@ export function AuthLayout({
   children,
 }: AuthLayoutProps) {
   return (
-    <main className="min-h-screen px-5 py-5 sm:px-8">
-      <section className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-5xl flex-col">
+    <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-5">
+      <section className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-5xl flex-col sm:min-h-[calc(100vh-2.5rem)]">
         <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
@@ -29,8 +29,8 @@ export function AuthLayout({
           <ThemeToggle />
         </header>
 
-        <div className="flex flex-1 items-center justify-center py-8">
-          <div className="grid w-full max-w-4xl overflow-hidden rounded-[32px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] shadow-[0_28px_80px_rgba(8,28,32,0.16)] backdrop-blur-xl lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="flex flex-1 items-start justify-center py-5 sm:items-center sm:py-8">
+          <div className="grid w-full max-w-4xl overflow-hidden rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] shadow-[0_22px_60px_rgba(8,28,32,0.14)] backdrop-blur-xl sm:rounded-[32px] lg:grid-cols-[0.9fr_1.1fr]">
             <div className="hidden border-r border-[var(--line)] p-8 lg:flex lg:flex-col lg:justify-between">
               <div>
                 <h1 className="display-title text-5xl font-semibold leading-tight text-[var(--sea-ink)]">
@@ -54,9 +54,9 @@ export function AuthLayout({
               </div>
             </div>
 
-            <div className="p-5 sm:p-7">
+            <div className="p-4 sm:p-7">
               <div className="text-center">
-                <h2 className="display-title text-4xl font-semibold leading-tight text-[var(--sea-ink)]">
+                <h2 className="display-title text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl">
                   {title}
                 </h2>
                 <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[var(--sea-ink-soft)]">
@@ -64,10 +64,10 @@ export function AuthLayout({
                 </p>
               </div>
 
-              <div className="mt-5">{children}</div>
+              <div className="mt-4 sm:mt-5">{children}</div>
 
               {footer ? (
-                <div className="mt-4 text-center text-sm font-semibold text-[var(--sea-ink-soft)]">
+                <div className="mt-3 text-center text-sm font-semibold text-[var(--sea-ink-soft)] sm:mt-4">
                   {footer}
                 </div>
               ) : null}

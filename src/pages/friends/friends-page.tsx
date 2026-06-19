@@ -57,8 +57,8 @@ export function FriendsPage() {
   }
 
   return (
-    <main className="min-h-screen px-5 py-6 sm:px-8">
-      <section className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-6xl content-center gap-7">
+    <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
+      <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
         <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
@@ -73,16 +73,16 @@ export function FriendsPage() {
 
         <div className="max-w-3xl">
           <p className="app-kicker">Friends</p>
-          <h1 className="display-title mt-2 text-5xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
+          <h1 className="display-title mt-2 text-3xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
             Find your table circle.
           </h1>
-          <p className="mt-4 text-lg leading-8 text-[var(--sea-ink-soft)]">
+          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)] sm:mt-4 sm:text-lg sm:leading-8">
             Search usernames, send requests, and manage players you already know.
           </p>
         </div>
 
-        <section className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-6">
+        <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr] lg:gap-5">
+          <article className="rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_18px_48px_rgba(8,28,32,0.1)] backdrop-blur-xl sm:rounded-[30px] sm:p-6">
             <div className="relative">
               <MagnifyingGlassIcon
                 weight="bold"
@@ -96,7 +96,7 @@ export function FriendsPage() {
               />
             </div>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
               {search.data?.items.map((user) => (
                 <SearchResultRow
                   key={user.id}
@@ -129,7 +129,7 @@ export function FriendsPage() {
             </div>
           </article>
 
-          <div className="grid gap-5">
+          <div className="grid gap-4 sm:gap-5">
             <FriendsList
               friends={friends.data?.items ?? []}
               isLoading={friends.isLoading}
@@ -245,16 +245,16 @@ function SearchResultRow({
   const relationshipLabel = getRelationshipLabel(relationship)
 
   return (
-    <article className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4">
+    <article className="flex items-center justify-between gap-3 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-[22px] sm:p-4">
       <UserSummary username={username} />
       {relationshipLabel ? (
-        <span className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-4 text-sm font-black text-[var(--sea-ink-soft)]">
+        <span className="inline-flex h-9 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-3 text-xs font-black text-[var(--sea-ink-soft)] sm:h-10 sm:px-4 sm:text-sm">
           {relationshipLabel}
         </span>
       ) : (
         <button
           type="button"
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-3 text-xs font-black text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-4 sm:text-sm"
           disabled={isDisabled}
           onClick={onAdd}
         >
@@ -280,9 +280,9 @@ function FriendsList({
   onRemove: (friendshipId: string) => void
 }) {
   return (
-    <article className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-6">
+    <article className="rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_18px_48px_rgba(8,28,32,0.1)] backdrop-blur-xl sm:rounded-[30px] sm:p-6">
       <p className="app-kicker">Your friends</p>
-      <div className="mt-4 grid gap-3">
+      <div className="mt-3 grid gap-2 sm:mt-4 sm:gap-3">
         {friends.map((friend) => {
           const isRemoving =
             isMutating && mutatingFriendshipId === friend.friendshipId
@@ -290,13 +290,13 @@ function FriendsList({
           return (
             <article
               key={friend.friendshipId}
-              className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4"
+              className="flex items-center justify-between gap-3 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-[22px] sm:p-4"
             >
               <UserSummary username={friend.username} />
               <button
                 type="button"
                 aria-label={`Remove ${friend.username}`}
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-[var(--line)] px-4 text-sm font-black text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border border-[var(--line)] px-3 text-xs font-black text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:px-4 sm:text-sm"
                 disabled={isMutating}
                 onClick={() => onRemove(friend.friendshipId)}
               >
@@ -331,13 +331,13 @@ function RequestsList({
   actions: (request: FriendRequestSummary) => ReactNode
 }) {
   return (
-    <article className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-6">
+    <article className="rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_18px_48px_rgba(8,28,32,0.1)] backdrop-blur-xl sm:rounded-[30px] sm:p-6">
       <p className="app-kicker">{title}</p>
-      <div className="mt-4 grid gap-3">
+      <div className="mt-3 grid gap-2 sm:mt-4 sm:gap-3">
         {requests.map((request) => (
           <article
             key={request.friendshipId}
-            className="flex flex-col gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:flex-row sm:items-center sm:justify-between sm:rounded-[22px] sm:p-4"
           >
             <UserSummary username={renderName(request)} />
             <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:shrink-0">
@@ -357,9 +357,9 @@ function UserSummary({ username }: { username: string }) {
     <Link
       to="/users/$username"
       params={{ username }}
-      className="flex min-w-0 items-center gap-3 rounded-2xl outline-none transition hover:translate-y-[-1px] focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+      className="flex min-w-0 items-center gap-2.5 rounded-2xl outline-none transition hover:translate-y-[-1px] focus-visible:ring-2 focus-visible:ring-[var(--primary)] sm:gap-3"
     >
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--surface-strong)] text-[var(--sea-ink)]">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface-strong)] text-[var(--sea-ink)] sm:h-11 sm:w-11 sm:rounded-2xl">
         <UserIcon weight="bold" className="h-5 w-5" />
       </span>
       <p className="truncate text-base font-black text-[var(--sea-ink)]">
@@ -371,7 +371,7 @@ function UserSummary({ username }: { username: string }) {
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <p className="rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm font-bold text-[var(--sea-ink-soft)]">
+    <p className="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 text-sm font-bold text-[var(--sea-ink-soft)] sm:rounded-[20px] sm:p-4">
       {text}
     </p>
   )

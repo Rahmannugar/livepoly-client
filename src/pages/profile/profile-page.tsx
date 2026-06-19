@@ -171,8 +171,8 @@ export function ProfilePage() {
   const avatarActionLabel = displayedAvatarUrl ? 'Change photo' : 'Add photo'
 
   return (
-    <main className="min-h-screen px-5 py-6 sm:px-8">
-      <section className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-6xl content-center gap-7">
+    <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
+      <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
         <header className="flex items-center justify-between gap-4">
           <Link
             to="/"
@@ -186,8 +186,8 @@ export function ProfilePage() {
         </header>
 
         <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-8">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+          <article className="rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_18px_48px_rgba(8,28,32,0.1)] backdrop-blur-xl sm:rounded-[30px] sm:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
               <div className="grid w-full justify-items-center gap-3 sm:w-44">
                 <div className="relative rounded-full bg-[linear-gradient(145deg,color-mix(in_oklab,var(--primary)_68%,white),color-mix(in_oklab,var(--sea-ink)_48%,transparent))] p-1 shadow-[0_18px_45px_rgba(8,28,32,0.18)]">
                   <div className="rounded-full bg-[var(--surface-strong)] p-1">
@@ -285,14 +285,14 @@ export function ProfilePage() {
                     {isEditingProfile ? 'Close editor' : 'Edit profile'}
                   </button>
                 </div>
-                <p className="mt-3 text-base font-semibold leading-7 text-[var(--sea-ink-soft)]">
+                <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)] sm:mt-3 sm:text-base sm:leading-7">
                   {user?.bio ?? 'Ready to roll, buy, build, and climb.'}
                 </p>
               </div>
             </div>
 
             {isEditingProfile ? (
-              <div className="mt-7 grid gap-4 rounded-[26px] border border-[var(--line)] bg-[var(--surface)] p-4 sm:p-5">
+              <div className="mt-5 grid gap-4 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:mt-7 sm:rounded-[26px] sm:p-5">
                 <label className="grid gap-2">
                   <span className="text-sm font-black text-[var(--sea-ink)]">
                     Username
@@ -301,7 +301,7 @@ export function ProfilePage() {
                     value={username}
                     maxLength={24}
                     onChange={(event) => setUsername(event.target.value)}
-                    className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
+                    className="h-11 rounded-2xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] sm:h-12"
                   />
                 </label>
 
@@ -318,20 +318,20 @@ export function ProfilePage() {
                   />
                 </label>
 
-                <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                   <button
                     type="button"
                     disabled={
                       updateProfile.isPending || profile.isLoading || !user
                     }
-                    className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-black text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-black text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:h-12"
                     onClick={handleSaveProfile}
                   >
                     {updateProfile.isPending ? 'Saving...' : 'Save profile'}
                   </button>
                   <button
                     type="button"
-                    className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--line)] px-5 text-sm font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
+                    className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] px-5 text-sm font-black text-[var(--sea-ink)] transition hover:translate-y-[-1px] sm:h-12"
                     onClick={() => setIsEditingProfile(false)}
                   >
                     Cancel
@@ -340,7 +340,7 @@ export function ProfilePage() {
               </div>
             ) : null}
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-7">
               <ProfileStat
                 label="Rating"
                 value={user ? String(user.stats.rating) : '...'}
@@ -364,13 +364,13 @@ export function ProfilePage() {
             </div>
           </article>
 
-          <article className="rounded-[30px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-6 shadow-[0_22px_70px_rgba(8,28,32,0.12)] backdrop-blur-xl sm:p-8">
+          <article className="rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_18px_48px_rgba(8,28,32,0.1)] backdrop-blur-xl sm:rounded-[30px] sm:p-8">
             <p className="app-kicker">Latest activity</p>
-            <h2 className="display-title mt-2 text-4xl font-semibold text-[var(--sea-ink)]">
+            <h2 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl">
               Your table record.
             </h2>
 
-            <div className="mt-6 grid gap-3">
+            <div className="mt-4 grid gap-2 sm:mt-6 sm:gap-3">
               <ProfileDetail
                 label="Joined"
                 value={user ? formatJoinedDate(user.createdAt) : '...'}
@@ -391,7 +391,7 @@ export function ProfilePage() {
               />
             </div>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap gap-3 sm:mt-7">
               <Link
                 to="/stats"
                 className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)]"
@@ -414,10 +414,10 @@ type ProfileStatProps = {
 
 function ProfileStat({ label, value, icon: Icon }: ProfileStatProps) {
   return (
-    <div className="rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4">
+    <div className="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-[22px] sm:p-4">
       <Icon weight="bold" className="h-5 w-5 text-[var(--sea-ink-soft)]" />
-      <p className="app-kicker mt-3">{label}</p>
-      <p className="mt-1 truncate text-xl font-black text-[var(--sea-ink)]">
+      <p className="app-kicker mt-2 sm:mt-3">{label}</p>
+      <p className="mt-1 truncate text-lg font-black text-[var(--sea-ink)] sm:text-xl">
         {value}
       </p>
     </div>
@@ -426,7 +426,7 @@ function ProfileStat({ label, value, icon: Icon }: ProfileStatProps) {
 
 function ProfileDetail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-4">
+    <div className="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-[20px] sm:p-4">
       <p className="app-kicker">{label}</p>
       <p className="mt-1 text-base font-bold leading-6 text-[var(--sea-ink)]">
         {value}

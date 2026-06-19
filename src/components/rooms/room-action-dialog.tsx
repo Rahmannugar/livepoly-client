@@ -40,7 +40,7 @@ export function RoomActionDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center px-4 pb-4 pt-16 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[70] flex items-end justify-center pt-12 sm:items-center sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="room-action-title"
@@ -52,7 +52,7 @@ export function RoomActionDialog({
         onClick={onClose}
       />
 
-      <section className="dialog-panel-enter relative w-full max-w-md rounded-[30px] border border-[var(--line)] bg-[var(--bg-base)] p-5 shadow-[0_28px_90px_rgba(4,12,15,0.32)] sm:p-6">
+      <section className="dialog-panel-enter relative w-full max-w-md rounded-t-[24px] border border-b-0 border-[var(--line)] bg-[var(--bg-base)] p-4 shadow-[0_28px_90px_rgba(4,12,15,0.32)] sm:rounded-[30px] sm:border sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="app-kicker">
@@ -60,7 +60,7 @@ export function RoomActionDialog({
             </p>
             <h2
               id="room-action-title"
-              className="display-title mt-3 text-3xl font-semibold text-[var(--sea-ink)]"
+              className="display-title mt-2 text-2xl font-semibold text-[var(--sea-ink)] sm:mt-3 sm:text-3xl"
             >
               {isCreateMode ? 'Create a room.' : 'Join a room.'}
             </h2>
@@ -82,13 +82,13 @@ export function RoomActionDialog({
               Pick a casual match length, then share the room code with friends.
             </p>
 
-            <div className="mt-5 grid grid-cols-2 gap-2">
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5">
               {ROOM_DURATIONS.map((duration) => (
                 <button
                   key={duration}
                   type="button"
                   className={[
-                    'h-11 rounded-2xl border text-sm font-black transition hover:translate-y-[-1px]',
+                    'h-10 rounded-2xl border text-sm font-black transition hover:translate-y-[-1px] sm:h-11',
                     durationMinutes === duration
                       ? 'border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]'
                       : 'border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)]',
@@ -103,19 +103,19 @@ export function RoomActionDialog({
             <button
               type="button"
               disabled={isCreating}
-              className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:mt-5 sm:h-11"
               onClick={onCreate}
             >
               {isCreating ? 'Creating room...' : 'Create room'}
             </button>
           </div>
         ) : (
-          <div className="mt-5">
+          <div className="mt-4 sm:mt-5">
             <p className="text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
               Enter the code from your host and take a seat at the table.
             </p>
 
-            <label className="mt-5 grid gap-2">
+            <label className="mt-4 grid gap-2 sm:mt-5">
               <span className="text-sm font-bold text-[var(--sea-ink)]">
                 Room code
               </span>
@@ -125,7 +125,7 @@ export function RoomActionDialog({
                 autoCapitalize="characters"
                 autoComplete="off"
                 spellCheck={false}
-                className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-center text-lg font-black tracking-[0.18em] text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
+                className="h-11 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-center text-lg font-black tracking-[0.18em] text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] sm:h-12"
                 onChange={(event) => onRoomCodeChange(event.target.value)}
               />
             </label>
@@ -133,7 +133,7 @@ export function RoomActionDialog({
             <button
               type="button"
               disabled={isJoining}
-              className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:mt-5 sm:h-11"
               onClick={onJoin}
             >
               {isJoining ? 'Joining room...' : 'Join room'}

@@ -203,17 +203,17 @@ export function HomePage() {
   }
 
   return (
-    <main className="min-h-screen px-5 py-6 sm:px-8">
-      <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
-        <header className="grid grid-cols-[1fr_auto] items-center gap-3 sm:flex sm:justify-between">
+    <main className="min-h-screen px-3 py-3 min-[420px]:px-4 min-[420px]:py-4 sm:px-8 sm:py-6">
+      <section className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-6xl flex-col sm:min-h-[calc(100vh-3rem)]">
+        <header className="grid grid-cols-[1fr_auto] items-center gap-2 min-[420px]:gap-3 sm:flex sm:justify-between">
           <Link
             to="/"
-            className="display-title min-w-0 text-[clamp(1.55rem,9vw,2.25rem)] font-semibold leading-none text-[var(--sea-ink)] sm:text-4xl"
+            className="display-title min-w-0 text-[1.6rem] font-semibold leading-none text-[var(--sea-ink)] min-[420px]:text-3xl sm:text-4xl"
           >
             {APP_NAME}
           </Link>
 
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-1.5 min-[420px]:gap-2 sm:gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-bold text-[var(--sea-ink)]">
                 {displayName}
@@ -226,7 +226,7 @@ export function HomePage() {
             <Link
               to="/profile"
               aria-label="Open profile"
-              className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] sm:h-10 sm:w-10"
+              className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] min-[420px]:h-9 min-[420px]:w-9 sm:h-10 sm:w-10"
             >
               {avatarUrl ? (
                 <img
@@ -242,7 +242,7 @@ export function HomePage() {
             <Link
               to="/notifications"
               aria-label="Open notifications"
-              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] sm:h-10 sm:w-10"
+              className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] min-[420px]:h-9 min-[420px]:w-9 sm:h-10 sm:w-10"
             >
               <BellIcon weight="bold" className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
               {unreadNotifications.count ? (
@@ -258,7 +258,7 @@ export function HomePage() {
               type="button"
               aria-label="Sign out"
               disabled={auth.logout.isPending}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:h-10 sm:w-10"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.12)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 min-[420px]:h-9 min-[420px]:w-9 sm:h-10 sm:w-10"
               onClick={handleLogout}
             >
               <SignOutIcon weight="bold" className="h-5 w-5" />
@@ -268,20 +268,20 @@ export function HomePage() {
           </div>
         </header>
 
-        <div className="grid flex-1 content-center gap-8 py-12 sm:py-16">
+        <div className="grid flex-1 content-start gap-3 py-5 min-[420px]:gap-4 min-[420px]:py-6 sm:content-center sm:gap-8 sm:py-16">
           <div className="max-w-3xl">
-            <h1 className="display-title text-5xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-6xl">
+            <h1 className="display-title text-[1.75rem] font-semibold leading-tight text-[var(--sea-ink)] min-[420px]:text-3xl sm:text-6xl">
               Welcome back, {displayName}.
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--sea-ink-soft)]">
+            <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[var(--sea-ink-soft)] sm:mt-5 sm:text-lg sm:leading-8">
               Create a room, join a game, or check your stats and leaderboard.
             </p>
           </div>
 
           {currentRoom.data ? (
-            <article className="flex flex-col gap-4 rounded-[28px] border border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary)_12%,var(--bg-base))] p-5 shadow-[0_22px_60px_rgba(8,28,32,0.14)] sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex min-w-0 items-start gap-3">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)]">
+            <article className="flex flex-col gap-2.5 rounded-[18px] border border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary)_12%,var(--bg-base))] p-2.5 shadow-[0_18px_44px_rgba(8,28,32,0.12)] min-[420px]:gap-3 min-[420px]:rounded-[22px] min-[420px]:p-3 sm:flex-row sm:items-center sm:justify-between sm:rounded-[28px] sm:p-5">
+              <div className="flex min-w-0 items-start gap-2.5 min-[420px]:gap-3">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] min-[420px]:h-9 min-[420px]:w-9 sm:h-11 sm:w-11 sm:rounded-2xl">
                   <GameControllerIcon weight="bold" className="h-5 w-5" />
                 </span>
                 <div className="min-w-0">
@@ -290,10 +290,10 @@ export function HomePage() {
                       ? 'Room waiting'
                       : 'Game in progress'}
                   </p>
-                  <h2 className="display-title mt-1 truncate text-3xl font-semibold text-[var(--sea-ink)]">
+                  <h2 className="display-title mt-1 truncate text-xl font-semibold text-[var(--sea-ink)] min-[420px]:text-2xl sm:text-3xl">
                     Room {currentRoom.data.code}
                   </h2>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+                  <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-[var(--sea-ink-soft)] sm:text-sm sm:leading-6">
                     Rejoin your room and continue from where you stopped.
                   </p>
                 </div>
@@ -301,7 +301,7 @@ export function HomePage() {
 
               <button
                 type="button"
-                className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px]"
+                className="inline-flex h-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-3 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] min-[420px]:h-10 min-[420px]:px-4 sm:h-11 sm:px-5"
                 onClick={resumeCurrentRoom}
               >
                 {currentRoom.data.activeGameId ? 'Rejoin game' : 'Open room'}
@@ -309,12 +309,12 @@ export function HomePage() {
             </article>
           ) : null}
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2 min-[420px]:gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {homeActions.map((action) => (
               <button
                 key={action.title}
                 type="button"
-                className="group min-h-32 rounded-[26px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-5 text-left shadow-[0_18px_45px_rgba(8,28,32,0.1)] backdrop-blur-xl transition hover:translate-y-[-2px] hover:border-[var(--primary)]"
+                className="group flex min-h-0 items-center gap-2.5 rounded-[18px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-2.5 text-left shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl transition hover:translate-y-[-2px] hover:border-[var(--primary)] min-[420px]:gap-3 min-[420px]:rounded-[20px] min-[420px]:p-3 sm:block sm:min-h-32 sm:rounded-[26px] sm:p-5"
                 onClick={() => {
                   if (action.dialog) {
                     setActiveDialog(action.dialog)
@@ -332,14 +332,16 @@ export function HomePage() {
                   })
                 }}
               >
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_10px_24px_rgba(8,28,32,0.1)] transition group-hover:bg-[var(--primary)] group-hover:text-[var(--primary-foreground)]">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_10px_24px_rgba(8,28,32,0.1)] transition group-hover:bg-[var(--primary)] group-hover:text-[var(--primary-foreground)] min-[420px]:h-9 min-[420px]:w-9 sm:h-11 sm:w-11 sm:rounded-2xl">
                   <action.icon weight="bold" className="h-5 w-5" />
                 </span>
-                <span className="mt-4 block text-base font-black text-[var(--sea-ink)]">
-                  {action.title}
-                </span>
-                <span className="mt-1 block text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-                  {action.description}
+                <span className="min-w-0">
+                  <span className="block text-sm font-black text-[var(--sea-ink)] min-[420px]:text-base sm:mt-4">
+                    {action.title}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[0.7rem] font-semibold leading-4 text-[var(--sea-ink-soft)] min-[420px]:text-xs min-[420px]:leading-5 sm:mt-1 sm:whitespace-normal sm:text-sm sm:leading-6">
+                    {action.description}
+                  </span>
                 </span>
               </button>
             ))}

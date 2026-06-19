@@ -293,6 +293,22 @@ button:disabled,
   background: rgba(10, 20, 24, 0.96);
 }
 
+@media (max-width: 419px) {
+  .theme-toggle__track {
+    width: 48px;
+    height: 28px;
+  }
+
+  .theme-toggle__thumb {
+    width: 20px;
+    height: 20px;
+  }
+
+  .dark .theme-toggle__thumb {
+    transform: translateX(20px);
+  }
+}
+
 @keyframes dialog-backdrop-in {
   from {
     opacity: 0;

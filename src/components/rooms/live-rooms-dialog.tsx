@@ -37,7 +37,7 @@ export function LiveRoomsDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center px-4 pb-4 pt-16 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[70] flex items-end justify-center pt-12 sm:items-center sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="live-rooms-title"
@@ -49,13 +49,13 @@ export function LiveRoomsDialog({
         onClick={onClose}
       />
 
-      <section className="dialog-panel-enter relative w-full max-w-2xl rounded-[30px] border border-[var(--line)] bg-[var(--bg-base)] p-5 shadow-[0_28px_90px_rgba(4,12,15,0.32)] sm:p-6">
+      <section className="dialog-panel-enter relative w-full max-w-2xl rounded-t-[24px] border border-b-0 border-[var(--line)] bg-[var(--bg-base)] p-4 shadow-[0_28px_90px_rgba(4,12,15,0.32)] sm:rounded-[30px] sm:border sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="app-kicker">Live rooms</p>
             <h2
               id="live-rooms-title"
-              className="display-title mt-3 text-3xl font-semibold text-[var(--sea-ink)]"
+              className="display-title mt-2 text-2xl font-semibold text-[var(--sea-ink)] sm:mt-3 sm:text-3xl"
             >
               Find a table.
             </h2>
@@ -74,15 +74,15 @@ export function LiveRoomsDialog({
           </button>
         </div>
 
-        <div className="mt-5 max-h-[min(64vh,32rem)] overflow-y-auto pr-1">
+        <div className="mt-4 max-h-[min(64vh,32rem)] overflow-y-auto pr-1 sm:mt-5">
           {isLoading ? (
-            <div className="grid min-h-44 place-items-center rounded-3xl border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink-soft)]">
+            <div className="grid min-h-32 place-items-center rounded-2xl border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink-soft)] sm:min-h-44 sm:rounded-3xl">
               <SpinnerGapIcon weight="bold" className="h-7 w-7 animate-spin" />
             </div>
           ) : null}
 
           {!isLoading && rooms.length === 0 ? (
-            <div className="rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-5">
+            <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 sm:rounded-3xl sm:p-5">
               <p className="text-base font-black text-[var(--sea-ink)]">
                 No open tables right now.
               </p>
@@ -119,9 +119,9 @@ export function LiveRoomsDialog({
               return (
                 <article
                   key={room.id}
-                  className="rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-4 sm:p-5"
+                  className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-3xl sm:p-5"
                 >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <button
                       type="button"
                       className="min-w-0 text-left"
@@ -132,7 +132,7 @@ export function LiveRoomsDialog({
                           ? 'Waiting room'
                           : 'Live match'}
                       </span>
-                      <span className="display-title mt-2 block text-3xl font-semibold text-[var(--sea-ink)]">
+                      <span className="display-title mt-1 block text-2xl font-semibold text-[var(--sea-ink)] sm:mt-2 sm:text-3xl">
                         Room {room.code}
                       </span>
                       <span className="mt-2 flex flex-wrap items-center gap-3 text-sm font-bold text-[var(--sea-ink-soft)]">
@@ -148,7 +148,7 @@ export function LiveRoomsDialog({
                     <button
                       type="button"
                       disabled={isBusy}
-                      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:h-11 sm:px-5"
                       onClick={() =>
                         shouldOpenRoom
                           ? onOpenRoom(room.code)
@@ -169,7 +169,7 @@ export function LiveRoomsDialog({
 
         <button
           type="button"
-          className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
+          className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] sm:mt-4 sm:h-11"
           onClick={onClose}
         >
           Close
