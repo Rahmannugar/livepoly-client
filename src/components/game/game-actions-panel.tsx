@@ -2,7 +2,6 @@ import { DiceFiveIcon, SpinnerGapIcon, XIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type {
-  GameAuction,
   GameDebt,
   GamePhase,
   GamePlayer,
@@ -10,7 +9,7 @@ import type {
   GameTradeOffer,
 } from '#/lib/game/game.types'
 import type { GameTile } from '#/lib/game/game-board'
-import { AuctionActions } from './game-auction-actions'
+import { findPlayer, getPlayerName } from '#/lib/game/game-board'
 import { DebtActions } from './game-debt-actions'
 import { JailActions } from './game-jail-actions'
 import { GamePanel } from './game-primitives'
@@ -18,8 +17,8 @@ import { TradeOfferActions } from './game-trade-actions'
 import {
   PrimaryActionButton,
   PropertyDecisionActions,
-  type PrimaryGameAction,
 } from './game-primary-actions'
+import type { PrimaryGameAction } from './game-primary-actions'
 
 export type { PrimaryGameAction } from './game-primary-actions'
 
@@ -29,7 +28,6 @@ export function GameActionsPanel({
   gameExpired,
   errorMessage,
   debt,
-  auction,
   players,
   roomPlayerId,
   currentPlayer,
@@ -37,16 +35,12 @@ export function GameActionsPanel({
   isCurrentTurn,
   phase,
   tradeOffer,
-  auctionTileName,
   pendingTile,
   pendingProperty,
-  minimumAuctionBid,
   onRollAndMove,
   onEndTurn,
   onBuyProperty,
   onDeclinePropertyPurchase,
-  onPlaceAuctionBid,
-  onPassAuctionBid,
   onPayDebt,
   onManageProperties,
   onPayJailFine,
@@ -61,7 +55,6 @@ export function GameActionsPanel({
   gameExpired: boolean
   errorMessage: string | null
   debt: GameDebt | null | undefined
-  auction: GameAuction | null | undefined
   players: GamePlayer[]
   roomPlayerId: string | null
   currentPlayer: GamePlayer | null
@@ -69,16 +62,12 @@ export function GameActionsPanel({
   isCurrentTurn: boolean
   phase: GamePhase | undefined
   tradeOffer: GameTradeOffer | null | undefined
-  auctionTileName: string | null
   pendingTile: GameTile | null
   pendingProperty: GameProperty | null
-  minimumAuctionBid: number
   onRollAndMove: () => void
   onEndTurn: () => void
   onBuyProperty: () => void
   onDeclinePropertyPurchase: () => void
-  onPlaceAuctionBid: (amount: number) => void
-  onPassAuctionBid: () => void
   onPayDebt: () => void
   onManageProperties: () => void
   onPayJailFine: () => void
@@ -102,12 +91,6 @@ export function GameActionsPanel({
   const shouldShowDebtActions = Boolean(
     debt && roomPlayerId && debt.roomPlayerId === roomPlayerId,
   )
-  const shouldShowAuctionActions = Boolean(
-    auction &&
-    roomPlayerId &&
-    auction.currentBidderRoomPlayerId === roomPlayerId &&
-    !auction.passedRoomPlayerIds.includes(roomPlayerId),
-  )
   const shouldShowJailActions = Boolean(
     !gameClosed &&
     currentPlayerInJail &&
@@ -118,30 +101,31 @@ export function GameActionsPanel({
     actionableTradeOffer ||
     shouldShowDebtActions ||
     shouldShowJailActions ||
-    shouldShowAuctionActions ||
     primaryAction.command === 'propertyDecision'
   const canOpenActionSheet = Boolean(
-    !gameClosed &&
-    !gameExpired &&
-    (isSpecializedAction || primaryAction.enabled),
+    !gameClosed && !gameExpired && isSpecializedAction,
   )
+  const actionAudiencePlayer = shouldShowDebtActions
+    ? findPlayer(players, debt?.roomPlayerId)
+    : currentPlayer
+  const actionAudience =
+    !actionableTradeOffer && actionAudiencePlayer
+      ? getPlayerName(actionAudiencePlayer)
+      : null
   const actionSheetTitle = useMemo(() => {
     if (actionableTradeOffer) return 'Trade offer'
     if (shouldShowDebtActions) return 'Settle payment'
     if (shouldShowJailActions) return 'Jail move'
-    if (shouldShowAuctionActions) return 'Bid or pass'
     if (primaryAction.command === 'propertyDecision') return 'Buy or auction'
     return primaryAction.label
   }, [
     actionableTradeOffer,
     primaryAction.command,
     primaryAction.label,
-    shouldShowAuctionActions,
     shouldShowDebtActions,
     shouldShowJailActions,
   ])
   const panelTitle = useMemo(() => {
-    if (auction && phase === 'awaiting_auction_bid') return 'Auction'
     if (tradeOffer && actionableTradeOffer) return 'Trade'
     if (debt && phase === 'awaiting_debt_resolution') return 'Debt'
     if (primaryAction.command === 'propertyDecision') return 'Property'
@@ -149,7 +133,6 @@ export function GameActionsPanel({
     return 'Actions'
   }, [
     actionableTradeOffer,
-    auction,
     debt,
     phase,
     primaryAction.command,
@@ -165,19 +148,9 @@ export function GameActionsPanel({
       phase ?? 'none',
       tradeOffer?.id ?? 'no-trade',
       debt?.roomPlayerId ?? 'no-debt',
-      auction
-        ? [
-            auction.tileKey,
-            auction.currentBid,
-            auction.currentBidderRoomPlayerId ?? 'none',
-            auction.highestBidderRoomPlayerId ?? 'none',
-            auction.bidExpiresAt ?? 'none',
-          ].join(':')
-        : 'no-auction',
       pendingTile?.key ?? 'no-pending-tile',
     ].join('|')
   }, [
-    auction,
     canOpenActionSheet,
     debt?.roomPlayerId,
     pendingTile?.key,
@@ -247,18 +220,6 @@ export function GameActionsPanel({
           onPayFine={() => runAndClose(onPayJailFine)}
           onUseCard={() => runAndClose(onUseGetOutOfJailCard)}
         />
-      ) : auction && shouldShowAuctionActions ? (
-        <AuctionActions
-          auction={auction}
-          players={players}
-          roomPlayerId={roomPlayerId}
-          tileName={auctionTileName ?? auction.tileKey}
-          minimumBid={minimumAuctionBid}
-          availableCash={currentPlayer?.cash ?? null}
-          commandPending={commandPending}
-          onPlaceBid={(amount) => runAndClose(() => onPlaceAuctionBid(amount))}
-          onPass={() => runAndClose(onPassAuctionBid)}
-        />
       ) : primaryAction.command === 'propertyDecision' ? (
         <PropertyDecisionActions
           tile={pendingTile}
@@ -297,12 +258,19 @@ export function GameActionsPanel({
           {commandPending ? 'Playing...' : actionSheetTitle}
         </button>
       ) : (
-        <PrimaryActionButton
-          primaryAction={primaryAction}
-          commandPending={commandPending}
-          onRollAndMove={onRollAndMove}
-          onEndTurn={onEndTurn}
-        />
+        <div className="grid gap-2">
+          <PrimaryActionButton
+            primaryAction={primaryAction}
+            commandPending={commandPending}
+            onRollAndMove={onRollAndMove}
+            onEndTurn={onEndTurn}
+          />
+          <p className="text-sm font-bold leading-5 text-[var(--sea-ink-soft)]">
+            {actionAudience && isCurrentTurn
+              ? `${actionAudience}, ${lowercaseFirst(primaryAction.copy)}`
+              : primaryAction.copy}
+          </p>
+        </div>
       )}
 
       {errorMessage ? (
@@ -317,6 +285,7 @@ export function GameActionsPanel({
       {actionSheetOpen ? (
         <GameActionSheet
           title={actionSheetTitle}
+          audience={actionAudience}
           onClose={() => setActionSheetOpen(false)}
         >
           {actionControls}
@@ -328,10 +297,12 @@ export function GameActionsPanel({
 
 function GameActionSheet({
   title,
+  audience,
   children,
   onClose,
 }: {
   title: string
+  audience: string | null
   children: ReactNode
   onClose: () => void
 }) {
@@ -354,6 +325,7 @@ function GameActionSheet({
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
+            {audience ? <p className="app-kicker">For {audience}</p> : null}
             <h3 className="display-title truncate text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">
               {title}
             </h3>
@@ -371,4 +343,8 @@ function GameActionSheet({
       </section>
     </div>
   )
+}
+
+function lowercaseFirst(value: string) {
+  return value ? `${value[0].toLowerCase()}${value.slice(1)}` : value
 }

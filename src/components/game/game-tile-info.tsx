@@ -4,8 +4,8 @@ import {
   formatCash,
   getTilePurchasePrice,
   getPlayerName,
-  type GameTile,
 } from '#/lib/game/game-board'
+import type { GameTile } from '#/lib/game/game-board'
 import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
 
 type TileInfoPanelProps = {
@@ -49,7 +49,9 @@ export function TileInfoPanel({
     tile.mortgageValue
       ? { label: 'Mortgage', value: formatCash(tile.mortgageValue) }
       : null,
-    tile.houseCost ? { label: 'Build', value: formatCash(tile.houseCost) } : null,
+    tile.houseCost
+      ? { label: 'Build', value: formatCash(tile.houseCost) }
+      : null,
     owner ? { label: 'Owner', value: getPlayerName(owner) } : null,
     buildingSummary ? { label: 'Buildings', value: buildingSummary } : null,
     getTileStatus(tile, property, owner),
@@ -80,7 +82,9 @@ export function TileInfoPanel({
         />
       </button>
 
-      <div className={`game-collapsible ${collapsed ? '' : 'game-collapsible--open'}`}>
+      <div
+        className={`game-collapsible ${collapsed ? '' : 'game-collapsible--open'}`}
+      >
         <div className="pt-2">
           <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
             {getTileInfoCopy(tile)}
@@ -243,8 +247,7 @@ export function TileInfoSheet({
         aria-label={`${tile.name} details`}
         className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[min(86vh,42rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:bottom-auto md:left-1/2 md:top-1/2 md:max-w-xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[28px] md:p-4"
       >
-        <div className="flex items-center justify-between gap-3">
-          <span className="h-1.5 w-12 rounded-full bg-[color-mix(in_oklab,var(--sea-ink-soft)_42%,transparent)] md:hidden" />
+        <div className="flex items-center justify-end gap-3 md:justify-between">
           <p className="app-kicker hidden md:block">Square details</p>
           <button
             type="button"

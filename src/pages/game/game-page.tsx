@@ -6,9 +6,10 @@ import {
   MapPinIcon,
   TrophyIcon,
   XIcon,
-  type Icon,
 } from '@phosphor-icons/react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import type { Icon } from '@phosphor-icons/react'
+import { useEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import '#/components/game/game.css'
@@ -165,56 +166,55 @@ export function GamePage({ gameId }: GamePageProps) {
                 <AuctionStatusPanel
                   auction={activeAuction}
                   players={state?.players ?? []}
+                  events={game.events}
                   roomPlayerId={game.roomPlayerId}
                   tileName={model.auctionTile?.name ?? activeAuction.tileKey}
                   minimumBid={model.minimumAuctionBid}
+                  commandPending={game.commandPending}
+                  onPlaceBid={(amount) => void game.placeAuctionBid(amount)}
+                  onPass={() => void game.passAuctionBid()}
                 />
               </div>
             ) : null}
 
-            <div className="col-span-2 xl:col-span-1">
-              <GameActionsPanel
-                primaryAction={model.primaryAction}
-                commandPending={game.commandPending}
-                gameExpired={model.gameExpired}
-                errorMessage={game.errorMessage}
-                debt={
-                  state?.phase === 'awaiting_debt_resolution'
-                    ? state.debt
-                    : null
-                }
-                auction={activeAuction}
-                players={state?.players ?? []}
-                roomPlayerId={game.roomPlayerId}
-                currentPlayer={game.currentPlayer}
-                currentPlayerInJail={model.currentPlayerInJail}
-                isCurrentTurn={model.isUserTurn}
-                phase={state?.phase}
-                tradeOffer={state?.tradeOffer}
-                auctionTileName={model.auctionTile?.name ?? null}
-                pendingTile={model.pendingTile ?? null}
-                pendingProperty={model.pendingProperty}
-                minimumAuctionBid={model.minimumAuctionBid}
-                onRollAndMove={() => void game.rollAndMove()}
-                onEndTurn={() => void game.endTurn()}
-                onBuyProperty={() => void game.buyProperty()}
-                onDeclinePropertyPurchase={() =>
-                  void game.declinePropertyPurchase()
-                }
-                onPlaceAuctionBid={(amount) =>
-                  void game.placeAuctionBid(amount)
-                }
-                onPassAuctionBid={() => void game.passAuctionBid()}
-                onPayDebt={() => void game.payDebt()}
-                onManageProperties={() => setActiveSidePanel('properties')}
-                onPayJailFine={() => void game.payJailFine()}
-                onUseGetOutOfJailCard={() => void game.useGetOutOfJailCard()}
-                onDeclareBankruptcy={() => void game.declareBankruptcy()}
-                onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
-                onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
-                onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
-              />
-            </div>
+            {!activeAuction ? (
+              <div className="col-span-2 xl:col-span-1">
+                <GameActionsPanel
+                  primaryAction={model.primaryAction}
+                  commandPending={game.commandPending}
+                  gameExpired={model.gameExpired}
+                  errorMessage={game.errorMessage}
+                  debt={
+                    state?.phase === 'awaiting_debt_resolution'
+                      ? state.debt
+                      : null
+                  }
+                  players={state?.players ?? []}
+                  roomPlayerId={game.roomPlayerId}
+                  currentPlayer={game.currentPlayer}
+                  currentPlayerInJail={model.currentPlayerInJail}
+                  isCurrentTurn={model.isUserTurn}
+                  phase={state?.phase}
+                  tradeOffer={state?.tradeOffer}
+                  pendingTile={model.pendingTile ?? null}
+                  pendingProperty={model.pendingProperty}
+                  onRollAndMove={() => void game.rollAndMove()}
+                  onEndTurn={() => void game.endTurn()}
+                  onBuyProperty={() => void game.buyProperty()}
+                  onDeclinePropertyPurchase={() =>
+                    void game.declinePropertyPurchase()
+                  }
+                  onPayDebt={() => void game.payDebt()}
+                  onManageProperties={() => setActiveSidePanel('properties')}
+                  onPayJailFine={() => void game.payJailFine()}
+                  onUseGetOutOfJailCard={() => void game.useGetOutOfJailCard()}
+                  onDeclareBankruptcy={() => void game.declareBankruptcy()}
+                  onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
+                  onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
+                  onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
+                />
+              </div>
+            ) : null}
 
             {model.activeTile ? (
               <GameSidePanelLauncher
