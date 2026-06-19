@@ -1,13 +1,14 @@
 import { BuildingsIcon } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
+import { findPlayer, gameTiles, getPlayerName } from '#/lib/game/game-board'
+import type { GameTile } from '#/lib/game/game-board'
 import {
-  findPlayer,
-  formatCash,
-  gameTiles,
-  getPlayerName,
-  getUnmortgageCost,
-  type GameTile,
-} from '#/lib/game/game-board'
+  getActionNotice,
+  getBuildAction,
+  getMortgageAction,
+  getOwnedSetProperties,
+  getSellAction,
+} from '#/lib/game/game-property-actions'
 import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
 import { GamePanel } from './game-primitives'
 
@@ -148,17 +149,45 @@ function PropertyList({
           roomPlayerId && property.ownerRoomPlayerId === roomPlayerId,
         )
         const mortgageValue = tile?.mortgageValue ?? 0
-        const unmortgageCost = getUnmortgageCost(mortgageValue)
-        const canManageBuilding = Boolean(
-          canManageProperties &&
-          isMine &&
-          tile?.kind === 'property' &&
-          ownsFullPropertySet(properties, tile, property.ownerRoomPlayerId) &&
-          !property.mortgaged &&
-          !property.hasHotel,
-        )
         const hasBuilding = property.hasHotel || property.houseCount > 0
-        const buildingCost = tile?.houseCost ?? 0
+        const setProperties = getOwnedSetProperties(
+          properties,
+          tile,
+          property.ownerRoomPlayerId,
+        )
+        const buildAction = getBuildAction({
+          property,
+          tile,
+          owner,
+          setProperties,
+          canManageProperties,
+          isMine,
+        })
+        const sellAction = getSellAction({
+          property,
+          tile,
+          setProperties,
+          canLiquidateProperties,
+          isMine,
+        })
+        const mortgageAction = getMortgageAction({
+          property,
+          tile,
+          owner,
+          setProperties,
+          canManageProperties,
+          canLiquidateProperties,
+          isMine,
+        })
+        const actionNotice = getActionNotice({
+          tile,
+          property,
+          buildAction,
+          sellAction,
+          mortgageAction,
+          canManageProperties,
+          hasBuilding,
+        })
 
         return (
           <div
@@ -191,46 +220,31 @@ function PropertyList({
                   <div className="grid gap-2 sm:grid-cols-2">
                     <button
                       type="button"
-                      disabled={
-                        !canManageBuilding ||
-                        commandPending ||
-                        buildingCost <= 0
-                      }
+                      disabled={!buildAction.enabled || commandPending}
                       className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onBuild(property.tileKey)}
                     >
-                      {property.hasHotel
-                        ? 'Built out'
-                        : property.houseCount === 4
-                          ? `Hotel ${formatCash(buildingCost)}`
-                          : `Build ${formatCash(buildingCost)}`}
+                      {buildAction.label}
                     </button>
                     <button
                       type="button"
-                      disabled={!isMine || !hasBuilding || commandPending}
+                      disabled={!sellAction.enabled || commandPending}
                       className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-3 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                       onClick={() => onSellBuilding(property.tileKey)}
                     >
-                      Sell +{formatCash(buildingCost / 2)}
+                      {sellAction.label}
                     </button>
                   </div>
                 ) : null}
-                {canManageProperties &&
-                tile?.kind === 'property' &&
-                isMine &&
-                !canManageBuilding ? (
+                {actionNotice ? (
                   <p className="text-xs font-bold leading-5 text-[var(--sea-ink-soft)]">
-                    Own the full color set before building here.
+                    {actionNotice}
                   </p>
                 ) : null}
 
                 <button
                   type="button"
-                  disabled={
-                    !isMine ||
-                    commandPending ||
-                    (property.mortgaged && !canManageProperties)
-                  }
+                  disabled={!mortgageAction.enabled || commandPending}
                   className="inline-flex min-h-10 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_88%,transparent)] px-4 py-2 text-center text-xs font-black leading-4 text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={() => {
                     if (property.mortgaged) {
@@ -241,11 +255,7 @@ function PropertyList({
                     onMortgage(property.tileKey)
                   }}
                 >
-                  {property.mortgaged
-                    ? canManageProperties
-                      ? `Unmortgage ${formatCash(unmortgageCost)}`
-                      : 'Mortgaged'
-                    : `Mortgage +${formatCash(mortgageValue)}`}
+                  {mortgageAction.label}
                 </button>
               </div>
             ) : null}
@@ -268,27 +278,4 @@ function getPropertyBuildLabel(property: GameProperty, tile?: GameTile) {
   }
 
   return 'Owned'
-}
-
-function ownsFullPropertySet(
-  properties: GameProperty[],
-  tile: GameTile | undefined,
-  ownerRoomPlayerId: string | null,
-) {
-  if (!tile?.setKey || !ownerRoomPlayerId) {
-    return false
-  }
-
-  const setTiles = gameTiles.filter(
-    (item) => item.kind === 'property' && item.setKey === tile.setKey,
-  )
-
-  return setTiles.every((setTile) =>
-    properties.some(
-      (property) =>
-        property.tileKey === setTile.key &&
-        property.ownerRoomPlayerId === ownerRoomPlayerId &&
-        !property.mortgaged,
-    ),
-  )
 }

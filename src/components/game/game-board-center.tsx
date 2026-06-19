@@ -28,7 +28,7 @@ export function GameBoardCenter({
   const copy = gameClosed
     ? phase === 'cancelled'
       ? 'This game was cancelled.'
-      : 'Results are being saved.'
+      : 'Final results appear below.'
     : access === 'spectator'
       ? 'Watching live.'
       : isCurrentTurn
@@ -44,7 +44,7 @@ export function GameBoardCenter({
         </div>
 
         <div>
-            <p className="display-title text-xl font-semibold text-[var(--sea-ink)] sm:text-4xl">
+          <p className="display-title text-xl font-semibold text-[var(--sea-ink)] sm:text-4xl">
             {APP_NAME}
           </p>
           <DiceRollDisplay
@@ -52,7 +52,7 @@ export function GameBoardCenter({
             isRolling={!gameClosed && isRollingDice}
           />
           {title ? (
-              <p className="display-title mt-1 text-2xl font-semibold text-[var(--sea-ink)] sm:mt-3 sm:text-4xl">
+            <p className="display-title mt-1 text-2xl font-semibold text-[var(--sea-ink)] sm:mt-3 sm:text-4xl">
               {title}
             </p>
           ) : null}
@@ -67,13 +67,7 @@ export function GameBoardCenter({
   )
 }
 
-function DeckCard({
-  label,
-  tone,
-}: {
-  label: string
-  tone: 'chance' | 'fund'
-}) {
+function DeckCard({ label, tone }: { label: string; tone: 'chance' | 'fund' }) {
   return (
     <div
       className={`game-deck-card game-deck-card--${tone} grid min-h-11 place-items-center rounded-lg border border-[var(--line)] px-2 py-2 shadow-[0_18px_44px_rgba(4,12,15,0.16)] sm:min-h-20 sm:rounded-[18px] sm:px-3 sm:py-4`}

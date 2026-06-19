@@ -47,7 +47,7 @@ export function TradeOfferActions({
     <div className="grid gap-4">
       <div>
         <p className="app-kicker">Trade</p>
-        <h3 className="display-title mt-1 text-3xl font-semibold text-[var(--sea-ink)]">
+        <h3 className="display-title mt-1 text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">
           {isTarget
             ? `${fromPlayerName} made an offer.`
             : isSender

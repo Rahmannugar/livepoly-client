@@ -40,8 +40,8 @@ export function AuctionActions({
   )
   const canBid = Boolean(
     roomPlayerId &&
-      auction.currentBidderRoomPlayerId === roomPlayerId &&
-      !hasPassed,
+    auction.currentBidderRoomPlayerId === roomPlayerId &&
+    !hasPassed,
   )
   const activeBidderCount = auction.activeRoomPlayerIds.filter(
     (activeRoomPlayerId) =>
@@ -54,16 +54,6 @@ export function AuctionActions({
       : currentBidder
         ? `${getPlayerName(currentBidder)} is deciding on ${tileName}.`
         : `The auction for ${tileName} is settling.`
-  const statusCopy = canBid
-    ? availableCash !== null
-      ? `Enter ${formatCash(minimumBid)} to ${formatCash(availableCash)}, or pass.`
-      : `Enter any whole number from ${formatCash(minimumBid)} upward, or pass.`
-    : hasPassed
-      ? `You passed on ${tileName}.`
-      : currentBidder
-        ? `${getPlayerName(currentBidder)} is choosing a bid or pass.`
-        : 'Auction is closing.'
-
   useEffect(() => {
     if (!canBid) {
       setBidInputValue('')
@@ -84,10 +74,10 @@ export function AuctionActions({
     <div className="game-auction-panel grid gap-4">
       <div>
         <p className="app-kicker">Auction</p>
-        <h3 className="display-title mt-2 text-3xl font-semibold text-[var(--sea-ink)]">
+        <h3 className="display-title mt-1 text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">
           {tileName}
         </h3>
-        <p className="mt-2 text-base font-black leading-7 text-[var(--sea-ink)]">
+        <p className="mt-2 text-sm font-black leading-6 text-[var(--sea-ink)] sm:text-base">
           {turnCopy}
         </p>
         <p className="mt-1 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
@@ -96,30 +86,30 @@ export function AuctionActions({
             : 'No bid yet.'}{' '}
           {highestBidder ? `${getPlayerName(highestBidder)} leads.` : ''}
         </p>
-        <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
-          Bids move one player at a time.
-        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <StatePill label="Next bid" value={`${formatCash(minimumBid)}+`} />
         <StatePill
-          label="Now deciding"
-          value={currentBidder ? getPlayerName(currentBidder) : 'Settling'}
+          label="Current"
+          value={
+            auction.currentBid > 0 ? formatCash(auction.currentBid) : 'None'
+          }
         />
-        <StatePill label="Still in" value={`${activeBidderCount}`} />
+        <StatePill label="Next bid" value={formatCash(minimumBid)} />
         <StatePill
           label="Leading"
           value={highestBidder ? getPlayerName(highestBidder) : 'No bid'}
         />
-        <StatePill
-          label="Passed"
-          value={`${auction.passedRoomPlayerIds.length}`}
-        />
+        <StatePill label="Still in" value={`${activeBidderCount}`} />
       </div>
 
       <label className="grid gap-2 text-sm font-black text-[var(--sea-ink)]">
         Bid amount
+        {availableCash !== null ? (
+          <span className="text-xs font-bold text-[var(--sea-ink-soft)]">
+            {formatCash(availableCash)} available
+          </span>
+        ) : null}
         <input
           type="text"
           inputMode="numeric"
@@ -134,9 +124,12 @@ export function AuctionActions({
           placeholder={formatCash(minimumBid)}
           className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-70"
         />
-        {canBid && bidInputValue && Number.isFinite(parsedBidAmount) && !bidIsAffordable ? (
+        {canBid &&
+        bidInputValue &&
+        Number.isFinite(parsedBidAmount) &&
+        !bidIsAffordable ? (
           <span className="text-xs font-black text-red-500">
-            You only have {formatCash(availableCash ?? 0)}.
+            You only have {formatCash(availableCash)}.
           </span>
         ) : canBid && bidInputValue && !bidIsValid ? (
           <span className="text-xs font-black text-red-500">
@@ -145,14 +138,10 @@ export function AuctionActions({
         ) : null}
       </label>
 
-      <div className="grid gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          disabled={
-            !canBid ||
-            commandPending ||
-            !bidIsValid
-          }
+          disabled={!canBid || commandPending || !bidIsValid}
           className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
             commandPending ? 'game-command-button--active' : ''
           }`}
@@ -178,10 +167,6 @@ export function AuctionActions({
           Pass
         </button>
       </div>
-
-      <p className="text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-        {statusCopy}
-      </p>
     </div>
   )
 }

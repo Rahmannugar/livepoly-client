@@ -32,9 +32,9 @@ export function AuctionStatusPanel({
   return (
     <GamePanel title="Auction" icon={GavelIcon} collapsible={false}>
       <div className="grid gap-3">
-        <div className="rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--primary)_10%,var(--surface))] p-4">
+        <div className="rounded-xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--primary)_10%,var(--surface))] p-3 sm:rounded-2xl sm:p-4">
           <p className="app-kicker">Live auction</p>
-          <h3 className="display-title mt-2 truncate text-3xl font-semibold text-[var(--sea-ink)]">
+          <h3 className="display-title mt-1 truncate text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">
             {tileName}
           </h3>
           <p className="mt-2 text-sm font-black leading-6 text-[var(--sea-ink)]">
@@ -55,7 +55,7 @@ export function AuctionStatusPanel({
               auction.currentBid > 0 ? formatCash(auction.currentBid) : 'None'
             }
           />
-          <StatePill label="Next bid" value={`${formatCash(minimumBid)}+`} />
+          <StatePill label="Next bid" value={formatCash(minimumBid)} />
           <StatePill
             label="Leading"
             value={highestBidder ? getPlayerName(highestBidder) : 'No bid'}
@@ -64,12 +64,11 @@ export function AuctionStatusPanel({
             label="Now deciding"
             value={currentBidder ? getPlayerName(currentBidder) : 'Settling'}
           />
-          <StatePill label="Still in" value={`${activeBidderCount}`} />
-          <StatePill
-            label="Passed"
-            value={`${auction.passedRoomPlayerIds.length}`}
-          />
         </div>
+        <p className="text-xs font-bold text-[var(--sea-ink-soft)]">
+          {activeBidderCount} still in · {auction.passedRoomPlayerIds.length}{' '}
+          passed
+        </p>
       </div>
     </GamePanel>
   )
