@@ -8,8 +8,8 @@ import {
   UserPlusIcon,
 } from '@phosphor-icons/react'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { AppPageHeader } from '#/components/common/app-page-header'
 import { useToast } from '#/components/common/toast'
-import { APP_NAME } from '#/config/app.constants'
 import {
   useNotificationMutations,
   useNotifications,
@@ -131,17 +131,7 @@ export function NotificationsPage() {
   return (
     <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
       <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-5xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
-        <header className="flex items-center justify-between gap-4">
-          <Link
-            to="/"
-            className="display-title text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl"
-          >
-            {APP_NAME}
-          </Link>
-          <Link to="/" className="app-link text-sm">
-            Home
-          </Link>
-        </header>
+        <AppPageHeader />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-3xl">

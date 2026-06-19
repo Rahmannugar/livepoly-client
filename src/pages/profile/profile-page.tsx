@@ -10,8 +10,8 @@ import {
 } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { AppPageHeader } from '#/components/common/app-page-header'
 import { useToast } from '#/components/common/toast'
-import { APP_NAME } from '#/config/app.constants'
 import {
   USER_AVATAR_ALLOWED_TYPES,
   USER_AVATAR_MAX_BYTES,
@@ -173,17 +173,7 @@ export function ProfilePage() {
   return (
     <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
       <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
-        <header className="flex items-center justify-between gap-4">
-          <Link
-            to="/"
-            className="display-title text-3xl font-semibold text-[var(--sea-ink)] sm:text-4xl"
-          >
-            {APP_NAME}
-          </Link>
-          <Link to="/" className="app-link text-sm">
-            Home
-          </Link>
-        </header>
+        <AppPageHeader />
 
         <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
           <article className="rounded-[24px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-4 shadow-[0_18px_48px_rgba(8,28,32,0.1)] backdrop-blur-xl sm:rounded-[30px] sm:p-8">

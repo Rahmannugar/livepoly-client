@@ -208,7 +208,7 @@ export function HomePage() {
         <header className="grid grid-cols-[1fr_auto] items-center gap-2 min-[420px]:gap-3 sm:flex sm:justify-between">
           <Link
             to="/"
-            className="display-title min-w-0 text-[1.6rem] font-semibold leading-none text-[var(--sea-ink)] min-[420px]:text-3xl sm:text-4xl"
+            className="display-title min-w-0 text-2xl font-semibold leading-none text-[var(--sea-ink)] min-[420px]:text-3xl sm:text-4xl"
           >
             {APP_NAME}
           </Link>

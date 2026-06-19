@@ -13,6 +13,7 @@ import {
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useCallback, useState } from 'react'
 import { RoomInviteDialog } from '#/components/rooms/room-invite-dialog'
+import { GlobalNotificationButton } from '#/components/common/global-notification-button'
 import { RouteTransitionOverlay } from '#/components/common/route-transition-overlay'
 import { APP_NAME } from '#/config/app.constants'
 import { ThemeToggle } from '#/components/common/theme-toggle'
@@ -326,6 +327,7 @@ export function RoomPage({ code }: RoomPageProps) {
           </Link>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <GlobalNotificationButton />
             <Link
               to="/"
               aria-label="Back home"
