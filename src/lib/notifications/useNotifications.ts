@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
+import { useAuth } from '#/lib/auth/useAuth'
 import {
   NOTIFICATIONS_QUERY_KEYS,
   NOTIFICATIONS_REFETCH_INTERVAL_MS,
@@ -10,6 +11,9 @@ import {
 import * as notificationsService from './notifications.service'
 
 export function useNotifications() {
+  const auth = useAuth()
+  const canFetchNotifications = auth.hydration.data && !!auth.currentUser.data
+
   return useInfiniteQuery({
     queryKey: NOTIFICATIONS_QUERY_KEYS.list,
     queryFn: ({ pageParam }) =>
@@ -17,6 +21,7 @@ export function useNotifications() {
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     refetchInterval: NOTIFICATIONS_REFETCH_INTERVAL_MS,
+    enabled: canFetchNotifications,
   })
 }
 

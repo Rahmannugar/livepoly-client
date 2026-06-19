@@ -79,7 +79,7 @@ export function RoomActionDialog({
         {isCreateMode ? (
           <div className="mt-5">
             <p className="text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-              Pick a casual match length, then share the room code with friends.
+              90m is ranked. Other lengths stay casual.
             </p>
 
             <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5">
