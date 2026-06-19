@@ -153,7 +153,7 @@ export function FriendsPage() {
                 <>
                   <button
                     type="button"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex h-10 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-black text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
                     disabled={
                       mutations.acceptRequest.isPending ||
                       mutations.rejectRequest.isPending
@@ -174,7 +174,7 @@ export function FriendsPage() {
                   </button>
                   <button
                     type="button"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[var(--line)] px-4 text-sm font-black text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex h-10 min-w-0 flex-1 items-center justify-center gap-2 rounded-full border border-[var(--line)] px-4 text-sm font-black text-[var(--sea-ink)] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
                     disabled={
                       mutations.acceptRequest.isPending ||
                       mutations.rejectRequest.isPending
@@ -337,10 +337,10 @@ function RequestsList({
         {requests.map((request) => (
           <article
             key={request.friendshipId}
-            className="flex items-center justify-between gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4"
+            className="flex flex-col gap-3 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <UserSummary username={renderName(request)} />
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:shrink-0">
               {actions(request)}
             </div>
           </article>
