@@ -360,17 +360,17 @@ function GameSidePanelLauncher({
   return (
     <button
       type="button"
-      className="group flex min-h-24 min-w-0 flex-col items-start gap-2 rounded-xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-2.5 text-left shadow-[0_18px_55px_rgba(4,12,15,0.12)] backdrop-blur-xl transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-row xl:items-center xl:gap-3 xl:p-4"
+      className="group flex min-h-[4.75rem] min-w-0 items-center gap-2 rounded-xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-2 text-left shadow-[0_14px_42px_rgba(4,12,15,0.1)] backdrop-blur-xl transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:min-h-[5.25rem] sm:gap-3 sm:rounded-2xl sm:p-3 xl:min-h-[5rem] xl:p-3.5"
       onClick={onClick}
     >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] sm:h-10 sm:w-10 sm:rounded-2xl">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] sm:h-10 sm:w-10 sm:rounded-2xl xl:h-11 xl:w-11">
         <IconComponent weight="bold" className="h-4 w-4 sm:h-5 sm:w-5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="display-title block truncate text-base font-semibold text-[var(--sea-ink)] sm:text-lg xl:text-xl">
+        <span className="display-title block truncate text-base font-semibold text-[var(--sea-ink)] sm:text-lg">
           {title}
         </span>
-        <span className="mt-0.5 block line-clamp-2 text-xs font-bold leading-4 text-[var(--sea-ink-soft)] sm:text-sm sm:leading-5">
+        <span className="mt-0.5 block line-clamp-2 text-[0.72rem] font-bold leading-4 text-[var(--sea-ink-soft)] sm:text-xs sm:leading-4 xl:text-sm xl:leading-5">
           {copy}
         </span>
       </span>

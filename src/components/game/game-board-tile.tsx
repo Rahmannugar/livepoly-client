@@ -63,7 +63,7 @@ export function GameTileCell({
           </span>
         ) : null}
         <span
-          className={`game-tile__label line-clamp-4 text-[0.38rem] font-black leading-[0.88] sm:text-[0.5rem] sm:leading-[0.95] xl:text-[0.55rem] 2xl:text-[0.6rem] ${
+          className={`game-tile__label line-clamp-4 text-[0.34rem] font-black leading-[0.84] sm:text-[0.46rem] sm:leading-[0.92] xl:text-[0.5rem] 2xl:text-[0.56rem] ${
             TileIcon ? 'game-tile__label--special' : ''
           }`}
           title={tile.name}

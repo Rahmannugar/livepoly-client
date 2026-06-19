@@ -121,6 +121,8 @@
 
   .game-tile__label {
     letter-spacing: 0;
+    font-size: 0.32rem;
+    line-height: 0.8;
   }
 
   .game-tile__icon {
@@ -133,6 +135,13 @@
 
   .game-tile__owner-marker {
     display: none;
+  }
+}
+
+@media (max-width: 370px) {
+  .game-tile__label {
+    font-size: 0.29rem;
+    line-height: 0.78;
   }
 }
 
@@ -281,15 +290,6 @@
 .game-deck-card-layer--middle {
   opacity: 0.64;
   transform: translate(0.28rem, 0.16rem) rotate(2.4deg);
-}
-
-.game-deck-card::after {
-  content: '';
-  position: absolute;
-  inset: 0.45rem;
-  border: 1px dashed color-mix(in oklab, var(--sea-ink-soft) 42%, transparent);
-  border-radius: 0.85rem;
-  pointer-events: none;
 }
 
 .game-deck-card--chance {
