@@ -11,6 +11,16 @@ import { ROOMS_QUERY_KEYS } from './rooms.constants'
 import { getRoomStreamUrl } from './rooms.service'
 
 const ROOM_STREAM_RECONNECT_DELAYS_MS = [1_000, 2_000, 5_000, 10_000] as const
+const ROOM_STREAM_EVENTS = new Set([
+  'room.updated',
+  'room.created',
+  'room.joined',
+  'room.left',
+  'room.cancelled',
+  'room.spectator_joined',
+  'room.spectator_left',
+  'room.started',
+])
 
 type RoomStreamPayload = {
   event?: string
@@ -33,7 +43,7 @@ function getReconnectDelay(attempt: number) {
 }
 
 function parseStreamMessage(message: string): RoomStreamEvent | null {
-  const lines = message.split('\n')
+  const lines = message.replaceAll('\r\n', '\n').split('\n')
   let event = 'message'
   const dataLines: string[] = []
 
@@ -65,6 +75,13 @@ function parseStreamMessage(message: string): RoomStreamEvent | null {
   }
 }
 
+function isRoomStreamEvent(event: RoomStreamEvent) {
+  return (
+    ROOM_STREAM_EVENTS.has(event.event) ||
+    (event.data?.event ? ROOM_STREAM_EVENTS.has(event.data.event) : false)
+  )
+}
+
 async function readRoomStream(
   response: Response,
   onRoomChanged: (event: RoomStreamEvent) => void,
@@ -85,7 +102,7 @@ async function readRoomStream(
       break
     }
 
-    buffer += decoder.decode(value, { stream: true })
+    buffer += decoder.decode(value, { stream: true }).replaceAll('\r\n', '\n')
 
     let messageEndIndex = buffer.indexOf('\n\n')
 
@@ -95,7 +112,7 @@ async function readRoomStream(
 
       const event = parseStreamMessage(message)
 
-      if (event?.event === 'room.updated') {
+      if (event && isRoomStreamEvent(event)) {
         onRoomChanged(event)
       }
 

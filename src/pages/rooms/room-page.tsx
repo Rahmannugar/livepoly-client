@@ -110,9 +110,10 @@ export function RoomPage({ code }: RoomPageProps) {
     async (event: RoomStreamEvent) => {
       const result = await refetchRoom()
       const nextRoom = result.data
+      const roomEvent = event.data?.event ?? event.event
 
       if (
-        event.data?.event === 'room.started' &&
+        roomEvent === 'room.started' &&
         nextRoom?.activeGameId &&
         nextRoom.currentUserAccess !== 'none'
       ) {
