@@ -19,6 +19,8 @@ import { ThemeToggle } from '#/components/common/theme-toggle'
 import { useToast } from '#/components/common/toast'
 import { useAuth } from '#/lib/auth/useAuth'
 import { useDebouncedValue } from '#/lib/common/useDebouncedValue'
+import { useFriends } from '#/lib/friends/useFriends'
+import type { FriendSummary } from '#/lib/friends/friends.types'
 import {
   BOT_DIFFICULTIES,
   DEFAULT_BOT_DIFFICULTY,
@@ -36,6 +38,7 @@ export function RoomPage({ code }: RoomPageProps) {
   const auth = useAuth()
   const rooms = useRooms()
   const roomQuery = useRoom(code)
+  const friends = useFriends()
   const refetchRoom = roomQuery.refetch
   const navigate = useNavigate()
   const { showToast } = useToast()
@@ -60,6 +63,13 @@ export function RoomPage({ code }: RoomPageProps) {
       room.currentUserAccess === 'player',
   )
   const userSearch = useUserSearch(debouncedInviteQuery, isInviteOpen)
+  const inviteFriends = room
+    ? filterInviteResults({
+        currentUsername: user?.username,
+        players: playersAtTable,
+        results: friendsToInviteCandidates(friends.data?.items ?? []),
+      })
+    : []
   const inviteResults = room
     ? filterInviteResults({
         currentUsername: user?.username,
@@ -538,6 +548,7 @@ export function RoomPage({ code }: RoomPageProps) {
                 isOpen={isInviteOpen}
                 query={inviteQuery}
                 selectedUsername={selectedInviteUsername}
+                friends={inviteFriends}
                 results={inviteResults}
                 isSearching={userSearch.isFetching}
                 isSending={rooms.inviteToRoom.isPending}
@@ -650,6 +661,14 @@ function filterInviteResults({
   return results.filter(
     (user) => !unavailableUsernames.has(user.username.toLowerCase()),
   )
+}
+
+function friendsToInviteCandidates(friends: FriendSummary[]) {
+  return friends.map((friend) => ({
+    id: friend.userId,
+    username: friend.username,
+    avatarUrl: null,
+  }))
 }
 
 function joinedPlayers(players: RoomPlayer[]) {

@@ -4,14 +4,21 @@ import {
   UserIcon,
   XIcon,
 } from '@phosphor-icons/react'
+import { useState } from 'react'
 import { USER_SEARCH_MIN_LENGTH } from '#/lib/users/users.constants'
-import type { UserSearchItem } from '#/lib/users/users.types'
+
+type RoomInviteCandidate = {
+  id: string
+  username: string
+  avatarUrl: string | null
+}
 
 type RoomInviteDialogProps = {
   isOpen: boolean
   query: string
   selectedUsername: string
-  results: UserSearchItem[]
+  friends: RoomInviteCandidate[]
+  results: RoomInviteCandidate[]
   isSearching: boolean
   isSending: boolean
   onClose: () => void
@@ -24,6 +31,7 @@ export function RoomInviteDialog({
   isOpen,
   query,
   selectedUsername,
+  friends,
   results,
   isSearching,
   isSending,
@@ -32,12 +40,15 @@ export function RoomInviteDialog({
   onSelectUser,
   onInvite,
 }: RoomInviteDialogProps) {
+  const [activeTab, setActiveTab] = useState<'friends' | 'search'>('friends')
+
   if (!isOpen) {
     return null
   }
 
   const normalizedQuery = query.trim()
   const canSearch = normalizedQuery.length >= USER_SEARCH_MIN_LENGTH
+  const visibleResults = activeTab === 'friends' ? friends : results
 
   return (
     <div
@@ -75,48 +86,74 @@ export function RoomInviteDialog({
           </button>
         </div>
 
-        <label className="mt-5 grid gap-2">
-          <span className="text-sm font-bold text-[var(--sea-ink)]">
-            Username
-          </span>
-          <span className="relative block">
-            <MagnifyingGlassIcon
-              weight="bold"
-              className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--sea-ink-soft)]"
-            />
-            <input
-              type="search"
-              value={query}
-              autoCapitalize="none"
-              autoComplete="off"
-              spellCheck={false}
-              className="h-12 w-full rounded-2xl border border-[var(--line)] bg-[var(--surface)] pl-12 pr-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
-              placeholder="Search username"
-              onChange={(event) => onQueryChange(event.target.value)}
-            />
-          </span>
-        </label>
+        <div className="mt-5 grid grid-cols-2 gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1">
+          {(['friends', 'search'] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={[
+                'h-10 rounded-full text-sm font-black capitalize transition',
+                activeTab === tab
+                  ? 'bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[0_10px_24px_rgba(23,58,64,0.16)]'
+                  : 'text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]',
+              ].join(' ')}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'search' ? (
+          <label className="mt-4 grid gap-2">
+            <span className="text-sm font-bold text-[var(--sea-ink)]">
+              Username
+            </span>
+            <span className="relative block">
+              <MagnifyingGlassIcon
+                weight="bold"
+                className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--sea-ink-soft)]"
+              />
+              <input
+                type="search"
+                value={query}
+                autoCapitalize="none"
+                autoComplete="off"
+                spellCheck={false}
+                className="h-12 w-full rounded-2xl border border-[var(--line)] bg-[var(--surface)] pl-12 pr-4 text-base font-bold text-[var(--sea-ink)] outline-none transition focus:border-[var(--primary)]"
+                placeholder="Search username"
+                onChange={(event) => onQueryChange(event.target.value)}
+              />
+            </span>
+          </label>
+        ) : null}
 
         <div className="mt-4 max-h-56 overflow-y-auto rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-2">
-          {!canSearch ? (
+          {activeTab === 'friends' && friends.length === 0 ? (
+            <p className="px-3 py-4 text-sm font-semibold text-[var(--sea-ink-soft)]">
+              No inviteable friends.
+            </p>
+          ) : null}
+
+          {activeTab === 'search' && !canSearch ? (
             <p className="px-3 py-4 text-sm font-semibold text-[var(--sea-ink-soft)]">
               Type at least {USER_SEARCH_MIN_LENGTH} characters.
             </p>
           ) : null}
 
-          {canSearch && isSearching ? (
+          {activeTab === 'search' && canSearch && isSearching ? (
             <p className="px-3 py-4 text-sm font-semibold text-[var(--sea-ink-soft)]">
               Finding players...
             </p>
           ) : null}
 
-          {canSearch && !isSearching && results.length === 0 ? (
+          {activeTab === 'search' && canSearch && !isSearching && results.length === 0 ? (
             <p className="px-3 py-4 text-sm font-semibold text-[var(--sea-ink-soft)]">
               No players found.
             </p>
           ) : null}
 
-          {results.map((user) => {
+          {visibleResults.map((user) => {
             const isSelected = selectedUsername === user.username
 
             return (
