@@ -50,7 +50,7 @@ export function GameCardReveal({
 
           <div>
             <p className="app-kicker">
-              {playerName ? `For ${playerName} · ${deckName}` : deckName}
+              {playerName ? `${deckName} · For ${playerName}` : deckName}
             </p>
             <h2 className="display-title mt-2 text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-4xl">
               {card.title}

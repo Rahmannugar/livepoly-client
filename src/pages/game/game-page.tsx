@@ -124,7 +124,7 @@ export function GamePage({ gameId }: GamePageProps) {
         />
         <GameMatchTimer remainingMatchTimeMs={model.remainingMatchTimeMs} />
 
-        <div className="grid flex-1 gap-4 xl:grid-cols-[17rem_minmax(0,1fr)_21rem] 2xl:grid-cols-[19rem_minmax(58rem,1fr)_23rem]">
+        <div className="grid flex-1 gap-4 xl:grid-cols-[17rem_minmax(0,1fr)_26rem] 2xl:grid-cols-[18rem_minmax(56rem,1fr)_29rem]">
           <aside className="order-3 grid gap-3 md:grid-cols-2 xl:order-1 xl:grid-cols-1 xl:content-start">
             <PlayersPanel state={state} roomPlayerId={game.roomPlayerId} />
             <GameStatePanel

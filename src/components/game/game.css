@@ -260,13 +260,7 @@
 .game-deck-card {
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(
-      circle at 30% 20%,
-      color-mix(in oklab, var(--primary) 16%, transparent),
-      transparent 46%
-    ),
-    var(--surface);
+  background: var(--surface);
 }
 
 .game-deck-card-stack {
@@ -293,23 +287,11 @@
 }
 
 .game-deck-card--chance {
-  background:
-    radial-gradient(
-      circle at 28% 18%,
-      rgba(255, 212, 74, 0.22),
-      transparent 44%
-    ),
-    var(--surface);
+  background: var(--surface);
 }
 
 .game-deck-card--fund {
-  background:
-    radial-gradient(
-      circle at 28% 18%,
-      color-mix(in oklab, var(--primary) 22%, transparent),
-      transparent 44%
-    ),
-    var(--surface);
+  background: var(--surface);
 }
 
 .game-card-reveal {
