@@ -1,5 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { HeadContent, Scripts } from '@tanstack/react-router'
+import { GlobalNotificationButton } from '#/components/common/global-notification-button'
 import { ToastProvider } from '#/components/common/toast'
 import { queryClient } from '#/lib/client/queryClient'
 import { AuthHydrator } from '#/lib/auth/auth-hydrator'
@@ -18,6 +19,7 @@ export function RootDocument({ children }: { children: React.ReactNode }) {
             <ToastProvider>
               <AuthHydrator>
                 <NotificationsStream />
+                <GlobalNotificationButton />
                 {children}
               </AuthHydrator>
             </ToastProvider>

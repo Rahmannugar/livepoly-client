@@ -56,6 +56,7 @@ export function RoomPage({ code }: RoomPageProps) {
   const room = roomQuery.data
   const isHost = Boolean(room && user?.id === room.hostUserId)
   const playersAtTable = room ? joinedPlayers(room.players) : []
+  const displayedRoomPlayers = room ? getDisplayedRoomPlayers(room) : []
   const canInvite = Boolean(
     room &&
       user &&
@@ -535,13 +536,17 @@ export function RoomPage({ code }: RoomPageProps) {
                     </h2>
                   </div>
                   <span className="text-sm font-black text-[var(--sea-ink-soft)]">
-                    {playersAtTable.length}/{room.maxPlayers}
+                    {displayedRoomPlayers.length}/{room.maxPlayers}
                   </span>
                 </div>
 
                 <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                  {buildSeats(room.players, room.maxPlayers).map((player) => (
-                    <PlayerSeat key={player.key} player={player.player} />
+                  {displayedRoomPlayers.map((player) => (
+                    <PlayerSeat
+                      key={player.key}
+                      player={player.player}
+                      showStatus={room.status !== 'waiting'}
+                    />
                   ))}
                 </div>
               </section>
@@ -691,8 +696,37 @@ function buildSeats(players: RoomPlayer[], maxPlayers: number) {
   })
 }
 
-function PlayerSeat({ player }: { player: RoomPlayer | null }) {
+function getDisplayedRoomPlayers(room: {
+  players: RoomPlayer[]
+  maxPlayers: number
+  status: string
+}) {
+  if (room.status === 'waiting') {
+    return buildSeats(room.players, room.maxPlayers)
+  }
+
+  return room.players
+    .filter((player) => player.status !== 'kicked')
+    .sort((first, second) => first.seatNumber - second.seatNumber)
+    .map((player) => ({
+      key: player.id,
+      player,
+    }))
+}
+
+function PlayerSeat({
+  player,
+  showStatus = false,
+}: {
+  player: RoomPlayer | null
+  showStatus?: boolean
+}) {
   const playerName = player ? player.username ?? player.botName ?? 'Bot' : 'Open seat'
+  const playerMeta = player
+    ? showStatus && player.status !== 'joined'
+      ? `${player.playerType} - ${player.status}`
+      : player.playerType
+    : 'Waiting'
 
   return (
     <div className="flex min-h-14 items-center gap-2.5 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3">
@@ -714,7 +748,7 @@ function PlayerSeat({ player }: { player: RoomPlayer | null }) {
           </p>
         )}
         <p className="text-xs font-bold capitalize leading-4 text-[var(--sea-ink-soft)]">
-          {player ? player.playerType : 'Waiting'}
+          {playerMeta}
         </p>
       </div>
     </div>

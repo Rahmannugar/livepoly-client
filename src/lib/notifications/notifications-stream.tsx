@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { env } from '#/config/env'
+import { useToast } from '#/components/common/toast'
 import { AUTH_QUERY_KEYS } from '#/lib/auth/auth.constants'
 import {
   getAccessToken,
@@ -92,6 +93,7 @@ async function readNotificationStream(
 
 export function NotificationsStream() {
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
   const stoppedRef = useRef(false)
   const user = useQuery<AuthUser | null>({
     queryKey: AUTH_QUERY_KEYS.currentUser,
@@ -156,6 +158,12 @@ export function NotificationsStream() {
               void queryClient.invalidateQueries({
                 queryKey: NOTIFICATIONS_QUERY_KEYS.list,
               })
+              if (
+                !window.location.pathname.startsWith('/games/') &&
+                !window.location.pathname.startsWith('/rooms/')
+              ) {
+                showToast({ kind: 'info', message: 'New notification.' })
+              }
             }
           })
         } catch (error) {
@@ -181,7 +189,7 @@ export function NotificationsStream() {
       stoppedRef.current = true
       abortController.abort()
     }
-  }, [queryClient, user.data])
+  }, [queryClient, showToast, user.data])
 
   return null
 }
