@@ -1,9 +1,11 @@
+import { CaretDownIcon } from '@phosphor-icons/react'
 import { useEffect, useMemo, useState } from 'react'
 import {
   findPlayer,
   formatCash,
   gameTiles,
   getPlayerName,
+  propertySetColors,
 } from '#/lib/game/game-board'
 import type {
   GamePlayer,
@@ -361,6 +363,11 @@ function TradePropertyPicker({
   onCashChange: (value: string) => void
   onToggleProperty: (tileKey: string) => void
 }) {
+  const propertyGroups = useMemo(
+    () => groupTradeProperties(properties),
+    [properties],
+  )
+
   return (
     <div className="grid gap-3 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_72%,transparent)] p-3">
       <p className="text-sm font-black text-[var(--sea-ink)]">{title}</p>
@@ -379,40 +386,182 @@ function TradePropertyPicker({
           placeholder="0"
         />
       </label>
-      <div className="grid max-h-36 gap-2 overflow-y-auto pr-1">
+      <div className="grid max-h-64 gap-2 overflow-y-auto pr-1">
         {properties.length === 0 ? (
           <p className="rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-bold text-[var(--sea-ink-soft)]">
             No properties available.
           </p>
         ) : (
-          properties.map((property) => {
+          propertyGroups.map((group) => (
+            <TradePropertyGroup
+              key={group.key}
+              group={group}
+              selectedPropertyKeys={selectedPropertyKeys}
+              disabled={disabled}
+              onToggleProperty={onToggleProperty}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
+type TradePropertyGroup = {
+  key: string
+  label: string
+  color: string | null
+  properties: GameProperty[]
+}
+
+function TradePropertyGroup({
+  group,
+  selectedPropertyKeys,
+  disabled,
+  onToggleProperty,
+}: {
+  group: TradePropertyGroup
+  selectedPropertyKeys: string[]
+  disabled: boolean
+  onToggleProperty: (tileKey: string) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const selectedCount = group.properties.filter((property) =>
+    selectedPropertyKeys.includes(property.tileKey),
+  ).length
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface)]">
+      <button
+        type="button"
+        className="flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((current) => !current)}
+      >
+        {group.color ? (
+          <span
+            className="h-5 w-1.5 shrink-0 rounded-full"
+            style={{ backgroundColor: group.color }}
+            aria-hidden="true"
+          />
+        ) : null}
+        <span className="min-w-0 flex-1 truncate text-sm font-black text-[var(--sea-ink)]">
+          {group.label}
+        </span>
+        <span className="shrink-0 text-xs font-bold text-[var(--sea-ink-soft)]">
+          {selectedCount > 0
+            ? `${selectedCount}/${group.properties.length} added`
+            : group.properties.length}
+        </span>
+        <CaretDownIcon
+          weight="bold"
+          className={`h-4 w-4 shrink-0 text-[var(--sea-ink-soft)] transition-transform ${
+            expanded ? 'rotate-180' : ''
+          }`}
+          aria-hidden="true"
+        />
+      </button>
+
+      {expanded ? (
+        <div className="grid gap-1.5 border-t border-[var(--line)] p-2">
+          {group.properties.map((property) => {
             const checked = selectedPropertyKeys.includes(property.tileKey)
+            const status = getTradePropertyStatus(property)
 
             return (
               <button
                 key={property.tileKey}
                 type="button"
                 disabled={disabled}
-                className={`flex min-w-0 items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
+                className={`flex min-w-0 items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
                   checked
                     ? 'border-[var(--primary)] bg-[color-mix(in_oklab,var(--primary)_14%,var(--surface))]'
-                    : 'border-[var(--line)] bg-[var(--surface)]'
+                    : 'border-[var(--line)] bg-[var(--surface-strong)]'
                 }`}
                 onClick={() => onToggleProperty(property.tileKey)}
               >
-                <span className="min-w-0 truncate text-sm font-black text-[var(--sea-ink)]">
-                  {getTileName(property.tileKey)}
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-black text-[var(--sea-ink)]">
+                    {getTileName(property.tileKey)}
+                  </span>
+                  {status ? (
+                    <span className="mt-0.5 block truncate text-[0.68rem] font-bold text-[var(--sea-ink-soft)]">
+                      {status}
+                    </span>
+                  ) : null}
                 </span>
                 <span className="shrink-0 text-xs font-black text-[var(--sea-ink-soft)]">
                   {checked ? 'Added' : 'Add'}
                 </span>
               </button>
             )
-          })
-        )}
-      </div>
+          })}
+        </div>
+      ) : null}
     </div>
   )
+}
+
+function groupTradeProperties(
+  properties: GameProperty[],
+): TradePropertyGroup[] {
+  const groups = new Map<string, TradePropertyGroup>()
+
+  for (const property of properties) {
+    const tile = gameTiles.find((item) => item.key === property.tileKey)
+    const key = tile?.setKey ?? tile?.kind ?? 'other'
+    const existing = groups.get(key)
+
+    if (existing) {
+      existing.properties.push(property)
+      continue
+    }
+
+    groups.set(key, {
+      key,
+      label: getTradePropertyGroupLabel(key),
+      color: tile?.setKey ? propertySetColors[tile.setKey] : null,
+      properties: [property],
+    })
+  }
+
+  return [...groups.values()].map((group) => ({
+    ...group,
+    properties: group.properties.sort(
+      (left, right) => getTileIndex(left.tileKey) - getTileIndex(right.tileKey),
+    ),
+  }))
+}
+
+function getTradePropertyGroupLabel(key: string) {
+  const labels: Record<string, string> = {
+    brown: 'Brown set',
+    light_blue: 'Light blue set',
+    pink: 'Pink set',
+    orange: 'Orange set',
+    red: 'Red set',
+    yellow: 'Yellow set',
+    green: 'Green set',
+    dark_blue: 'Dark blue set',
+    airport: 'Airports',
+    utility: 'Utilities',
+  }
+
+  return labels[key] ?? 'Other properties'
+}
+
+function getTradePropertyStatus(property: GameProperty) {
+  if (property.mortgaged) return 'Mortgaged'
+  if (property.hasHotel) return 'Hotel'
+  if (property.houseCount > 0) {
+    return `${property.houseCount} house${property.houseCount === 1 ? '' : 's'}`
+  }
+
+  return null
+}
+
+function getTileIndex(tileKey: string) {
+  return gameTiles.find((tile) => tile.key === tileKey)?.index ?? 999
 }
 
 function normalizeCash(value: string) {
