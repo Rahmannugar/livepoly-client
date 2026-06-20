@@ -19,6 +19,14 @@ function formatDuration(seconds: number) {
   return `${minutes}m`
 }
 
+function formatRatingDelta(value: number | null) {
+  if (value == null || value === 0) {
+    return 'No change'
+  }
+
+  return value > 0 ? `+${value}` : String(value)
+}
+
 export function MatchesPage() {
   const profile = useCurrentUserProfile()
   const matches = useUserMatches(profile.data?.username)
@@ -43,9 +51,15 @@ export function MatchesPage() {
           {items.map((match) => (
             <article
               key={match.gameId}
-              className="rounded-[22px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-3 shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl sm:rounded-[28px] sm:p-5"
+              className="group relative rounded-[22px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-3 text-left shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[var(--primary)] focus-within:border-[var(--primary)] sm:rounded-[28px] sm:p-5"
             >
-              <div className="grid gap-3 lg:grid-cols-[1fr_auto_auto_auto] lg:items-center lg:gap-4">
+              <Link
+                to="/matches/$gameId"
+                params={{ gameId: match.gameId }}
+                aria-label={`Open match details for room ${match.roomCode}`}
+                className="absolute inset-0 rounded-[inherit] focus:outline-none"
+              />
+              <div className="pointer-events-none grid gap-3 lg:grid-cols-[1fr_auto_auto_auto] lg:items-center lg:gap-4">
                 <div className="min-w-0">
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] sm:h-11 sm:w-11 sm:rounded-2xl">
@@ -76,13 +90,7 @@ export function MatchesPage() {
                 />
                 <MatchValue
                   label="Rating"
-                  value={
-                    match.ratingDelta == null
-                      ? 'No change'
-                      : match.ratingDelta > 0
-                        ? `+${match.ratingDelta}`
-                        : String(match.ratingDelta)
-                  }
+                  value={formatRatingDelta(match.ratingDelta)}
                 />
               </div>
 

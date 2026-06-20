@@ -40,6 +40,14 @@ export function GameResultsPanel({
                 value={formatEndReason(result.endReason)}
               />
               <StatePill label="Mode" value={result.mode} />
+              <StatePill
+                label="Duration"
+                value={formatDuration(result.durationSeconds)}
+              />
+              <StatePill
+                label="Ended"
+                value={formatCompletedAt(result.completedAt)}
+              />
             </div>
           </div>
 
@@ -94,4 +102,23 @@ function formatEndReason(reason: GameResult['endReason']) {
   }
 
   return labels[reason]
+}
+
+function formatDuration(seconds: number) {
+  const totalMinutes = Math.max(1, Math.round(seconds / 60))
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  if (hours === 0) {
+    return `${minutes}m`
+  }
+
+  return minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`
+}
+
+function formatCompletedAt(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
 }

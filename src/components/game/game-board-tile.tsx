@@ -13,25 +13,20 @@ import {
 } from '@phosphor-icons/react'
 import type { CSSProperties } from 'react'
 import type { Icon } from '@phosphor-icons/react'
-import { PlayerToken } from './game-primitives'
 import type { GamePlayer, GameProperty } from '#/lib/game/game.types'
 import { propertySetColors } from '#/lib/game/game-board'
 import type { GameTile } from '#/lib/game/game-board'
 
 export function GameTileCell({
   tile,
-  players,
   property,
   owner,
-  currentTurnRoomPlayerId,
   isActiveTile,
   onSelect,
 }: {
   tile: GameTile
-  players: GamePlayer[]
   property: GameProperty | null
   owner: GamePlayer | null
-  currentTurnRoomPlayerId: string | null
   isActiveTile: boolean
   onSelect: (tile: GameTile) => void
 }) {
@@ -87,14 +82,6 @@ export function GameTileCell({
             {owner.seatNumber}
           </span>
         ) : null}
-        {players.slice(0, 4).map((player) => (
-          <PlayerToken
-            key={player.roomPlayerId}
-            player={player}
-            compact
-            isActive={player.roomPlayerId === currentTurnRoomPlayerId}
-          />
-        ))}
       </div>
     </button>
   )

@@ -7,7 +7,7 @@ import {
   InfoIcon,
   UserPlusIcon,
 } from '@phosphor-icons/react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { AppPageHeader } from '#/components/common/app-page-header'
 import { useToast } from '#/components/common/toast'
 import {

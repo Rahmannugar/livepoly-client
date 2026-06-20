@@ -38,7 +38,7 @@ export function GameBoardCenter({
   return (
     <div className="col-start-2 col-end-11 row-start-2 row-end-11 grid place-items-center rounded-[14px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_82%,transparent)] p-2 text-center sm:rounded-[24px] sm:p-5">
       <div className="grid w-full place-items-center gap-2 sm:gap-5">
-        <div className="grid w-full max-w-md grid-cols-2 gap-2 sm:gap-3">
+        <div className="grid w-full max-w-[15rem] grid-cols-2 gap-2 sm:max-w-sm sm:gap-3 2xl:max-w-md">
           <DeckCard label="Chance" tone="chance" />
           <DeckCard label="World Fund" tone="fund" />
         </div>
@@ -69,7 +69,7 @@ export function GameBoardCenter({
 
 function DeckCard({ label, tone }: { label: string; tone: 'chance' | 'fund' }) {
   return (
-    <div className="game-deck-card-stack relative min-h-11 sm:min-h-20">
+    <div className="game-deck-card-stack relative min-h-9 sm:min-h-16 2xl:min-h-20">
       <span
         aria-hidden="true"
         className="game-deck-card-layer game-deck-card-layer--back"
@@ -79,9 +79,9 @@ function DeckCard({ label, tone }: { label: string; tone: 'chance' | 'fund' }) {
         className="game-deck-card-layer game-deck-card-layer--middle"
       />
       <div
-        className={`game-deck-card game-deck-card--${tone} relative z-10 grid h-full min-h-11 place-items-center rounded-lg border border-[var(--line)] px-2 py-2 shadow-[0_18px_44px_rgba(4,12,15,0.16)] sm:min-h-20 sm:rounded-xl sm:px-3 sm:py-4`}
+        className={`game-deck-card game-deck-card--${tone} relative z-10 grid h-full min-h-9 place-items-center rounded-lg border border-[var(--line)] px-2 py-1.5 shadow-[0_18px_44px_rgba(4,12,15,0.16)] sm:min-h-16 sm:rounded-xl sm:px-3 sm:py-3 2xl:min-h-20 2xl:py-4`}
       >
-        <span className="text-center text-[0.42rem] font-black uppercase tracking-[0.08em] text-[var(--sea-ink)] sm:text-[0.62rem] sm:tracking-[0.12em]">
+        <span className="text-center text-[0.38rem] font-black uppercase tracking-[0.08em] text-[var(--sea-ink)] sm:text-[0.56rem] sm:tracking-[0.12em] 2xl:text-[0.62rem]">
           {label}
         </span>
       </div>

@@ -117,7 +117,10 @@ export function useGamePage(gameId: string) {
   })
   const isRollingDice = game.commandPending && primaryAction.command === 'roll'
   const gameClosed = state?.phase === 'finished' || state?.phase === 'cancelled'
-  const shouldLoadGameResult = gameClosed || gameExpired
+  const shouldLoadGameResult =
+    gameClosed ||
+    gameExpired ||
+    game.errorMessage === 'You are not part of this game.'
   const gameResult = useGameResult(gameId, shouldLoadGameResult)
   const canManageProperties =
     !gameClosed &&
@@ -158,7 +161,7 @@ export function useGamePage(gameId: string) {
       return
     }
 
-    if (!latestCardRevealId) {
+    if (!latestCardReveal || !latestCardRevealId) {
       lastCardRevealIdRef.current = null
       setVisibleCardRevealId(null)
       return

@@ -68,6 +68,7 @@ export function GamePage({ gameId }: GamePageProps) {
     game.errorMessage,
     state?.players ?? [],
     game.roomPlayerId,
+    Boolean(model.gameResult.data),
   )
 
   useEffect(() => {
@@ -484,7 +485,12 @@ function getVisibleGameErrorMessage(
   errorMessage: string | null,
   players: GamePlayer[],
   roomPlayerId: string | null,
+  hasResult: boolean,
 ) {
+  if (errorMessage === 'You are not part of this game.' && hasResult) {
+    return null
+  }
+
   if (
     errorMessage === 'You are not part of this game.' &&
     roomPlayerId &&

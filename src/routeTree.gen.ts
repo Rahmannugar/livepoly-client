@@ -18,6 +18,7 @@ import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersUsernameRouteImport } from './routes/users.$username'
 import { Route as RoomsCodeRouteImport } from './routes/rooms/$code'
+import { Route as MatchesGameIdRouteImport } from './routes/matches_.$gameId'
 import { Route as GamesGameIdRouteImport } from './routes/games/$gameId'
 import { Route as AuthVerifyEmailRouteImport } from './routes/auth/verify-email'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
@@ -70,6 +71,11 @@ const RoomsCodeRoute = RoomsCodeRouteImport.update({
   path: '/rooms/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MatchesGameIdRoute = MatchesGameIdRouteImport.update({
+  id: '/matches_/$gameId',
+  path: '/matches/$gameId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GamesGameIdRoute = GamesGameIdRouteImport.update({
   id: '/games/$gameId',
   path: '/games/$gameId',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/games/$gameId': typeof GamesGameIdRoute
+  '/matches/$gameId': typeof MatchesGameIdRoute
   '/rooms/$code': typeof RoomsCodeRoute
   '/users/$username': typeof UsersUsernameRoute
 }
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/games/$gameId': typeof GamesGameIdRoute
+  '/matches/$gameId': typeof MatchesGameIdRoute
   '/rooms/$code': typeof RoomsCodeRoute
   '/users/$username': typeof UsersUsernameRoute
 }
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/games/$gameId': typeof GamesGameIdRoute
+  '/matches_/$gameId': typeof MatchesGameIdRoute
   '/rooms/$code': typeof RoomsCodeRoute
   '/users/$username': typeof UsersUsernameRoute
 }
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/verify-email'
     | '/games/$gameId'
+    | '/matches/$gameId'
     | '/rooms/$code'
     | '/users/$username'
   fileRoutesByTo: FileRoutesByTo
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/verify-email'
     | '/games/$gameId'
+    | '/matches/$gameId'
     | '/rooms/$code'
     | '/users/$username'
   id:
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/verify-email'
     | '/games/$gameId'
+    | '/matches_/$gameId'
     | '/rooms/$code'
     | '/users/$username'
   fileRoutesById: FileRoutesById
@@ -221,6 +233,7 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
   GamesGameIdRoute: typeof GamesGameIdRoute
+  MatchesGameIdRoute: typeof MatchesGameIdRoute
   RoomsCodeRoute: typeof RoomsCodeRoute
   UsersUsernameRoute: typeof UsersUsernameRoute
 }
@@ -290,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RoomsCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/matches_/$gameId': {
+      id: '/matches_/$gameId'
+      path: '/matches/$gameId'
+      fullPath: '/matches/$gameId'
+      preLoaderRoute: typeof MatchesGameIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/games/$gameId': {
       id: '/games/$gameId'
       path: '/games/$gameId'
@@ -349,6 +369,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
   GamesGameIdRoute: GamesGameIdRoute,
+  MatchesGameIdRoute: MatchesGameIdRoute,
   RoomsCodeRoute: RoomsCodeRoute,
   UsersUsernameRoute: UsersUsernameRoute,
 }

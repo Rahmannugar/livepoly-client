@@ -1,5 +1,4 @@
 import { TrophyIcon } from '@phosphor-icons/react'
-import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { AppPageHeader } from '#/components/common/app-page-header'
 import type { LeaderboardPeriod } from '#/lib/leaderboards/leaderboards.constants'

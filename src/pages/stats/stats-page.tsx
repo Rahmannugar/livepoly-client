@@ -9,11 +9,22 @@ import { AppPageHeader } from '#/components/common/app-page-header'
 import { useCurrentUserProfile, useUserMatches } from '#/lib/users/useUsers'
 
 function formatDelta(value: number | null) {
-  if (value == null) {
+  if (value == null || value === 0) {
     return 'No change'
   }
 
   return value > 0 ? `+${value}` : String(value)
+}
+
+function formatMatchDate(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+  }).format(new Date(value))
+}
+
+function formatDuration(seconds: number) {
+  const minutes = Math.max(1, Math.round(seconds / 60))
+  return `${minutes}m`
 }
 
 export function StatsPage() {
@@ -82,24 +93,33 @@ export function StatsPage() {
             {recentMatches.slice(0, 5).map((match) => (
               <article
                 key={match.gameId}
-                className="grid gap-2 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 sm:grid-cols-[1fr_auto_auto] sm:gap-3 sm:rounded-[22px] sm:p-4"
+                className="group relative grid gap-3 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-3 text-left transition hover:-translate-y-0.5 hover:border-[var(--primary)] focus-within:border-[var(--primary)] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:gap-3 sm:rounded-[22px] sm:p-4"
               >
-                <div className="min-w-0">
+                <Link
+                  to="/matches/$gameId"
+                  params={{ gameId: match.gameId }}
+                  aria-label={`Open match details for room ${match.roomCode}`}
+                  className="absolute inset-0 rounded-[inherit] focus:outline-none"
+                />
+                <div className="pointer-events-none min-w-0">
                   <p className="truncate text-base font-black text-[var(--sea-ink)]">
                     Room {match.roomCode}
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-[var(--sea-ink-soft)]">
-                    Placed {match.placement} of {match.playerCount}
-                  </p>
+                  <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs font-bold text-[var(--sea-ink-soft)]">
+                    <span>Placed {match.placement} of {match.playerCount}</span>
+                    <span>{formatMatchDate(match.completedAt)}</span>
+                    <span>{formatDuration(match.durationSeconds)}</span>
+                    <span>{match.endReason.replaceAll('_', ' ')}</span>
+                  </div>
                 </div>
-                <p className="text-sm font-black text-[var(--sea-ink)]">
+                <p className="pointer-events-none text-sm font-black text-[var(--sea-ink)]">
                   W{match.finalNetWorth.toLocaleString()}
                 </p>
                 <p
                   className={
                     match.ratingDelta && match.ratingDelta > 0
-                      ? 'text-sm font-black text-[var(--primary)]'
-                      : 'text-sm font-black text-[var(--sea-ink-soft)]'
+                      ? 'pointer-events-none text-sm font-black text-[var(--primary)]'
+                      : 'pointer-events-none text-sm font-black text-[var(--sea-ink-soft)]'
                   }
                 >
                   {formatDelta(match.ratingDelta)}

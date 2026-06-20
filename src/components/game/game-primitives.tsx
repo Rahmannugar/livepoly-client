@@ -1,5 +1,4 @@
 import { CaretDownIcon, SpinnerGapIcon, type Icon } from '@phosphor-icons/react'
-import { motion } from 'motion/react'
 import gsap from 'gsap'
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -103,19 +102,6 @@ export function PlayerToken({
   }`
   const style = { backgroundColor: getPlayerColor(player.seatNumber) }
 
-  if (compact) {
-    return (
-      <motion.span
-        layoutId={`board-token-${player.roomPlayerId}`}
-        className={tokenClassName}
-        style={style}
-        transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.75 }}
-      >
-        {player.seatNumber}
-      </motion.span>
-    )
-  }
-
   return (
     <span
       className={tokenClassName}
@@ -148,14 +134,23 @@ export function DiceRollDisplay({
     const faces = diceRef.current.querySelectorAll('.dice-face')
     gsap.fromTo(
       faces,
-      { y: -12, rotate: -8, scale: 0.88 },
+      {
+        y: -24,
+        rotateX: -126,
+        rotateY: 58,
+        rotateZ: -22,
+        scale: 0.78,
+        transformPerspective: 760,
+      },
       {
         y: 0,
-        rotate: 0,
+        rotateX: 0,
+        rotateY: 0,
+        rotateZ: 0,
         scale: 1,
-        duration: 0.62,
-        stagger: 0.08,
-        ease: 'elastic.out(1, 0.64)',
+        duration: 0.9,
+        stagger: 0.1,
+        ease: 'elastic.out(1, 0.5)',
         overwrite: 'auto',
       },
     )
