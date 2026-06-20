@@ -1,4 +1,5 @@
 import { XIcon } from '@phosphor-icons/react'
+import { motion } from 'motion/react'
 import type { GameCardMetadata } from '#/lib/game/game-cards'
 
 export function GameCardReveal({
@@ -17,8 +18,20 @@ export function GameCardReveal({
   const deckName = card.deck === 'world_fund' ? 'World Fund' : 'Chance'
 
   return (
-    <div className="game-card-reveal fixed inset-0 z-50 grid place-items-center bg-[rgba(4,12,15,0.48)] p-2 backdrop-blur-sm sm:p-4">
-      <div className="game-card-reveal__stack relative w-[min(17rem,calc(100vw-2.5rem))] sm:w-full sm:max-w-sm">
+    <motion.div
+      className="game-card-reveal fixed inset-0 z-50 grid place-items-center bg-[rgba(4,12,15,0.48)] p-2 backdrop-blur-sm sm:p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+    >
+      <motion.div
+        className="game-card-reveal__stack relative w-[min(17rem,calc(100vw-2.5rem))] sm:w-full sm:max-w-sm"
+        initial={{ y: 22, scale: 0.94, rotateX: 8 }}
+        animate={{ y: 0, scale: 1, rotateX: 0 }}
+        exit={{ y: 14, scale: 0.97, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 360, damping: 28, mass: 0.8 }}
+      >
         <span
           aria-hidden="true"
           className="game-card-reveal__layer game-card-reveal__layer--back"
@@ -60,7 +73,7 @@ export function GameCardReveal({
             </p>
           </div>
         </section>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

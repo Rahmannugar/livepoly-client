@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { AnimatePresence, motion } from 'motion/react'
 import '#/components/game/game.css'
 import { useToast } from '#/components/common/toast'
 import { GameActionsPanel } from '#/components/game/game-actions-panel'
@@ -155,74 +156,103 @@ export function GamePage({ gameId }: GamePageProps) {
           />
 
           <aside className="order-2 grid grid-cols-2 gap-2 sm:gap-3 xl:order-3 xl:grid-cols-1 xl:content-start">
-            {hasResultsPanel ? (
-              <div className="col-span-2 xl:col-span-1">
-                <GameResultsPanel
-                  result={model.gameResult.data}
-                  isLoading={model.gameResult.isFetching}
-                  errorMessage={
-                    model.gameResult.error instanceof Error
-                      ? model.gameResult.error.message
-                      : null
-                  }
-                />
-              </div>
-            ) : null}
+            <AnimatePresence initial={false}>
+              {hasResultsPanel ? (
+                <motion.div
+                  key="results-summary"
+                  className="col-span-2 xl:col-span-1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                >
+                  <GameResultsPanel
+                    result={model.gameResult.data}
+                    isLoading={model.gameResult.isFetching}
+                    errorMessage={
+                      model.gameResult.error instanceof Error
+                        ? model.gameResult.error.message
+                        : null
+                    }
+                  />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
 
-            {activeAuction ? (
-              <div className="col-span-2 xl:col-span-1">
-                <AuctionStatusPanel
-                  auction={activeAuction}
-                  players={state?.players ?? []}
-                  events={game.events}
-                  roomPlayerId={game.roomPlayerId}
-                  tileName={model.auctionTile?.name ?? activeAuction.tileKey}
-                  minimumBid={model.minimumAuctionBid}
-                  commandPending={game.commandPending}
-                  onPlaceBid={(amount) => void game.placeAuctionBid(amount)}
-                  onPass={() => void game.passAuctionBid()}
-                />
-              </div>
-            ) : null}
+            <AnimatePresence initial={false}>
+              {activeAuction ? (
+                <motion.div
+                  key="auction-panel"
+                  className="col-span-2 xl:col-span-1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                >
+                  <AuctionStatusPanel
+                    auction={activeAuction}
+                    players={state?.players ?? []}
+                    events={game.events}
+                    roomPlayerId={game.roomPlayerId}
+                    tileName={model.auctionTile?.name ?? activeAuction.tileKey}
+                    minimumBid={model.minimumAuctionBid}
+                    commandPending={game.commandPending}
+                    onPlaceBid={(amount) => void game.placeAuctionBid(amount)}
+                    onPass={() => void game.passAuctionBid()}
+                  />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
 
-            {!activeAuction ? (
-              <div className="col-span-2 xl:col-span-1">
-                <GameActionsPanel
-                  primaryAction={model.primaryAction}
-                  commandPending={game.commandPending}
-                  gameExpired={model.gameExpired}
-                  errorMessage={visibleErrorMessage}
-                  debt={
-                    state?.phase === 'awaiting_debt_resolution'
-                      ? state.debt
-                      : null
-                  }
-                  players={state?.players ?? []}
-                  roomPlayerId={game.roomPlayerId}
-                  currentPlayer={game.currentPlayer}
-                  currentPlayerInJail={model.currentPlayerInJail}
-                  isCurrentTurn={model.isUserTurn}
-                  phase={state?.phase}
-                  tradeOffer={state?.tradeOffer}
-                  pendingTile={model.pendingTile ?? null}
-                  pendingProperty={model.pendingProperty}
-                  onRollAndMove={() => void game.rollAndMove()}
-                  onEndTurn={() => void game.endTurn()}
-                  onBuyProperty={() => void game.buyProperty()}
-                  onDeclinePropertyPurchase={() =>
-                    void game.declinePropertyPurchase()
-                  }
-                  onPayDebt={() => void game.payDebt()}
-                  onManageProperties={() => setActiveSidePanel('properties')}
-                  onPayJailFine={() => void game.payJailFine()}
-                  onUseGetOutOfJailCard={() => void game.useGetOutOfJailCard()}
-                  onDeclareBankruptcy={() => void game.declareBankruptcy()}
-                  onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
-                  onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
-                  onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
-                />
-              </div>
-            ) : null}
+            <AnimatePresence initial={false}>
+              {!activeAuction ? (
+                <motion.div
+                  key="actions-panel"
+                  className="col-span-2 xl:col-span-1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                >
+                  <GameActionsPanel
+                    primaryAction={model.primaryAction}
+                    commandPending={game.commandPending}
+                    gameExpired={model.gameExpired}
+                    errorMessage={visibleErrorMessage}
+                    debt={
+                      state?.phase === 'awaiting_debt_resolution'
+                        ? state.debt
+                        : null
+                    }
+                    players={state?.players ?? []}
+                    roomPlayerId={game.roomPlayerId}
+                    currentPlayer={game.currentPlayer}
+                    currentPlayerInJail={model.currentPlayerInJail}
+                    isCurrentTurn={model.isUserTurn}
+                    phase={state?.phase}
+                    tradeOffer={state?.tradeOffer}
+                    pendingTile={model.pendingTile ?? null}
+                    pendingProperty={model.pendingProperty}
+                    onRollAndMove={() => void game.rollAndMove()}
+                    onEndTurn={() => void game.endTurn()}
+                    onBuyProperty={() => void game.buyProperty()}
+                    onDeclinePropertyPurchase={() =>
+                      void game.declinePropertyPurchase()
+                    }
+                    onPayDebt={() => void game.payDebt()}
+                    onManageProperties={() => setActiveSidePanel('properties')}
+                    onPayJailFine={() => void game.payJailFine()}
+                    onUseGetOutOfJailCard={() =>
+                      void game.useGetOutOfJailCard()
+                    }
+                    onDeclareBankruptcy={() => void game.declareBankruptcy()}
+                    onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
+                    onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
+                    onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
+                  />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
 
             {model.activeTile ? (
               <GameSidePanelLauncher
@@ -280,11 +310,15 @@ export function GamePage({ gameId }: GamePageProps) {
             />
           </aside>
         </div>
-        <GameCardReveal
-          card={model.visibleCardReveal}
-          playerName={model.visibleCardRevealPlayerName}
-          onClose={model.dismissVisibleCardReveal}
-        />
+        <AnimatePresence>
+          {model.visibleCardReveal ? (
+            <GameCardReveal
+              card={model.visibleCardReveal}
+              playerName={model.visibleCardRevealPlayerName}
+              onClose={model.dismissVisibleCardReveal}
+            />
+          ) : null}
+        </AnimatePresence>
         <TileInfoSheet
           open={Boolean(model.selectedTile)}
           tile={model.selectedTile}
@@ -292,63 +326,69 @@ export function GamePage({ gameId }: GamePageProps) {
           owner={model.selectedTileOwner}
           onClose={model.clearSelectedTile}
         />
-        <GameSidePanelDialog
-          title={getSidePanelTitle(activeSidePanel)}
-          open={Boolean(activeSidePanel)}
-          onClose={() => setActiveSidePanel(null)}
-        >
-          {activeSidePanel === 'banker' ? (
-            <BankerPanel
-              phase={state?.phase}
-              currentTurnPlayer={model.currentTurnPlayer}
-              roomPlayerId={game.roomPlayerId}
-              activeTile={model.activeTile}
-              events={model.recentEvents}
-              players={state?.players ?? []}
-            />
-          ) : activeSidePanel === 'results' ? (
-            <GameResultsPanel
-              result={model.gameResult.data}
-              isLoading={model.gameResult.isFetching}
-              errorMessage={
-                model.gameResult.error instanceof Error
-                  ? model.gameResult.error.message
-                  : null
-              }
-            />
-          ) : activeSidePanel === 'properties' ? (
-            <PropertiesPanel
-              properties={model.ownedProperties}
-              players={state?.players ?? []}
-              roomPlayerId={game.roomPlayerId}
-              canManageProperties={model.canManageProperties}
-              canLiquidateProperties={model.canLiquidateProperties}
-              commandPending={game.commandPending}
-              onBuild={(tileKey) => void game.buildProperty(tileKey)}
-              onSellBuilding={(tileKey) => void game.sellBuilding(tileKey)}
-              onMortgage={(tileKey) => void game.mortgageProperty(tileKey)}
-              onUnmortgage={(tileKey) => void game.unmortgageProperty(tileKey)}
-            />
-          ) : activeSidePanel === 'trade' ? (
-            <TradePanel
-              properties={model.ownedProperties}
-              players={state?.players ?? []}
-              roomPlayerId={game.roomPlayerId}
-              tradeOffer={state?.tradeOffer}
-              canCreateTrade={model.canManageProperties}
-              commandPending={game.commandPending}
-              onProposeTrade={(input) => void game.proposeTrade(input)}
-              onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
-              onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
-              onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
-            />
-          ) : activeSidePanel === 'events' ? (
-            <EventsPanel
-              events={model.recentEvents}
-              players={state?.players ?? []}
-            />
+        <AnimatePresence>
+          {activeSidePanel ? (
+            <GameSidePanelDialog
+              key="game-side-panel-dialog"
+              title={getSidePanelTitle(activeSidePanel)}
+              onClose={() => setActiveSidePanel(null)}
+            >
+              {activeSidePanel === 'banker' ? (
+                <BankerPanel
+                  phase={state?.phase}
+                  currentTurnPlayer={model.currentTurnPlayer}
+                  roomPlayerId={game.roomPlayerId}
+                  activeTile={model.activeTile}
+                  events={model.recentEvents}
+                  players={state?.players ?? []}
+                />
+              ) : activeSidePanel === 'results' ? (
+                <GameResultsPanel
+                  result={model.gameResult.data}
+                  isLoading={model.gameResult.isFetching}
+                  errorMessage={
+                    model.gameResult.error instanceof Error
+                      ? model.gameResult.error.message
+                      : null
+                  }
+                />
+              ) : activeSidePanel === 'properties' ? (
+                <PropertiesPanel
+                  properties={model.ownedProperties}
+                  players={state?.players ?? []}
+                  roomPlayerId={game.roomPlayerId}
+                  canManageProperties={model.canManageProperties}
+                  canLiquidateProperties={model.canLiquidateProperties}
+                  commandPending={game.commandPending}
+                  onBuild={(tileKey) => void game.buildProperty(tileKey)}
+                  onSellBuilding={(tileKey) => void game.sellBuilding(tileKey)}
+                  onMortgage={(tileKey) => void game.mortgageProperty(tileKey)}
+                  onUnmortgage={(tileKey) =>
+                    void game.unmortgageProperty(tileKey)
+                  }
+                />
+              ) : activeSidePanel === 'trade' ? (
+                <TradePanel
+                  properties={model.ownedProperties}
+                  players={state?.players ?? []}
+                  roomPlayerId={game.roomPlayerId}
+                  tradeOffer={state?.tradeOffer}
+                  canCreateTrade={model.canManageProperties}
+                  commandPending={game.commandPending}
+                  onProposeTrade={(input) => void game.proposeTrade(input)}
+                  onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
+                  onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
+                  onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
+                />
+              ) : activeSidePanel === 'events' ? (
+                <EventsPanel
+                  events={model.recentEvents}
+                  players={state?.players ?? []}
+                />
+              ) : null}
+            </GameSidePanelDialog>
           ) : null}
-        </GameSidePanelDialog>
+        </AnimatePresence>
       </section>
     </main>
   )
@@ -366,10 +406,13 @@ function GameSidePanelLauncher({
   onClick: () => void
 }) {
   return (
-    <button
+    <motion.button
       type="button"
       className="group flex min-h-[4.75rem] min-w-0 items-center gap-2 rounded-xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_76%,transparent)] p-2 text-left shadow-[0_14px_42px_rgba(4,12,15,0.1)] backdrop-blur-xl transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:min-h-[5.25rem] sm:gap-3 sm:rounded-2xl sm:p-3 xl:min-h-[5rem] xl:p-3.5"
       onClick={onClick}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: 'spring', stiffness: 420, damping: 32 }}
     >
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] sm:h-10 sm:w-10 sm:rounded-2xl xl:h-11 xl:w-11">
         <IconComponent weight="bold" className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -382,25 +425,19 @@ function GameSidePanelLauncher({
           {copy}
         </span>
       </span>
-    </button>
+    </motion.button>
   )
 }
 
 function GameSidePanelDialog({
-  open,
   title,
   children,
   onClose,
 }: {
-  open: boolean
   title: string
   children: ReactNode
   onClose: () => void
 }) {
-  if (!open) {
-    return null
-  }
-
   return (
     <div aria-live="polite">
       <button

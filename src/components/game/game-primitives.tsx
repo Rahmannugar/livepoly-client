@@ -1,6 +1,8 @@
 import { CaretDownIcon, SpinnerGapIcon, type Icon } from '@phosphor-icons/react'
+import { motion } from 'motion/react'
+import gsap from 'gsap'
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { GamePlayer } from '#/lib/game/game.types'
 import { getPlayerColor } from '#/lib/game/game-board'
 
@@ -94,14 +96,30 @@ export function PlayerToken({
   compact?: boolean
   isActive?: boolean
 }) {
+  const tokenClassName = `player-token ${isActive ? 'player-token--active' : ''} ${
+    compact
+      ? 'grid h-2 w-2 place-items-center rounded-full text-[0.28rem] font-black text-white shadow-sm sm:h-3.5 sm:w-3.5 sm:text-[0.48rem] xl:h-4 xl:w-4 xl:text-[0.54rem] 2xl:h-5 2xl:w-5 2xl:text-[0.62rem]'
+      : 'grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-black text-white shadow-sm sm:h-9 sm:w-9 sm:text-sm'
+  }`
+  const style = { backgroundColor: getPlayerColor(player.seatNumber) }
+
+  if (compact) {
+    return (
+      <motion.span
+        layoutId={`board-token-${player.roomPlayerId}`}
+        className={tokenClassName}
+        style={style}
+        transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.75 }}
+      >
+        {player.seatNumber}
+      </motion.span>
+    )
+  }
+
   return (
     <span
-      className={`player-token ${isActive ? 'player-token--active' : ''} ${
-        compact
-          ? 'grid h-2 w-2 place-items-center rounded-full text-[0.28rem] font-black text-white shadow-sm sm:h-3.5 sm:w-3.5 sm:text-[0.48rem] xl:h-4 xl:w-4 xl:text-[0.54rem] 2xl:h-5 2xl:w-5 2xl:text-[0.62rem]'
-          : 'grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-black text-white shadow-sm sm:h-9 sm:w-9 sm:text-sm'
-      }`}
-      style={{ backgroundColor: getPlayerColor(player.seatNumber) }}
+      className={tokenClassName}
+      style={style}
     >
       {player.seatNumber}
     </span>
@@ -115,6 +133,34 @@ export function DiceRollDisplay({
   dice?: readonly [number, number] | null
   isRolling: boolean
 }) {
+  const diceRef = useRef<HTMLDivElement | null>(null)
+  const diceKey = dice ? `${dice[0]}-${dice[1]}` : null
+
+  useEffect(() => {
+    if (!diceKey || isRolling || !diceRef.current) {
+      return
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return
+    }
+
+    const faces = diceRef.current.querySelectorAll('.dice-face')
+    gsap.fromTo(
+      faces,
+      { y: -12, rotate: -8, scale: 0.88 },
+      {
+        y: 0,
+        rotate: 0,
+        scale: 1,
+        duration: 0.62,
+        stagger: 0.08,
+        ease: 'elastic.out(1, 0.64)',
+        overwrite: 'auto',
+      },
+    )
+  }, [diceKey, isRolling])
+
   if (!dice && !isRolling) {
     return null
   }
@@ -123,6 +169,7 @@ export function DiceRollDisplay({
 
   return (
     <div
+      ref={diceRef}
       className="dice-display"
       aria-live="polite"
       aria-label={

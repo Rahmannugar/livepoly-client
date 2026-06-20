@@ -24,6 +24,7 @@ export function GameTileCell({
   property,
   owner,
   currentTurnRoomPlayerId,
+  isActiveTile,
   onSelect,
 }: {
   tile: GameTile
@@ -31,6 +32,7 @@ export function GameTileCell({
   property: GameProperty | null
   owner: GamePlayer | null
   currentTurnRoomPlayerId: string | null
+  isActiveTile: boolean
   onSelect: (tile: GameTile) => void
 }) {
   const TileIcon = getTileIcon(tile)
@@ -42,7 +44,7 @@ export function GameTileCell({
       aria-label={`View ${tile.name}${buildingLabel ? `, ${buildingLabel}` : ''}`}
       className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-[0.18rem] border border-[var(--line)] bg-[var(--bg-base)] p-0.5 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-sm sm:p-1.5 2xl:p-2 ${
         TileIcon ? 'game-tile--special' : ''
-      }`}
+      } ${isActiveTile ? 'game-tile--active' : ''}`}
       style={getTileGridStyle(tile.index)}
       onClick={() => onSelect(tile)}
     >

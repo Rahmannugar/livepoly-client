@@ -52,6 +52,7 @@ export function GameStage({
       </div>
 
       <GameTurnSummary
+        key={`${state?.phase ?? 'loading'}:${state?.lastDiceRoll?.join('-') ?? 'none'}:${activeTile?.key ?? 'none'}:${turnConsequence}`}
         phase={state?.phase}
         dice={state?.lastDiceRoll}
         tile={activeTile}
@@ -64,6 +65,7 @@ export function GameStage({
         access={access}
         isCurrentTurn={isCurrentTurn}
         isRollingDice={isRollingDice}
+        activeTileKey={activeTile?.key ?? null}
         onSelectTile={onSelectTile}
       />
     </section>
