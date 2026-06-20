@@ -63,18 +63,26 @@ export function GamePage({ gameId }: GamePageProps) {
     state?.phase === 'awaiting_auction_bid' && state.auction
       ? state.auction
       : null
+  const visibleErrorMessage = getVisibleGameErrorMessage(
+    game.errorMessage,
+    state?.players ?? [],
+    game.roomPlayerId,
+  )
 
   useEffect(() => {
-    if (!game.errorMessage || game.errorMessage === lastErrorToastRef.current) {
+    if (
+      !visibleErrorMessage ||
+      visibleErrorMessage === lastErrorToastRef.current
+    ) {
       return
     }
 
-    lastErrorToastRef.current = game.errorMessage
+    lastErrorToastRef.current = visibleErrorMessage
     showToast({
       kind: 'error',
-      message: game.errorMessage,
+      message: visibleErrorMessage,
     })
-  }, [game.errorMessage, showToast])
+  }, [showToast, visibleErrorMessage])
 
   useEffect(() => {
     const tradeEvent = model.recentEvents.find((event) =>
@@ -183,7 +191,7 @@ export function GamePage({ gameId }: GamePageProps) {
                   primaryAction={model.primaryAction}
                   commandPending={game.commandPending}
                   gameExpired={model.gameExpired}
-                  errorMessage={game.errorMessage}
+                  errorMessage={visibleErrorMessage}
                   debt={
                     state?.phase === 'awaiting_debt_resolution'
                       ? state.debt
@@ -433,6 +441,22 @@ function getSidePanelTitle(
   if (panel === 'results') return 'Results'
 
   return 'Game view'
+}
+
+function getVisibleGameErrorMessage(
+  errorMessage: string | null,
+  players: GamePlayer[],
+  roomPlayerId: string | null,
+) {
+  if (
+    errorMessage === 'You are not part of this game.' &&
+    roomPlayerId &&
+    findPlayer(players, roomPlayerId)
+  ) {
+    return null
+  }
+
+  return errorMessage
 }
 
 function isTradeOutcomeEvent(type: string) {
