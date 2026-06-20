@@ -88,6 +88,7 @@ export function useGamePage(gameId: string) {
     tile: activeTile,
     currentTurnPlayer,
     recentEvent: recentEvents[0],
+    players: state?.players ?? [],
   })
   const currentPlayerInJail = Boolean(game.currentPlayer?.inJail)
   const minimumAuctionBid = getMinimumAuctionBid(state?.auction)

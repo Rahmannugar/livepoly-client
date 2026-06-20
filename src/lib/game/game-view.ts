@@ -1,10 +1,16 @@
 import {
   formatCash,
+  formatEventSummary,
   getPlayerName,
   getTilePurchasePrice,
   type GameTile,
 } from './game-board'
-import type { GameAuction, GameDebt, GamePlayer } from './game.types'
+import type {
+  GameAuction,
+  GameDebt,
+  GameEventLogItem,
+  GamePlayer,
+} from './game.types'
 
 export type PrimaryGameAction = {
   command: 'roll' | 'endTurn' | 'propertyDecision' | null
@@ -18,11 +24,13 @@ export function getGameTurnConsequence({
   tile,
   currentTurnPlayer,
   recentEvent,
+  players,
 }: {
   phase?: string
   tile: GameTile | null
   currentTurnPlayer: GamePlayer | null
-  recentEvent: { type: string; payload: Record<string, unknown> } | undefined
+  recentEvent: GameEventLogItem | undefined
+  players: GamePlayer[]
 }) {
   if (phase === 'finished') {
     return 'Game over.'
@@ -83,6 +91,10 @@ export function getGameTurnConsequence({
     return `${tile.name} is the latest landed square.`
   }
 
+  if (recentEvent && isTableActivityEvent(recentEvent.type)) {
+    return formatEventSummary(recentEvent, players)
+  }
+
   if (phase === 'awaiting_turn_end') {
     return 'The move is settled. End the turn when ready.'
   }
@@ -92,6 +104,22 @@ export function getGameTurnConsequence({
   }
 
   return 'Waiting for the next move.'
+}
+
+function isTableActivityEvent(type: string) {
+  return (
+    type === 'property_house_built' ||
+    type === 'property_hotel_built' ||
+    type === 'property_house_sold' ||
+    type === 'property_hotel_sold' ||
+    type === 'property_mortgaged' ||
+    type === 'property_unmortgaged' ||
+    type === 'trade_proposed' ||
+    type === 'trade_buildings_liquidated' ||
+    type === 'trade_accepted' ||
+    type === 'trade_rejected' ||
+    type === 'trade_cancelled'
+  )
 }
 
 export function getPrimaryGameAction({

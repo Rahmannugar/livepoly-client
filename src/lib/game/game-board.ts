@@ -607,6 +607,9 @@ export function formatEventSummary(
     case 'trade_proposed':
       return `${tradeSender} offered ${tradeRecipient} a trade.`
 
+    case 'trade_buildings_liquidated':
+      return `${player} sold buildings on ${tile} for ${formatCash(amount ?? 0)} before the trade.`
+
     case 'trade_accepted':
       return `${tradeSender} and ${tradeRecipient} completed a trade.`
 

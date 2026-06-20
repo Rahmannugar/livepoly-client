@@ -367,6 +367,10 @@ export function GamePage({ gameId }: GamePageProps) {
                   onUnmortgage={(tileKey) =>
                     void game.unmortgageProperty(tileKey)
                   }
+                  onSelectProperty={(tileKey) => {
+                    setActiveSidePanel(null)
+                    model.selectTile(tileKey)
+                  }}
                 />
               ) : activeSidePanel === 'trade' ? (
                 <TradePanel
@@ -383,7 +387,7 @@ export function GamePage({ gameId }: GamePageProps) {
                 />
               ) : activeSidePanel === 'events' ? (
                 <EventsPanel
-                  events={model.recentEvents}
+                  events={game.events}
                   players={state?.players ?? []}
                 />
               ) : null}

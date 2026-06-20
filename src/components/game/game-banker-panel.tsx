@@ -56,8 +56,8 @@ export function BankerPanel({
           </div>
         ) : (
           <p className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-4 text-sm font-bold leading-6 text-[var(--sea-ink-soft)]">
-            The banker will call out rolls, payments, purchases, auctions, and
-            turn changes as the game moves.
+            The banker will call out rolls, payments, purchases, auctions,
+            trades, property changes, and turn changes as the game moves.
           </p>
         )}
       </div>

@@ -5,8 +5,11 @@ import {
   formatCash,
   gameTiles,
   getPlayerName,
-  propertySetColors,
 } from '#/lib/game/game-board'
+import {
+  groupGameProperties,
+  type GamePropertyGroup,
+} from '#/lib/game/game-property-groups'
 import type {
   GamePlayer,
   GameProperty,
@@ -364,7 +367,7 @@ function TradePropertyPicker({
   onToggleProperty: (tileKey: string) => void
 }) {
   const propertyGroups = useMemo(
-    () => groupTradeProperties(properties),
+    () => groupGameProperties(properties),
     [properties],
   )
 
@@ -407,20 +410,13 @@ function TradePropertyPicker({
   )
 }
 
-type TradePropertyGroup = {
-  key: string
-  label: string
-  color: string | null
-  properties: GameProperty[]
-}
-
 function TradePropertyGroup({
   group,
   selectedPropertyKeys,
   disabled,
   onToggleProperty,
 }: {
-  group: TradePropertyGroup
+  group: GamePropertyGroup
   selectedPropertyKeys: string[]
   disabled: boolean
   onToggleProperty: (tileKey: string) => void
@@ -502,54 +498,6 @@ function TradePropertyGroup({
   )
 }
 
-function groupTradeProperties(
-  properties: GameProperty[],
-): TradePropertyGroup[] {
-  const groups = new Map<string, TradePropertyGroup>()
-
-  for (const property of properties) {
-    const tile = gameTiles.find((item) => item.key === property.tileKey)
-    const key = tile?.setKey ?? tile?.kind ?? 'other'
-    const existing = groups.get(key)
-
-    if (existing) {
-      existing.properties.push(property)
-      continue
-    }
-
-    groups.set(key, {
-      key,
-      label: getTradePropertyGroupLabel(key),
-      color: tile?.setKey ? propertySetColors[tile.setKey] : null,
-      properties: [property],
-    })
-  }
-
-  return [...groups.values()].map((group) => ({
-    ...group,
-    properties: group.properties.sort(
-      (left, right) => getTileIndex(left.tileKey) - getTileIndex(right.tileKey),
-    ),
-  }))
-}
-
-function getTradePropertyGroupLabel(key: string) {
-  const labels: Record<string, string> = {
-    brown: 'Brown set',
-    light_blue: 'Light blue set',
-    pink: 'Pink set',
-    orange: 'Orange set',
-    red: 'Red set',
-    yellow: 'Yellow set',
-    green: 'Green set',
-    dark_blue: 'Dark blue set',
-    airport: 'Airports',
-    utility: 'Utilities',
-  }
-
-  return labels[key] ?? 'Other properties'
-}
-
 function getTradePropertyStatus(property: GameProperty) {
   if (property.mortgaged) return 'Mortgaged'
   if (property.hasHotel) return 'Hotel'
@@ -558,10 +506,6 @@ function getTradePropertyStatus(property: GameProperty) {
   }
 
   return null
-}
-
-function getTileIndex(tileKey: string) {
-  return gameTiles.find((tile) => tile.key === tileKey)?.index ?? 999
 }
 
 function normalizeCash(value: string) {
