@@ -1,4 +1,4 @@
-import { BuildingsIcon } from '@phosphor-icons/react'
+import { BuildingsIcon, LockKeyIcon } from '@phosphor-icons/react'
 import { useMemo, useState } from 'react'
 import { findPlayer, gameTiles, getPlayerName } from '#/lib/game/game-board'
 import type { GameTile } from '#/lib/game/game-board'
@@ -140,9 +140,22 @@ function PropertyList({
     )
   }
 
+  const sortedProperties = [...properties].sort((left, right) => {
+    const leftScore = getPropertyPriority(left, roomPlayerId, properties)
+    const rightScore = getPropertyPriority(right, roomPlayerId, properties)
+
+    if (leftScore !== rightScore) {
+      return rightScore - leftScore
+    }
+
+    return (
+      getPropertyTileIndex(left.tileKey) - getPropertyTileIndex(right.tileKey)
+    )
+  })
+
   return (
-    <div className="grid max-h-72 gap-2 overflow-y-auto pr-1">
-      {properties.map((property) => {
+    <div className="grid gap-2">
+      {sortedProperties.map((property) => {
         const tile = gameTiles.find((item) => item.key === property.tileKey)
         const owner = findPlayer(players, property.ownerRoomPlayerId)
         const isMine = Boolean(
@@ -209,8 +222,17 @@ function PropertyList({
                   {owner ? getPlayerName(owner) : 'Unowned'}
                 </p>
               </div>
-              <span className="max-w-24 shrink-0 truncate text-right text-xs font-black text-[var(--sea-ink)]">
-                {getPropertyBuildLabel(property, tile)}
+              <span className="inline-flex max-w-28 shrink-0 items-center justify-end gap-1 truncate text-right text-xs font-black text-[var(--sea-ink)]">
+                {property.mortgaged ? (
+                  <LockKeyIcon
+                    weight="fill"
+                    className="h-3.5 w-3.5 shrink-0"
+                    aria-hidden="true"
+                  />
+                ) : null}
+                <span className="truncate">
+                  {getPropertyBuildLabel(property, tile)}
+                </span>
               </span>
             </div>
 
@@ -264,6 +286,34 @@ function PropertyList({
       })}
     </div>
   )
+}
+
+function getPropertyPriority(
+  property: GameProperty,
+  roomPlayerId: string | null,
+  allProperties: GameProperty[],
+) {
+  const tile = gameTiles.find((item) => item.key === property.tileKey)
+  const isMine = Boolean(
+    roomPlayerId && property.ownerRoomPlayerId === roomPlayerId,
+  )
+  const ownsSet =
+    tile?.kind === 'property' &&
+    getOwnedSetProperties(allProperties, tile, property.ownerRoomPlayerId)
+      .length > 1
+  const hasBuildings = property.hasHotel || property.houseCount > 0
+
+  return (
+    (isMine ? 100 : 0) +
+    (ownsSet ? 45 : 0) +
+    (property.mortgaged ? 35 : 0) +
+    (hasBuildings ? 25 : 0) +
+    (tile?.kind === 'property' ? 10 : 0)
+  )
+}
+
+function getPropertyTileIndex(tileKey: string) {
+  return gameTiles.find((tile) => tile.key === tileKey)?.index ?? 999
 }
 
 function getPropertyBuildLabel(property: GameProperty, tile?: GameTile) {

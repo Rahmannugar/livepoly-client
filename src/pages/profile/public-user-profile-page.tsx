@@ -42,14 +42,16 @@ function formatPlacement(value: number | null) {
 }
 
 function formatDelta(value: number | null) {
-  if (value == null) {
+  if (!value) {
     return 'No change'
   }
 
   return value > 0 ? `+${value}` : String(value)
 }
 
-export function PublicUserProfilePage({ username }: PublicUserProfilePageProps) {
+export function PublicUserProfilePage({
+  username,
+}: PublicUserProfilePageProps) {
   const auth = useAuth()
   const { showToast } = useToast()
   const profile = useUserProfile(username)
@@ -96,12 +98,13 @@ export function PublicUserProfilePage({ username }: PublicUserProfilePageProps) 
       <section className="mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl content-start gap-4 sm:min-h-[calc(100vh-3rem)] sm:content-center sm:gap-7">
         <AppPageHeader />
 
-        {profile.isLoading ? (
-          <StatePanel title="Loading player..." />
-        ) : null}
+        {profile.isLoading ? <StatePanel title="Loading player..." /> : null}
 
         {profile.isError ? (
-          <StatePanel title="Player not found." detail="Check the username and try again." />
+          <StatePanel
+            title="Player not found."
+            detail="Check the username and try again."
+          />
         ) : null}
 
         {user ? (
@@ -210,7 +213,10 @@ export function PublicUserProfilePage({ username }: PublicUserProfilePageProps) 
               </h2>
 
               <div className="mt-4 grid gap-2 sm:mt-6 sm:gap-3">
-                <ProfileDetail label="Joined" value={formatJoinedDate(user.createdAt)} />
+                <ProfileDetail
+                  label="Joined"
+                  value={formatJoinedDate(user.createdAt)}
+                />
                 {recentMatches.slice(0, 4).map((match) => (
                   <article
                     key={match.gameId}
@@ -233,7 +239,10 @@ export function PublicUserProfilePage({ username }: PublicUserProfilePageProps) 
                   </article>
                 ))}
                 {!recentMatches.length ? (
-                  <ProfileDetail label="Matches" value="No completed matches yet" />
+                  <ProfileDetail
+                    label="Matches"
+                    value="No completed matches yet"
+                  />
                 ) : null}
               </div>
             </article>

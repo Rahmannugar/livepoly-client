@@ -7,6 +7,7 @@ import {
   DropIcon,
   HouseIcon,
   LightningIcon,
+  LockKeyIcon,
   PoliceCarIcon,
   QuestionIcon,
   ReceiptIcon,
@@ -32,11 +33,12 @@ export function GameTileCell({
 }) {
   const TileIcon = getTileIcon(tile)
   const buildingLabel = getBuildingLabel(property)
+  const mortgaged = Boolean(property?.mortgaged)
 
   return (
     <button
       type="button"
-      aria-label={`View ${tile.name}${buildingLabel ? `, ${buildingLabel}` : ''}`}
+      aria-label={`View ${tile.name}${buildingLabel ? `, ${buildingLabel}` : ''}${mortgaged ? ', mortgaged' : ''}`}
       className={`game-tile relative flex min-h-0 flex-col justify-between overflow-visible rounded-[0.18rem] border border-[var(--line)] bg-[var(--bg-base)] p-0.5 text-left text-[var(--sea-ink)] outline-none transition hover:translate-y-[-1px] focus-visible:border-[var(--primary)] sm:rounded-sm sm:p-1.5 2xl:p-2 ${
         TileIcon ? 'game-tile--special' : ''
       } ${isActiveTile ? 'game-tile--active' : ''}`}
@@ -73,6 +75,8 @@ export function GameTileCell({
         <BuildingMarker property={property} label={buildingLabel} />
       ) : null}
 
+      {mortgaged ? <MortgageMarker /> : null}
+
       <div className="game-tile__tokens pointer-events-none absolute bottom-1 right-1 z-40 flex max-w-[calc(100%-0.5rem)] flex-wrap items-end justify-end gap-0.5">
         {owner ? (
           <span
@@ -84,6 +88,18 @@ export function GameTileCell({
         ) : null}
       </div>
     </button>
+  )
+}
+
+function MortgageMarker() {
+  return (
+    <span
+      aria-hidden="true"
+      title="Mortgaged"
+      className="pointer-events-none absolute right-0.5 top-1 z-30 grid h-3 w-3 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] text-[var(--sea-ink)] shadow-sm sm:right-1 sm:top-1.5 sm:h-4 sm:w-4"
+    >
+      <LockKeyIcon weight="fill" className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
+    </span>
   )
 }
 

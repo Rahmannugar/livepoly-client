@@ -76,7 +76,7 @@ export function ProfilePage() {
 
   function handleSaveProfile() {
     const normalizedUsername = username.trim().toLowerCase()
-    const normalizedBio = bio.trim()
+    const normalizedBio = (bio ?? '').trim()
 
     if (!normalizedUsername) {
       showToast({ kind: 'error', message: 'Username is required.' })
@@ -97,7 +97,9 @@ export function ProfilePage() {
           showToast({
             kind: 'error',
             message:
-              error instanceof Error ? error.message : 'Could not update profile.',
+              error instanceof Error
+                ? error.message
+                : 'Could not update profile.',
           }),
       },
     )
@@ -275,9 +277,12 @@ export function ProfilePage() {
                     {isEditingProfile ? 'Close editor' : 'Edit profile'}
                   </button>
                 </div>
-                <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)] sm:mt-3 sm:text-base sm:leading-7">
-                  {user?.bio ?? 'Ready to roll, buy, build, and climb.'}
-                </p>
+                <div className="mt-2 sm:mt-3">
+                  <p className="app-kicker">Bio</p>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)] sm:text-base sm:leading-7">
+                    {user?.bio ?? 'Ready to roll, buy, build, and climb.'}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -348,7 +353,9 @@ export function ProfilePage() {
               />
               <ProfileStat
                 label="Avg. place"
-                value={user ? formatPlacement(user.stats.averagePlacement) : '...'}
+                value={
+                  user ? formatPlacement(user.stats.averagePlacement) : '...'
+                }
                 icon={CalendarDotsIcon}
               />
             </div>
@@ -376,7 +383,9 @@ export function ProfilePage() {
               <ProfileDetail
                 label="Net worth"
                 value={
-                  recentMatch ? `W${recentMatch.finalNetWorth.toLocaleString()}` : '...'
+                  recentMatch
+                    ? `W${recentMatch.finalNetWorth.toLocaleString()}`
+                    : '...'
                 }
               />
             </div>

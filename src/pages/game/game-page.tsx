@@ -124,7 +124,7 @@ export function GamePage({ gameId }: GamePageProps) {
         <GamePageHeader
           roomCode={state?.roomCode}
           gameId={gameId}
-          canLeave={Boolean(state?.roomCode)}
+          canLeave={Boolean(state?.roomCode) && !model.gameClosed}
           isLeaving={leaveGame.isPending}
           onLeave={() => {
             if (state?.roomCode) {
@@ -374,7 +374,7 @@ export function GamePage({ gameId }: GamePageProps) {
                   players={state?.players ?? []}
                   roomPlayerId={game.roomPlayerId}
                   tradeOffer={state?.tradeOffer}
-                  canCreateTrade={model.canManageProperties}
+                  canCreateTrade={model.canCreateTrade}
                   commandPending={game.commandPending}
                   onProposeTrade={(input) => void game.proposeTrade(input)}
                   onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}

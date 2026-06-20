@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   findPlayer,
   formatCash,
@@ -27,6 +27,7 @@ export function TradeOfferActions({
   onAccept,
   onReject,
   onCancel,
+  onCounter,
 }: {
   tradeOffer: GameTradeOffer
   players: GamePlayer[]
@@ -35,6 +36,7 @@ export function TradeOfferActions({
   onAccept: (tradeId: string) => void
   onReject: (tradeId: string) => void
   onCancel: (tradeId: string) => void
+  onCounter?: () => void
 }) {
   const fromPlayer = findPlayer(players, tradeOffer.fromRoomPlayerId)
   const toPlayer = findPlayer(players, tradeOffer.toRoomPlayerId)
@@ -75,23 +77,35 @@ export function TradeOfferActions({
       </p>
 
       {isTarget ? (
-        <div className="grid gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            disabled={commandPending}
-            className="game-command-button inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
-            onClick={() => onAccept(tradeOffer.id)}
-          >
-            Accept trade
-          </button>
-          <button
-            type="button"
-            disabled={commandPending}
-            className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
-            onClick={() => onReject(tradeOffer.id)}
-          >
-            Reject
-          </button>
+        <div className="grid gap-2">
+          {onCounter ? (
+            <button
+              type="button"
+              disabled={commandPending}
+              className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+              onClick={onCounter}
+            >
+              Counter offer
+            </button>
+          ) : null}
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              disabled={commandPending}
+              className="game-command-button inline-flex h-12 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+              onClick={() => onAccept(tradeOffer.id)}
+            >
+              Accept trade
+            </button>
+            <button
+              type="button"
+              disabled={commandPending}
+              className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+              onClick={() => onReject(tradeOffer.id)}
+            >
+              Reject
+            </button>
+          </div>
         </div>
       ) : isSender ? (
         <button
@@ -114,6 +128,7 @@ export function TradeProposalForm({
   commandPending,
   disabled,
   disabledReason,
+  initialTargetRoomPlayerId,
   onProposeTrade,
 }: {
   properties: GameProperty[]
@@ -122,6 +137,7 @@ export function TradeProposalForm({
   commandPending: boolean
   disabled: boolean
   disabledReason?: string
+  initialTargetRoomPlayerId?: string | null
   onProposeTrade: (input: ProposeTradeInput) => void
 }) {
   const tradablePlayers = players.filter(
@@ -138,6 +154,14 @@ export function TradeProposalForm({
   const [requestedPropertyKeys, setRequestedPropertyKeys] = useState<string[]>(
     [],
   )
+  useEffect(() => {
+    if (!initialTargetRoomPlayerId) {
+      return
+    }
+
+    setTargetRoomPlayerId(initialTargetRoomPlayerId)
+    setRequestedPropertyKeys([])
+  }, [initialTargetRoomPlayerId])
   const selectedTargetRoomPlayerId = tradablePlayers.some(
     (player) => player.roomPlayerId === targetRoomPlayerId,
   )

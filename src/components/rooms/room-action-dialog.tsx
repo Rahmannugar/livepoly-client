@@ -79,7 +79,7 @@ export function RoomActionDialog({
         {isCreateMode ? (
           <div className="mt-5">
             <p className="text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
-              90m is ranked. Other lengths stay casual.
+              60m is ranked. 90m stays casual.
             </p>
 
             <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5">

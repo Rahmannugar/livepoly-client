@@ -11,6 +11,7 @@ import { getRemainingMatchTimeMs } from './game-time'
 import { getGameTurnConsequence, getPrimaryGameAction } from './game-view'
 import { useGame } from './useGame'
 import { useGameResult } from './useGameResult'
+import type { GameEventLogItem } from './game.types'
 
 export function useGamePage(gameId: string) {
   const game = useGame(gameId)
@@ -19,9 +20,12 @@ export function useGamePage(gameId: string) {
   const gameOpenedAtRef = useRef(Date.now())
   const cardRevealReadyRef = useRef(false)
   const lastCardRevealIdRef = useRef<string | null>(null)
+  const pacedEventIdsRef = useRef<Set<string>>(new Set())
+  const pacedEventTimersRef = useRef<number[]>([])
   const [visibleCardRevealId, setVisibleCardRevealId] = useState<string | null>(
     null,
   )
+  const [pacedEvents, setPacedEvents] = useState<GameEventLogItem[]>([])
   const [selectedTileKey, setSelectedTileKey] = useState<string | null>(null)
 
   const currentTurnPlayer = state
@@ -35,7 +39,9 @@ export function useGamePage(gameId: string) {
   const ownedProperties = state
     ? state.properties.filter((property) => property.ownerRoomPlayerId)
     : []
-  const recentEvents = game.events.slice(0, 5)
+  const recentEvents = pacedEvents.length
+    ? pacedEvents
+    : game.events.slice(0, 5)
   const latestCardReveal = getLatestCardRevealFromEvents(game.events)
   const pendingTile = state?.pendingTileKey
     ? gameTiles.find((tile) => tile.key === state.pendingTileKey)
@@ -137,6 +143,21 @@ export function useGamePage(gameId: string) {
       state.debt?.roomPlayerId === game.roomPlayerId &&
       game.status === 'joined'),
   )
+  const canCreateTrade = Boolean(
+    state &&
+    game.roomPlayerId &&
+    game.status === 'joined' &&
+    !gameClosed &&
+    !gameExpired &&
+    !state.debt &&
+    [
+      'awaiting_first_turn',
+      'awaiting_roll',
+      'awaiting_property_decision',
+      'awaiting_turn_end',
+    ].includes(state.phase) &&
+    !findPlayer(state.players, game.roomPlayerId)?.bankrupt,
+  )
 
   useEffect(() => {
     if (gameClosed) {
@@ -151,6 +172,55 @@ export function useGamePage(gameId: string) {
 
     return () => window.clearInterval(intervalId)
   }, [state?.expiresAt, state?.turnExpiresAt, gameClosed])
+
+  useEffect(() => {
+    return () => {
+      pacedEventTimersRef.current.forEach((timerId) =>
+        window.clearTimeout(timerId),
+      )
+      pacedEventTimersRef.current = []
+    }
+  }, [])
+
+  useEffect(() => {
+    if (game.events.length === 0) {
+      setPacedEvents([])
+      pacedEventIdsRef.current = new Set()
+      return
+    }
+
+    if (pacedEventIdsRef.current.size === 0) {
+      const initialEvents = game.events.slice(0, 5)
+      setPacedEvents(initialEvents)
+      pacedEventIdsRef.current = new Set(initialEvents.map(getEventIdentity))
+      return
+    }
+
+    const newEvents = game.events
+      .filter((event) => !pacedEventIdsRef.current.has(getEventIdentity(event)))
+      .reverse()
+
+    if (newEvents.length === 0) {
+      return
+    }
+
+    pacedEventTimersRef.current = newEvents.map((event, index) => {
+      pacedEventIdsRef.current.add(getEventIdentity(event))
+
+      return window.setTimeout(() => {
+        setPacedEvents((current) => {
+          const eventIdentity = getEventIdentity(event)
+          return [
+            event,
+            ...current.filter(
+              (currentEvent) =>
+                getEventIdentity(currentEvent) !== eventIdentity,
+            ),
+          ].slice(0, 5)
+        })
+      }, index * 850)
+    })
+  }, [game.events])
 
   useEffect(() => {
     const latestCardRevealId = latestCardReveal?.id ?? null
@@ -220,6 +290,7 @@ export function useGamePage(gameId: string) {
     gameResult,
     canManageProperties,
     canLiquidateProperties,
+    canCreateTrade,
     visibleCardReveal,
     visibleCardRevealPlayerName: visibleCardRevealPlayer
       ? getPlayerName(visibleCardRevealPlayer)
@@ -228,4 +299,12 @@ export function useGamePage(gameId: string) {
     clearSelectedTile: () => setSelectedTileKey(null),
     dismissVisibleCardReveal: () => setVisibleCardRevealId(null),
   }
+}
+
+function getEventIdentity(event: GameEventLogItem) {
+  if (event.sequence !== null) {
+    return `sequence:${event.sequence}`
+  }
+
+  return `${event.type}:${event.createdAt}:${JSON.stringify(event.payload)}`
 }

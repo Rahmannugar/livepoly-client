@@ -1,4 +1,5 @@
 import { HandshakeIcon } from '@phosphor-icons/react'
+import { useEffect, useState } from 'react'
 import { findPlayer, getPlayerName } from '#/lib/game/game-board'
 import type {
   GamePlayer,
@@ -45,6 +46,28 @@ export function TradePanel({
     (tradeOffer.fromRoomPlayerId === roomPlayerId ||
       tradeOffer.toRoomPlayerId === roomPlayerId),
   )
+  const [counterTargetRoomPlayerId, setCounterTargetRoomPlayerId] = useState<
+    string | null
+  >(null)
+
+  useEffect(() => {
+    if (tradeOffer) {
+      return
+    }
+
+    if (!counterTargetRoomPlayerId) {
+      return
+    }
+
+    const targetStillActive = players.some(
+      (player) =>
+        player.roomPlayerId === counterTargetRoomPlayerId && !player.bankrupt,
+    )
+
+    if (!targetStillActive) {
+      setCounterTargetRoomPlayerId(null)
+    }
+  }, [counterTargetRoomPlayerId, players, tradeOffer])
 
   return (
     <GamePanel title="Trade" icon={HandshakeIcon} collapsible={false}>
@@ -57,6 +80,10 @@ export function TradePanel({
           onAccept={onAcceptTrade}
           onReject={onRejectTrade}
           onCancel={onCancelTrade}
+          onCounter={() => {
+            setCounterTargetRoomPlayerId(tradeOffer.fromRoomPlayerId)
+            onRejectTrade(tradeOffer.id)
+          }}
         />
       ) : tradeOffer ? (
         <TradeInProgress tradeOffer={tradeOffer} players={players} />
@@ -70,9 +97,13 @@ export function TradePanel({
           disabledReason={
             canCreateTrade
               ? undefined
-              : 'Make an offer after your move is settled.'
+              : 'Trades are paused while this action resolves.'
           }
-          onProposeTrade={onProposeTrade}
+          initialTargetRoomPlayerId={counterTargetRoomPlayerId}
+          onProposeTrade={(input) => {
+            setCounterTargetRoomPlayerId(null)
+            onProposeTrade(input)
+          }}
         />
       )}
     </GamePanel>
