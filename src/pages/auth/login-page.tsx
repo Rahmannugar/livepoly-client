@@ -8,6 +8,11 @@ import { PasswordField } from '#/components/auth/password-field'
 import { useToast } from '#/components/common/toast'
 import type { LoginRequest } from '#/lib/auth/auth.types'
 import { useAuth } from '#/lib/auth/useAuth'
+import type { ApiClientError } from '#/lib/client/client.types'
+
+function isApiClientError(error: unknown): error is ApiClientError {
+  return error instanceof Error && 'statusCode' in error
+}
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -52,6 +57,21 @@ export function LoginPage() {
         navigate({ to: '/' })
       },
       onError: (error) => {
+        if (
+          isApiClientError(error) &&
+          error.code === 'EMAIL_VERIFICATION_REQUIRED'
+        ) {
+          showToast({
+            kind: 'info',
+            message: 'Check your email for a verification code.',
+          })
+          navigate({
+            to: '/auth/verify-email',
+            search: { email: input.email.trim().toLowerCase() },
+          })
+          return
+        }
+
         showToast({
           kind: 'error',
           message:
