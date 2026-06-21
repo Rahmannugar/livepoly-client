@@ -123,6 +123,9 @@ export function GamePage({ gameId }: GamePageProps) {
       <section className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[112rem] flex-col gap-5">
         <GamePageHeader
           roomCode={state?.roomCode}
+          backRoomCode={
+            game.access === 'spectator' ? state?.roomCode : undefined
+          }
           gameId={gameId}
           canLeave={Boolean(state?.roomCode) && !model.gameClosed}
           isLeaving={leaveGame.isPending}
@@ -140,6 +143,7 @@ export function GamePage({ gameId }: GamePageProps) {
             <GameStatePanel
               state={state}
               playersOnline={game.presence?.playersOnline ?? 0}
+              spectatorsOnline={game.presence?.spectatorsOnline ?? 0}
             />
           </aside>
 
@@ -386,12 +390,12 @@ export function GamePage({ gameId }: GamePageProps) {
                   onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
                   onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
                 />
-              ) : activeSidePanel === 'events' ? (
+              ) : (
                 <EventsPanel
                   events={game.events}
                   players={state?.players ?? []}
                 />
-              ) : null}
+              )}
             </GameSidePanelDialog>
           ) : null}
         </AnimatePresence>

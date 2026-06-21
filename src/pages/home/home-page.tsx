@@ -11,7 +11,8 @@ import {
   UsersIcon,
 } from '@phosphor-icons/react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useState, type ComponentType } from 'react'
+import { useState } from 'react'
+import type { ComponentType } from 'react'
 import {
   getInitialRoomDuration,
   RoomActionDialog,
@@ -87,12 +88,13 @@ export function HomePage() {
   const displayName = user?.username ?? 'player'
   const avatarUrl = profile.data?.avatarUrl
   const [activeDialog, setActiveDialog] = useState<HomeDialogMode | null>(null)
-  const [durationMinutes, setDurationMinutes] =
-    useState<RoomDurationMinutes>(getInitialRoomDuration)
-  const [roomCode, setRoomCode] = useState('')
-  const [routeTransitionLabel, setRouteTransitionLabel] = useState<string | null>(
-    null,
+  const [durationMinutes, setDurationMinutes] = useState<RoomDurationMinutes>(
+    getInitialRoomDuration,
   )
+  const [roomCode, setRoomCode] = useState('')
+  const [routeTransitionLabel, setRouteTransitionLabel] = useState<
+    string | null
+  >(null)
   const currentRoom = useCurrentRoom(Boolean(user))
   const liveRooms = useLiveRooms(activeDialog === 'liveRooms')
   const unreadNotifications = useUnreadNotificationCount()
@@ -203,8 +205,8 @@ export function HomePage() {
   }
 
   return (
-    <main className="min-h-screen px-3 py-3 min-[420px]:px-4 min-[420px]:py-4 sm:px-8 sm:py-6">
-      <section className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-6xl flex-col sm:min-h-[calc(100vh-3rem)]">
+    <main className="min-h-screen overflow-x-hidden px-3 py-3 min-[420px]:px-4 min-[420px]:py-4 sm:px-8 sm:py-6">
+      <section className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-6xl min-w-0 flex-col sm:min-h-[calc(100vh-3rem)]">
         <header className="grid grid-cols-[1fr_auto] items-center gap-2 min-[420px]:gap-3 sm:flex sm:justify-between">
           <Link
             to="/"
@@ -309,12 +311,12 @@ export function HomePage() {
             </article>
           ) : null}
 
-          <div className="grid gap-2 min-[420px]:gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid min-w-0 max-w-full gap-2 min-[420px]:gap-3 min-[560px]:grid-cols-2 lg:grid-cols-3">
             {homeActions.map((action) => (
               <button
                 key={action.title}
                 type="button"
-                className="group flex min-h-0 items-center gap-2.5 rounded-[18px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-2.5 text-left shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl transition hover:translate-y-[-2px] hover:border-[var(--primary)] min-[420px]:gap-3 min-[420px]:rounded-[20px] min-[420px]:p-3 sm:block sm:min-h-32 sm:rounded-[26px] sm:p-5"
+                className="group flex min-h-0 w-full max-w-full min-w-0 items-center gap-2.5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[color-mix(in_oklab,var(--bg-base)_74%,transparent)] p-2.5 text-left shadow-[0_14px_34px_rgba(8,28,32,0.09)] backdrop-blur-xl transition hover:translate-y-[-2px] hover:border-[var(--primary)] min-[420px]:gap-3 min-[420px]:rounded-[20px] min-[420px]:p-3 min-[560px]:block min-[560px]:min-h-32 sm:rounded-[26px] sm:p-5"
                 onClick={() => {
                   if (action.dialog) {
                     setActiveDialog(action.dialog)
@@ -335,11 +337,11 @@ export function HomePage() {
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-[var(--sea-ink)] shadow-[0_10px_24px_rgba(8,28,32,0.1)] transition group-hover:bg-[var(--primary)] group-hover:text-[var(--primary-foreground)] min-[420px]:h-9 min-[420px]:w-9 sm:h-11 sm:w-11 sm:rounded-2xl">
                   <action.icon weight="bold" className="h-5 w-5" />
                 </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-black text-[var(--sea-ink)] min-[420px]:text-base sm:mt-4">
+                <span className="min-w-0 flex-1 overflow-hidden">
+                  <span className="block text-sm font-black text-[var(--sea-ink)] min-[420px]:text-base min-[560px]:mt-4">
                     {action.title}
                   </span>
-                  <span className="mt-0.5 block truncate text-[0.7rem] font-semibold leading-4 text-[var(--sea-ink-soft)] min-[420px]:text-xs min-[420px]:leading-5 sm:mt-1 sm:whitespace-normal sm:text-sm sm:leading-6">
+                  <span className="mt-0.5 block max-w-full break-words text-[0.7rem] font-semibold leading-4 text-[var(--sea-ink-soft)] min-[420px]:line-clamp-2 min-[420px]:text-xs min-[420px]:leading-5 min-[560px]:mt-1 min-[560px]:line-clamp-none sm:text-sm sm:leading-6">
                     {action.description}
                   </span>
                 </span>

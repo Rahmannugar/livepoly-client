@@ -6,6 +6,7 @@ import {
   UsersIcon,
   XIcon,
 } from '@phosphor-icons/react'
+import type { KeyboardEvent } from 'react'
 import type { Room } from '#/lib/rooms/rooms.types'
 
 type LiveRoomsDialogProps = {
@@ -18,6 +19,19 @@ type LiveRoomsDialogProps = {
   onJoin: (code: string) => void
   onSpectate: (code: string) => void
   onOpenRoom: (code: string) => void
+}
+
+function handleCardKeyDown(
+  event: KeyboardEvent<HTMLElement>,
+  code: string,
+  onOpenRoom: (code: string) => void,
+) {
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return
+  }
+
+  event.preventDefault()
+  onOpenRoom(code)
 }
 
 export function LiveRoomsDialog({
@@ -119,14 +133,16 @@ export function LiveRoomsDialog({
               return (
                 <article
                   key={room.id}
-                  className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-3xl sm:p-5"
+                  role="button"
+                  tabIndex={0}
+                  className="cursor-pointer rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 transition hover:translate-y-[-1px] hover:shadow-[0_16px_36px_rgba(8,28,32,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] sm:rounded-3xl sm:p-5"
+                  onClick={() => onOpenRoom(room.code)}
+                  onKeyDown={(event) =>
+                    handleCardKeyDown(event, room.code, onOpenRoom)
+                  }
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                    <button
-                      type="button"
-                      className="min-w-0 text-left"
-                      onClick={() => onOpenRoom(room.code)}
-                    >
+                    <div className="min-w-0 text-left">
                       <span className="app-kicker">
                         {room.status === 'waiting'
                           ? 'Waiting room'
@@ -143,19 +159,20 @@ export function LiveRoomsDialog({
                         <span>{room.durationMinutes}m</span>
                         <span>{room.spectatorCount} watching</span>
                       </span>
-                    </button>
+                    </div>
 
                     <button
                       type="button"
                       disabled={isBusy}
                       className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-4 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60 sm:h-11 sm:px-5"
-                      onClick={() =>
+                      onClick={(event) => {
+                        event.stopPropagation()
                         shouldOpenRoom
                           ? onOpenRoom(room.code)
                           : isWaiting
                             ? onJoin(room.code)
                             : onSpectate(room.code)
-                      }
+                      }}
                     >
                       <ActionIcon weight="bold" className="h-4.5 w-4.5" />
                       {isBusy ? 'Opening...' : actionLabel}

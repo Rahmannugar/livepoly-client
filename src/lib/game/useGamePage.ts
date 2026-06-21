@@ -14,6 +14,7 @@ import { useGameResult } from './useGameResult'
 import type { GameEventLogItem } from './game.types'
 
 const GAME_EVENT_PACING_MS = 2_000
+const CARD_REVEAL_DURATION_MS = 4_000
 
 export function useGamePage(gameId: string) {
   const game = useGame(gameId)
@@ -280,6 +281,18 @@ export function useGamePage(gameId: string) {
       setVisibleCardRevealId(latestCardRevealId)
     }
   }, [latestCardReveal?.createdAt, latestCardReveal?.id])
+
+  useEffect(() => {
+    if (!visibleCardRevealId) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setVisibleCardRevealId(null)
+    }, CARD_REVEAL_DURATION_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [visibleCardRevealId])
 
   const visibleCardReveal: GameCardMetadata | null =
     latestCardReveal && latestCardReveal.id === visibleCardRevealId

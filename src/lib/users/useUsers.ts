@@ -59,6 +59,17 @@ export function useUpdateCurrentUserProfile() {
   })
 }
 
+export function useDeleteCurrentUser() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: usersService.deleteCurrentUser,
+    onSuccess: () => {
+      queryClient.clear()
+    },
+  })
+}
+
 export function useUserSearch(query: string, enabled = true) {
   const normalizedQuery = query.trim().toLowerCase()
 

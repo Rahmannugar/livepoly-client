@@ -26,6 +26,12 @@ export function updateCurrentUserProfile(input: UpdateUserProfileRequest) {
   })
 }
 
+export function deleteCurrentUser() {
+  return apiClient<void>('/users/me', {
+    method: 'DELETE',
+  })
+}
+
 export function searchUsers(input: SearchUsersInput) {
   const params = new URLSearchParams({
     query: input.query,

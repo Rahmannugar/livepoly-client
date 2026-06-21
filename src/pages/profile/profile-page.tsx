@@ -5,10 +5,13 @@ import {
   ChartLineUpIcon,
   ClockCounterClockwiseIcon,
   MedalIcon,
+  ShieldCheckIcon,
+  TrashIcon,
   UserIcon,
+  WarningIcon,
   XIcon,
 } from '@phosphor-icons/react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { AppPageHeader } from '#/components/common/app-page-header'
 import { useToast } from '#/components/common/toast'
@@ -19,10 +22,12 @@ import {
 import {
   useAvatarUpload,
   useCurrentUserProfile,
+  useDeleteCurrentUser,
   useUpdateCurrentUserProfile,
   useUserMatches,
 } from '#/lib/users/useUsers'
 import type { AvatarContentType } from '#/lib/users/users.types'
+import { useAuth } from '#/lib/auth/useAuth'
 
 function formatJoinedDate(value: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -49,6 +54,9 @@ export function ProfilePage() {
   const recentMatch = matches.data?.items[0]
   const updateProfile = useUpdateCurrentUserProfile()
   const avatarUpload = useAvatarUpload()
+  const deleteUser = useDeleteCurrentUser()
+  const auth = useAuth()
+  const navigate = useNavigate()
   const { showToast } = useToast()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [username, setUsername] = useState('')
@@ -56,6 +64,8 @@ export function ProfilePage() {
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
   const [avatarPreviewFile, setAvatarPreviewFile] = useState<File | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
 
   useEffect(() => {
     if (!user) {
@@ -76,7 +86,7 @@ export function ProfilePage() {
 
   function handleSaveProfile() {
     const normalizedUsername = username.trim().toLowerCase()
-    const normalizedBio = (bio ?? '').trim()
+    const normalizedBio = bio.trim()
 
     if (!normalizedUsername) {
       showToast({ kind: 'error', message: 'Username is required.' })
@@ -171,6 +181,28 @@ export function ProfilePage() {
 
   const displayedAvatarUrl = avatarPreviewUrl ?? user?.avatarUrl
   const avatarActionLabel = displayedAvatarUrl ? 'Change photo' : 'Add photo'
+  const canDelete =
+    Boolean(user?.username) && deleteConfirmation === user?.username
+
+  function handleDeleteAccount() {
+    if (!canDelete) return
+
+    deleteUser.mutate(undefined, {
+      onSuccess: () => {
+        auth.clearAuthSession()
+        void navigate({ to: '/account-deleted', replace: true })
+      },
+      onError: (error) => {
+        showToast({
+          kind: 'error',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Could not delete account.',
+        })
+      },
+    })
+  }
 
   return (
     <main className="min-h-screen px-4 py-4 sm:px-8 sm:py-6">
@@ -400,7 +432,103 @@ export function ProfilePage() {
             </div>
           </article>
         </section>
+
+        <section className="grid gap-5 border-y border-[var(--line)] py-6 sm:grid-cols-[1fr_auto] sm:items-center sm:py-8">
+          <div>
+            <p className="app-kicker">Account controls</p>
+            <h2 className="display-title mt-2 text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">
+              Manage your LivePoly account.
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-3 sm:justify-end">
+            {auth.currentUser.data?.role === 'admin' ? (
+              <Link
+                to="/admin/users"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-black text-[var(--sea-ink)]"
+              >
+                <ShieldCheckIcon weight="bold" className="h-5 w-5" />
+                Admin users
+              </Link>
+            ) : null}
+            <button
+              type="button"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-400/40 bg-red-400/10 px-5 text-sm font-black text-red-700 dark:text-red-200"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              <TrashIcon weight="bold" className="h-5 w-5" />
+              Delete account
+            </button>
+          </div>
+        </section>
       </section>
+
+      {isDeleteDialogOpen ? (
+        <div
+          className="fixed inset-0 z-[70] flex items-end justify-center pt-12 sm:items-center sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-account-title"
+        >
+          <button
+            type="button"
+            aria-label="Close delete account dialog"
+            className="absolute inset-0 cursor-default bg-[rgba(4,12,15,0.62)]"
+            onClick={() => setIsDeleteDialogOpen(false)}
+          />
+          <section className="relative w-full max-w-md rounded-t-[24px] border border-b-0 border-[var(--line)] bg-[var(--bg-base)] p-5 shadow-[0_28px_90px_rgba(4,12,15,0.32)] sm:rounded-[24px] sm:border sm:p-6">
+            <div className="flex items-start gap-4">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-red-500/15 text-red-600 dark:text-red-200">
+                <WarningIcon weight="bold" className="h-6 w-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2
+                  id="delete-account-title"
+                  className="display-title text-2xl font-semibold text-[var(--sea-ink)]"
+                >
+                  Delete your account?
+                </h2>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
+                  You will be signed out everywhere. Only an administrator can
+                  restore the account afterward.
+                </p>
+              </div>
+            </div>
+
+            <label className="mt-5 grid gap-2">
+              <span className="text-sm font-bold text-[var(--sea-ink)]">
+                Type <strong>{user?.username}</strong> to confirm
+              </span>
+              <input
+                value={deleteConfirmation}
+                autoComplete="off"
+                className="h-12 rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 font-bold text-[var(--sea-ink)] outline-none focus:border-red-400"
+                onChange={(event) => setDeleteConfirmation(event.target.value)}
+              />
+            </label>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                className="h-11 rounded-full border border-[var(--line)] bg-[var(--surface)] text-sm font-black text-[var(--sea-ink)]"
+                onClick={() => {
+                  setDeleteConfirmation('')
+                  setIsDeleteDialogOpen(false)
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!canDelete || deleteUser.isPending}
+                className="h-11 rounded-full bg-red-600 px-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={handleDeleteAccount}
+              >
+                {deleteUser.isPending ? 'Deleting...' : 'Delete account'}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </main>
   )
 }

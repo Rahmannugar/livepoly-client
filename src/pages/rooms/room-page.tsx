@@ -4,6 +4,7 @@ import {
   ClockIcon,
   CopyIcon,
   CrownIcon,
+  EyeIcon,
   PaperPlaneTiltIcon,
   PlayIcon,
   SignOutIcon,
@@ -11,7 +12,7 @@ import {
   UsersIcon,
 } from '@phosphor-icons/react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { RoomInviteDialog } from '#/components/rooms/room-invite-dialog'
 import { GlobalNotificationButton } from '#/components/common/global-notification-button'
 import { RouteTransitionOverlay } from '#/components/common/route-transition-overlay'
@@ -25,11 +26,13 @@ import type { FriendSummary } from '#/lib/friends/friends.types'
 import {
   BOT_DIFFICULTIES,
   DEFAULT_BOT_DIFFICULTY,
+  WAITING_ROOM_EXPIRY_MS,
 } from '#/lib/rooms/rooms.constants'
-import { useRoomStream, type RoomStreamEvent } from '#/lib/rooms/rooms-stream'
+import { useRoomStream } from '#/lib/rooms/rooms-stream'
 import { useRoom, useRooms } from '#/lib/rooms/useRooms'
 import { useUserSearch } from '#/lib/users/useUsers'
 import type { BotDifficulty, RoomPlayer } from '#/lib/rooms/rooms.types'
+import type { RoomStreamEvent } from '#/lib/rooms/rooms-stream'
 
 type RoomPageProps = {
   code: string
@@ -46,23 +49,30 @@ export function RoomPage({ code }: RoomPageProps) {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [inviteQuery, setInviteQuery] = useState('')
   const [selectedInviteUsername, setSelectedInviteUsername] = useState('')
-  const [routeTransitionLabel, setRouteTransitionLabel] = useState<string | null>(
-    null,
-  )
+  const [routeTransitionLabel, setRouteTransitionLabel] = useState<
+    string | null
+  >(null)
   const [botDifficulty, setBotDifficulty] = useState<BotDifficulty>(
     DEFAULT_BOT_DIFFICULTY,
   )
+  const [nowMs, setNowMs] = useState(() => Date.now())
   const debouncedInviteQuery = useDebouncedValue(inviteQuery, 250)
   const user = auth.currentUser.data
   const room = roomQuery.data
+  const waitingRoomClosesIn =
+    room?.status === 'waiting'
+      ? formatWaitingRoomTimeRemaining(
+          new Date(room.createdAt).getTime() + WAITING_ROOM_EXPIRY_MS - nowMs,
+        )
+      : null
   const isHost = Boolean(room && user?.id === room.hostUserId)
   const playersAtTable = room ? joinedPlayers(room.players) : []
   const displayedRoomPlayers = room ? getDisplayedRoomPlayers(room) : []
   const canInvite = Boolean(
     room &&
-      user &&
-      room.status === 'waiting' &&
-      room.currentUserAccess === 'player',
+    user &&
+    room.status === 'waiting' &&
+    room.currentUserAccess === 'player',
   )
   const userSearch = useUserSearch(debouncedInviteQuery, isInviteOpen)
   const inviteFriends = room
@@ -84,16 +94,21 @@ export function RoomPage({ code }: RoomPageProps) {
   )
   const canJoinRoom = Boolean(
     room &&
-      room.status === 'waiting' &&
-      room.currentUserAccess === 'none' &&
-      playersAtTable.length < room.maxPlayers,
+    room.status === 'waiting' &&
+    room.currentUserAccess === 'none' &&
+    playersAtTable.length < room.maxPlayers,
+  )
+  const canSpectateRoom = Boolean(
+    room &&
+    room.currentUserAccess === 'none' &&
+    (room.status === 'active' || playersAtTable.length >= room.maxPlayers),
   )
   const willFillOpenSeats = Boolean(
     room &&
-      isHost &&
-      room.status === 'waiting' &&
-      playersAtTable.length > 0 &&
-      playersAtTable.length < room.maxPlayers,
+    isHost &&
+    room.status === 'waiting' &&
+    playersAtTable.length > 0 &&
+    playersAtTable.length < room.maxPlayers,
   )
   const exitActionLabel = getExitActionLabel({
     access: room?.currentUserAccess,
@@ -107,6 +122,11 @@ export function RoomPage({ code }: RoomPageProps) {
   })
   const exitIsPending =
     rooms.leaveRoom.isPending || rooms.stopSpectatingRoom.isPending
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNowMs(Date.now()), 1_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const handleRoomUpdated = useCallback(
     async (event: RoomStreamEvent) => {
@@ -158,7 +178,7 @@ export function RoomPage({ code }: RoomPageProps) {
         setRouteTransitionLabel('Opening home...')
         showToast({
           kind: 'success',
-          message: response.message ?? 'Left room.',
+          message: response.message,
         })
         navigate({ to: '/' })
       },
@@ -182,7 +202,7 @@ export function RoomPage({ code }: RoomPageProps) {
         setRouteTransitionLabel('Opening home...')
         showToast({
           kind: 'success',
-          message: response.message ?? 'Stopped spectating room.',
+          message: response.message,
         })
         navigate({ to: '/' })
       },
@@ -215,6 +235,29 @@ export function RoomPage({ code }: RoomPageProps) {
           kind: 'error',
           message:
             error instanceof Error ? error.message : 'Could not join room.',
+        })
+      },
+    })
+  }
+
+  function spectateRoom() {
+    if (!room?.code) {
+      return
+    }
+
+    rooms.spectateRoom.mutate(room.code, {
+      onSuccess: async () => {
+        await refetchRoom()
+        showToast({
+          kind: 'success',
+          message: `Spectating room ${room.code}.`,
+        })
+      },
+      onError: (error) => {
+        showToast({
+          kind: 'error',
+          message:
+            error instanceof Error ? error.message : 'Could not spectate room.',
         })
       },
     })
@@ -300,7 +343,7 @@ export function RoomPage({ code }: RoomPageProps) {
         onSuccess: (response) => {
           showToast({
             kind: 'success',
-            message: response.message ?? 'Invite sent.',
+            message: response.message,
           })
           closeInviteDialog()
         },
@@ -376,6 +419,7 @@ export function RoomPage({ code }: RoomPageProps) {
                       </h1>
                       <p className="mt-2 max-w-xl text-sm font-semibold leading-6 text-[var(--sea-ink-soft)]">
                         Share the code, fill the seats, and start when ready.
+                        Waiting rooms close after one hour.
                       </p>
                     </div>
 
@@ -389,7 +433,7 @@ export function RoomPage({ code }: RoomPageProps) {
                     </button>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-3 gap-2">
+                  <div className="mt-4 grid grid-cols-2 gap-2 min-[520px]:grid-cols-4">
                     <RoomStat
                       icon={UsersIcon}
                       label="Seats"
@@ -405,6 +449,13 @@ export function RoomPage({ code }: RoomPageProps) {
                       label="Watching"
                       value={String(room.spectatorCount)}
                     />
+                    {waitingRoomClosesIn ? (
+                      <RoomStat
+                        icon={ClockIcon}
+                        label="Closes"
+                        value={waitingRoomClosesIn}
+                      />
+                    ) : null}
                   </div>
                 </div>
 
@@ -429,6 +480,7 @@ export function RoomPage({ code }: RoomPageProps) {
                       isHost,
                       status: room.status,
                       playersAtTable: playersAtTable.length,
+                      maxPlayers: room.maxPlayers,
                     })}
                   </p>
 
@@ -502,6 +554,20 @@ export function RoomPage({ code }: RoomPageProps) {
                     </button>
                   ) : null}
 
+                  {canSpectateRoom ? (
+                    <button
+                      type="button"
+                      disabled={rooms.spectateRoom.isPending}
+                      className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--sea-ink)] shadow-[0_12px_30px_rgba(8,28,32,0.1)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={spectateRoom}
+                    >
+                      <EyeIcon weight="bold" className="h-4.5 w-4.5" />
+                      {rooms.spectateRoom.isPending
+                        ? 'Opening...'
+                        : 'Spectate room'}
+                    </button>
+                  ) : null}
+
                   {room.status === 'active' && room.activeGameId ? (
                     <button
                       type="button"
@@ -538,7 +604,7 @@ export function RoomPage({ code }: RoomPageProps) {
                     </h2>
                   </div>
                   <span className="text-sm font-black text-[var(--sea-ink-soft)]">
-                    {displayedRoomPlayers.length}/{room.maxPlayers}
+                    {playersAtTable.length}/{room.maxPlayers}
                   </span>
                 </div>
 
@@ -618,11 +684,13 @@ function getRoomStatusCopy({
   isHost,
   status,
   playersAtTable,
+  maxPlayers,
 }: {
   access?: string
   isHost: boolean
   status: string
   playersAtTable: number
+  maxPlayers: number
 }) {
   if (status === 'active') {
     return access === 'spectator'
@@ -636,15 +704,27 @@ function getRoomStatusCopy({
 
   if (isHost) {
     return playersAtTable > 0
-      ? 'Start when the table is ready. Empty seats can be filled by bots.'
-      : 'Waiting for at least one player to take a seat.'
+      ? 'Start when the table is ready. Empty seats can be filled by bots. Waiting rooms close after one hour.'
+      : 'Waiting for at least one player to take a seat. Waiting rooms close after one hour.'
   }
 
   if (access === 'none') {
-    return 'Join the room to take an open seat.'
+    if (playersAtTable >= maxPlayers) {
+      return 'This room is full, but you can still spectate the table. Waiting rooms close after one hour.'
+    }
+
+    return 'Join the room to take an open seat. Waiting rooms close after one hour.'
   }
 
-  return 'Waiting for the host to start the room.'
+  return 'Waiting for the host to start the room. Waiting rooms close after one hour.'
+}
+
+function formatWaitingRoomTimeRemaining(remainingMs: number) {
+  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
 function filterInviteResults({
@@ -703,12 +783,13 @@ function getDisplayedRoomPlayers(room: {
   maxPlayers: number
   status: string
 }) {
+  const joined = joinedPlayers(room.players)
+
   if (room.status === 'waiting') {
-    return buildSeats(room.players, room.maxPlayers)
+    return buildSeats(joined, room.maxPlayers)
   }
 
-  return room.players
-    .filter((player) => player.status !== 'kicked')
+  return joined
     .sort((first, second) => first.seatNumber - second.seatNumber)
     .map((player) => ({
       key: player.id,
@@ -723,7 +804,9 @@ function PlayerSeat({
   player: RoomPlayer | null
   showStatus?: boolean
 }) {
-  const playerName = player ? player.username ?? player.botName ?? 'Bot' : 'Open seat'
+  const playerName = player
+    ? (player.username ?? player.botName ?? 'Bot')
+    : 'Open seat'
   const playerMeta = player
     ? showStatus && player.status !== 'joined'
       ? `${player.playerType} - ${player.status}`
