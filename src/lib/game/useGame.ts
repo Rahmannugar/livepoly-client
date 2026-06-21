@@ -428,7 +428,7 @@ export function useGame(gameId: string) {
           { gameId },
         )
 
-        setEvents([...recovered.items].reverse())
+        setEvents(mergeGameEvents([], [...recovered.items].reverse()))
 
         const presenceSummary = await requestGameEvent<GamePresenceEvent>(
           GAME_SOCKET_EVENTS.presenceGet,
