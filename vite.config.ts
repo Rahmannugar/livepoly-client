@@ -24,7 +24,6 @@ const config = defineConfig({
       registerType: 'autoUpdate',
       injectRegister: false,
       outDir: pwaOutputDirectory,
-      includeAssets: ['favicon.ico', 'icons/*.png'],
       manifest: {
         name: 'LivePoly',
         short_name: 'LivePoly',
