@@ -13,6 +13,8 @@ import { useGame } from './useGame'
 import { useGameResult } from './useGameResult'
 import type { GameEventLogItem } from './game.types'
 
+const GAME_EVENT_PACING_MS = 1_500
+
 export function useGamePage(gameId: string) {
   const game = useGame(gameId)
   const state = game.state
@@ -21,7 +23,8 @@ export function useGamePage(gameId: string) {
   const cardRevealReadyRef = useRef(false)
   const lastCardRevealIdRef = useRef<string | null>(null)
   const pacedEventIdsRef = useRef<Set<string>>(new Set())
-  const pacedEventTimersRef = useRef<number[]>([])
+  const pacedEventQueueRef = useRef<GameEventLogItem[]>([])
+  const pacedEventTimerRef = useRef<number | null>(null)
   const [visibleCardRevealId, setVisibleCardRevealId] = useState<string | null>(
     null,
   )
@@ -176,10 +179,9 @@ export function useGamePage(gameId: string) {
 
   useEffect(() => {
     return () => {
-      pacedEventTimersRef.current.forEach((timerId) =>
-        window.clearTimeout(timerId),
-      )
-      pacedEventTimersRef.current = []
+      if (pacedEventTimerRef.current !== null) {
+        window.clearTimeout(pacedEventTimerRef.current)
+      }
     }
   }, [])
 
@@ -187,6 +189,11 @@ export function useGamePage(gameId: string) {
     if (game.events.length === 0) {
       setPacedEvents([])
       pacedEventIdsRef.current = new Set()
+      pacedEventQueueRef.current = []
+      if (pacedEventTimerRef.current !== null) {
+        window.clearTimeout(pacedEventTimerRef.current)
+        pacedEventTimerRef.current = null
+      }
       return
     }
 
@@ -205,10 +212,24 @@ export function useGamePage(gameId: string) {
       return
     }
 
-    pacedEventTimersRef.current = newEvents.map((event, index) => {
+    newEvents.forEach((event) => {
       pacedEventIdsRef.current.add(getEventIdentity(event))
+      pacedEventQueueRef.current.push(event)
+    })
 
-      return window.setTimeout(() => {
+    if (pacedEventTimerRef.current !== null) {
+      return
+    }
+
+    const presentNextEvent = () => {
+      pacedEventTimerRef.current = window.setTimeout(() => {
+        const event = pacedEventQueueRef.current.shift()
+
+        if (!event) {
+          pacedEventTimerRef.current = null
+          return
+        }
+
         setPacedEvents((current) => {
           const eventIdentity = getEventIdentity(event)
           return [
@@ -219,8 +240,16 @@ export function useGamePage(gameId: string) {
             ),
           ].slice(0, 5)
         })
-      }, index * 850)
-    })
+
+        if (pacedEventQueueRef.current.length > 0) {
+          presentNextEvent()
+        } else {
+          pacedEventTimerRef.current = null
+        }
+      }, GAME_EVENT_PACING_MS)
+    }
+
+    presentNextEvent()
   }, [game.events])
 
   useEffect(() => {

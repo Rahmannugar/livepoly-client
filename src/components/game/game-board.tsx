@@ -92,10 +92,8 @@ function BoardTokenLayer({
               top: `${position.top}%`,
             }}
             transition={{
-              type: 'spring',
-              stiffness: 130,
-              damping: 18,
-              mass: 0.85,
+              duration: 1.35,
+              ease: [0.22, 1, 0.36, 1],
             }}
           >
             <div
