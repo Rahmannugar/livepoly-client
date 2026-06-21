@@ -23,6 +23,10 @@ export const Route = createRootRoute({
         content: APP_DESCRIPTION,
       },
       {
+        name: 'theme-color',
+        content: '#173a40',
+      },
+      {
         property: 'og:title',
         content: APP_NAME,
       },
@@ -43,6 +47,14 @@ export const Route = createRootRoute({
       {
         rel: 'icon',
         href: APP_ASSETS.favicon,
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/icons/pwa-192.png',
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.webmanifest',
       },
     ],
   }),

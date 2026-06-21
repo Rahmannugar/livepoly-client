@@ -5,6 +5,7 @@ import { queryClient } from '#/lib/client/queryClient'
 import { AuthHydrator } from '#/lib/auth/auth-hydrator'
 import { NotificationsStream } from '#/lib/notifications/notifications-stream'
 import { ThemeProvider } from '#/lib/theme/theme-provider'
+import { PwaRegistration } from '#/lib/pwa/pwa-registration'
 
 export function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -23,6 +24,7 @@ export function RootDocument({ children }: { children: React.ReactNode }) {
             </ToastProvider>
           </ThemeProvider>
         </QueryClientProvider>
+        <PwaRegistration />
         <Scripts />
       </body>
     </html>
