@@ -6,10 +6,8 @@ import {
   gameTiles,
   getPlayerName,
 } from '#/lib/game/game-board'
-import {
-  groupGameProperties,
-  type GamePropertyGroup,
-} from '#/lib/game/game-property-groups'
+import { groupGameProperties } from '#/lib/game/game-property-groups'
+import type { GamePropertyGroup } from '#/lib/game/game-property-groups'
 import type {
   GamePlayer,
   GameProperty,

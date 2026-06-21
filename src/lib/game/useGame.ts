@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { io, type Socket } from 'socket.io-client'
+import { io } from 'socket.io-client'
+import type { Socket } from 'socket.io-client'
 import { env } from '#/config/env'
 import { AUTH_QUERY_KEYS } from '#/lib/auth/auth.constants'
 import { getAccessToken, refreshSession } from '#/lib/auth/auth.service'
@@ -108,9 +109,9 @@ function isSocketAcknowledgement<T>(
 ): response is SocketAcknowledgement<T> {
   return Boolean(
     response &&
-      typeof response === 'object' &&
-      'event' in response &&
-      'data' in response,
+    typeof response === 'object' &&
+    'event' in response &&
+    'data' in response,
   )
 }
 
@@ -119,8 +120,8 @@ function isGameResponse<TResponse extends { gameId?: string }>(
 ): response is TResponse {
   return Boolean(
     response &&
-      typeof response === 'object' &&
-      ('gameId' in response || 'state' in response || 'items' in response),
+    typeof response === 'object' &&
+    ('gameId' in response || 'state' in response || 'items' in response),
   )
 }
 
@@ -156,11 +157,27 @@ function mergeGameEvents(
 }
 
 function getGameEventIdentity(event: GameEventLogItem) {
+  if (isTradeOutcomeEvent(event.type)) {
+    const tradeId = event.payload['tradeId']
+
+    if (typeof tradeId === 'string') {
+      return `trade-outcome:${event.type}:${tradeId}`
+    }
+  }
+
   if (event.sequence !== null) {
     return `sequence:${event.sequence}`
   }
 
   return `${event.type}:${JSON.stringify(event.payload)}`
+}
+
+function isTradeOutcomeEvent(type: string) {
+  return (
+    type === 'trade_accepted' ||
+    type === 'trade_rejected' ||
+    type === 'trade_cancelled'
+  )
 }
 
 export function useGame(gameId: string) {
@@ -215,7 +232,7 @@ export function useGame(gameId: string) {
     state?.currentTurnRoomPlayerId === roomPlayerId
 
   const requestGameEvent = useCallback(
-    async <TResponse extends { gameId?: string },>(
+    async <TResponse extends { gameId?: string }>(
       event: string,
       expectedEvent: string,
       payload: object,
@@ -227,8 +244,6 @@ export function useGame(gameId: string) {
       }
 
       return new Promise<TResponse>((resolve, reject) => {
-        let timeoutId: number
-
         const handleEvent = (data: TResponse) => {
           if (data.gameId && data.gameId !== gameId) {
             return
@@ -249,7 +264,9 @@ export function useGame(gameId: string) {
 
         const handleSocketError = (data: unknown) => {
           cleanup()
-          reject(new Error(getGameSocketErrorMessage(getSocketPayloadMessage(data))))
+          reject(
+            new Error(getGameSocketErrorMessage(getSocketPayloadMessage(data))),
+          )
         }
 
         const cleanup = () => {
@@ -260,7 +277,7 @@ export function useGame(gameId: string) {
           socket.off(GAME_SOCKET_EXCEPTION_EVENT, handleSocketError)
         }
 
-        timeoutId = window.setTimeout(() => {
+        const timeoutId = window.setTimeout(() => {
           cleanup()
           reject(new Error('Game server did not respond in time'))
         }, GAME_SOCKET_ACKNOWLEDGEMENT_TIMEOUT_MS)

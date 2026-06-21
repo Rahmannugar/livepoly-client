@@ -24,6 +24,7 @@ export function TradePanel({
   tradeOffer,
   canCreateTrade,
   commandPending,
+  initialCounterTargetRoomPlayerId,
   onProposeTrade,
   onAcceptTrade,
   onRejectTrade,
@@ -35,6 +36,7 @@ export function TradePanel({
   tradeOffer: GameTradeOffer | null | undefined
   canCreateTrade: boolean
   commandPending: boolean
+  initialCounterTargetRoomPlayerId?: string | null
   onProposeTrade: (input: ProposeTradeInput) => void
   onAcceptTrade: (tradeId: string) => void
   onRejectTrade: (tradeId: string) => void
@@ -48,7 +50,15 @@ export function TradePanel({
   )
   const [counterTargetRoomPlayerId, setCounterTargetRoomPlayerId] = useState<
     string | null
-  >(null)
+  >(initialCounterTargetRoomPlayerId ?? null)
+
+  useEffect(() => {
+    if (!initialCounterTargetRoomPlayerId) {
+      return
+    }
+
+    setCounterTargetRoomPlayerId(initialCounterTargetRoomPlayerId)
+  }, [initialCounterTargetRoomPlayerId])
 
   useEffect(() => {
     if (tradeOffer) {

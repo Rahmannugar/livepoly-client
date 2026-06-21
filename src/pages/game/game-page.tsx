@@ -47,9 +47,12 @@ export function GamePage({ gameId }: GamePageProps) {
   const { showToast } = useToast()
   const lastErrorToastRef = useRef<string | null>(null)
   const gameOpenedAtRef = useRef(Date.now())
-  const lastTradeToastEventKeyRef = useRef<string | null>(null)
+  const seenTradeOutcomeIdsRef = useRef(new Set<string>())
   const [activeSidePanel, setActiveSidePanel] = useState<
     'banker' | 'properties' | 'trade' | 'events' | 'results' | null
+  >(null)
+  const [counterTargetRoomPlayerId, setCounterTargetRoomPlayerId] = useState<
+    string | null
   >(null)
   const leaveGame = useMutation({
     mutationFn: leaveRoom,
@@ -95,13 +98,13 @@ export function GamePage({ gameId }: GamePageProps) {
       return
     }
 
-    const eventKey = `${tradeEvent.sequence ?? 'live'}:${tradeEvent.type}:${tradeEvent.createdAt}`
+    const eventKey = getTradeOutcomeIdentity(tradeEvent)
 
-    if (lastTradeToastEventKeyRef.current === eventKey) {
+    if (seenTradeOutcomeIdsRef.current.has(eventKey)) {
       return
     }
 
-    lastTradeToastEventKeyRef.current = eventKey
+    seenTradeOutcomeIdsRef.current.add(eventKey)
 
     if (new Date(tradeEvent.createdAt).getTime() <= gameOpenedAtRef.current) {
       return
@@ -255,6 +258,11 @@ export function GamePage({ gameId }: GamePageProps) {
                     onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
                     onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
                     onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
+                    onCounterTrade={(targetRoomPlayerId, tradeId) => {
+                      setCounterTargetRoomPlayerId(targetRoomPlayerId)
+                      setActiveSidePanel('trade')
+                      void game.rejectTrade(tradeId)
+                    }}
                   />
                 </motion.div>
               ) : null}
@@ -337,7 +345,10 @@ export function GamePage({ gameId }: GamePageProps) {
             <GameSidePanelDialog
               key="game-side-panel-dialog"
               title={getSidePanelTitle(activeSidePanel)}
-              onClose={() => setActiveSidePanel(null)}
+              onClose={() => {
+                setActiveSidePanel(null)
+                setCounterTargetRoomPlayerId(null)
+              }}
             >
               {activeSidePanel === 'banker' ? (
                 <BankerPanel
@@ -379,13 +390,17 @@ export function GamePage({ gameId }: GamePageProps) {
                 />
               ) : activeSidePanel === 'trade' ? (
                 <TradePanel
-                  properties={model.ownedProperties}
+                  properties={state?.properties ?? []}
                   players={state?.players ?? []}
                   roomPlayerId={game.roomPlayerId}
                   tradeOffer={state?.tradeOffer}
                   canCreateTrade={model.canCreateTrade}
                   commandPending={game.commandPending}
-                  onProposeTrade={(input) => void game.proposeTrade(input)}
+                  initialCounterTargetRoomPlayerId={counterTargetRoomPlayerId}
+                  onProposeTrade={(input) => {
+                    setCounterTargetRoomPlayerId(null)
+                    void game.proposeTrade(input)
+                  }}
                   onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
                   onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
                   onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
@@ -448,6 +463,16 @@ function GameSidePanelDialog({
   children: ReactNode
   onClose: () => void
 }) {
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [])
+
   return (
     <div aria-live="polite">
       <button
@@ -460,7 +485,7 @@ function GameSidePanelDialog({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[min(86vh,46rem)] w-full gap-3 overflow-y-auto rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:bottom-auto md:left-1/2 md:top-1/2 md:max-w-2xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[28px] md:p-4"
+        className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[min(86vh,46rem)] w-full gap-3 overflow-y-auto overscroll-contain rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:bottom-auto md:left-1/2 md:top-1/2 md:max-w-2xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[28px] md:p-4"
       >
         <div className="flex items-center justify-end gap-3">
           <button
@@ -517,6 +542,14 @@ function isTradeOutcomeEvent(type: string) {
     type === 'trade_rejected' ||
     type === 'trade_cancelled'
   )
+}
+
+function getTradeOutcomeIdentity(event: GameEventLogItem) {
+  const tradeId = event.payload['tradeId']
+
+  return typeof tradeId === 'string'
+    ? `${event.type}:${tradeId}`
+    : `${event.type}:${JSON.stringify(event.payload)}`
 }
 
 function getTradeOutcomeToast(

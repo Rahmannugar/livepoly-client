@@ -50,6 +50,7 @@ export function GameActionsPanel({
   onAcceptTrade,
   onRejectTrade,
   onCancelTrade,
+  onCounterTrade,
 }: {
   primaryAction: PrimaryGameAction
   commandPending: boolean
@@ -77,6 +78,7 @@ export function GameActionsPanel({
   onAcceptTrade: (tradeId: string) => void
   onRejectTrade: (tradeId: string) => void
   onCancelTrade: (tradeId: string) => void
+  onCounterTrade: (targetRoomPlayerId: string, tradeId: string) => void
 }) {
   const [actionSheetOpen, setActionSheetOpen] = useState(false)
   const [lastAutoOpenedActionKey, setLastAutoOpenedActionKey] = useState<
@@ -194,6 +196,11 @@ export function GameActionsPanel({
           onAccept={(tradeId) => runAndClose(() => onAcceptTrade(tradeId))}
           onReject={(tradeId) => runAndClose(() => onRejectTrade(tradeId))}
           onCancel={(tradeId) => runAndClose(() => onCancelTrade(tradeId))}
+          onCounter={() =>
+            runAndClose(() =>
+              onCounterTrade(tradeOffer.fromRoomPlayerId, tradeOffer.id),
+            )
+          }
         />
       ) : gameClosed || gameExpired ? (
         <PrimaryActionButton
@@ -323,6 +330,16 @@ function GameActionSheet({
   children: ReactNode
   onClose: () => void
 }) {
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [])
+
   if (typeof document === 'undefined') {
     return null
   }
@@ -342,7 +359,7 @@ function GameActionSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="game-decision-sheet relative z-10 grid max-h-[min(86vh,38rem)] w-full gap-3 overflow-y-auto rounded-t-[24px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-lg md:rounded-2xl md:p-5"
+        className="game-decision-sheet relative z-10 grid max-h-[min(86vh,38rem)] w-full gap-3 overflow-y-auto overscroll-contain rounded-t-[24px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-lg md:rounded-2xl md:p-5"
       >
         <GameActionHeader
           title={title}
