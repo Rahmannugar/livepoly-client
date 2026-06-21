@@ -26,6 +26,7 @@ export type UserProfile = {
   id: string
   email: string
   username: string
+  role: 'player' | 'admin'
   bio: string | null
   avatarUrl: string | null
   stats: UserStats
@@ -33,7 +34,7 @@ export type UserProfile = {
   updatedAt: string
 }
 
-export type PublicUserProfile = Omit<UserProfile, 'email'>
+export type PublicUserProfile = Omit<UserProfile, 'email' | 'role'>
 
 export type UpdateUserProfileRequest = {
   username?: string

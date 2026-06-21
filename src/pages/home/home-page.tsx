@@ -87,6 +87,10 @@ export function HomePage() {
   const profile = useCurrentUserProfile(Boolean(user))
   const displayName = user?.username ?? 'player'
   const avatarUrl = profile.data?.avatarUrl
+  const roleLabel =
+    profile.data?.role === 'admin' || user?.role === 'admin'
+      ? 'Admin'
+      : 'Player'
   const [activeDialog, setActiveDialog] = useState<HomeDialogMode | null>(null)
   const [durationMinutes, setDurationMinutes] = useState<RoomDurationMinutes>(
     getInitialRoomDuration,
@@ -221,7 +225,7 @@ export function HomePage() {
                 {displayName}
               </p>
               <p className="text-xs font-semibold text-[var(--sea-ink-soft)]">
-                Player
+                {roleLabel}
               </p>
             </div>
 

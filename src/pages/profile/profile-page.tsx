@@ -66,6 +66,7 @@ export function ProfilePage() {
   const [avatarPreviewFile, setAvatarPreviewFile] = useState<File | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
+  const isAdmin = auth.currentUser.data?.role === 'admin'
 
   useEffect(() => {
     if (!user) {
@@ -83,6 +84,15 @@ export function ProfilePage() {
       }
     }
   }, [avatarPreviewUrl])
+
+  useEffect(() => {
+    if (!isAdmin) {
+      return
+    }
+
+    setIsDeleteDialogOpen(false)
+    setDeleteConfirmation('')
+  }, [isAdmin])
 
   function handleSaveProfile() {
     const normalizedUsername = username.trim().toLowerCase()
@@ -182,7 +192,7 @@ export function ProfilePage() {
   const displayedAvatarUrl = avatarPreviewUrl ?? user?.avatarUrl
   const avatarActionLabel = displayedAvatarUrl ? 'Change photo' : 'Add photo'
   const canDelete =
-    Boolean(user?.username) && deleteConfirmation === user?.username
+    !isAdmin && Boolean(user?.username) && deleteConfirmation === user?.username
 
   function handleDeleteAccount() {
     if (!canDelete) return
@@ -441,7 +451,7 @@ export function ProfilePage() {
             </h2>
           </div>
           <div className="flex flex-wrap gap-3 sm:justify-end">
-            {auth.currentUser.data?.role === 'admin' ? (
+            {isAdmin ? (
               <Link
                 to="/admin/users"
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-black text-[var(--sea-ink)]"
@@ -450,19 +460,21 @@ export function ProfilePage() {
                 Admin users
               </Link>
             ) : null}
-            <button
-              type="button"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-400/40 bg-red-400/10 px-5 text-sm font-black text-red-700 dark:text-red-200"
-              onClick={() => setIsDeleteDialogOpen(true)}
-            >
-              <TrashIcon weight="bold" className="h-5 w-5" />
-              Delete account
-            </button>
+            {!isAdmin ? (
+              <button
+                type="button"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-red-400/40 bg-red-400/10 px-5 text-sm font-black text-red-700 dark:text-red-200"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                <TrashIcon weight="bold" className="h-5 w-5" />
+                Delete account
+              </button>
+            ) : null}
           </div>
         </section>
       </section>
 
-      {isDeleteDialogOpen ? (
+      {!isAdmin && isDeleteDialogOpen ? (
         <div
           className="fixed inset-0 z-[70] flex items-end justify-center pt-12 sm:items-center sm:p-6"
           role="dialog"

@@ -59,19 +59,31 @@ export function RoomPage({ code }: RoomPageProps) {
   const debouncedInviteQuery = useDebouncedValue(inviteQuery, 250)
   const user = auth.currentUser.data
   const room = roomQuery.data
-  const waitingRoomClosesIn =
+  const waitingRoomRemainingMs =
     room?.status === 'waiting'
-      ? formatWaitingRoomTimeRemaining(
-          new Date(room.createdAt).getTime() + WAITING_ROOM_EXPIRY_MS - nowMs,
-        )
+      ? new Date(room.createdAt).getTime() + WAITING_ROOM_EXPIRY_MS - nowMs
       : null
+  const waitingRoomIsExpired =
+    waitingRoomRemainingMs !== null && waitingRoomRemainingMs <= 0
+  const waitingRoomClosesIn =
+    waitingRoomRemainingMs !== null && !waitingRoomIsExpired
+      ? formatWaitingRoomTimeRemaining(waitingRoomRemainingMs)
+      : null
+  const roomIsOpenForWaitingActions =
+    room?.status === 'waiting' && !waitingRoomIsExpired
+  const roomDisplayStatus = waitingRoomIsExpired ? 'cancelled' : room?.status
   const isHost = Boolean(room && user?.id === room.hostUserId)
   const playersAtTable = room ? joinedPlayers(room.players) : []
-  const displayedRoomPlayers = room ? getDisplayedRoomPlayers(room) : []
+  const displayedRoomPlayers = room
+    ? getDisplayedRoomPlayers({
+        ...room,
+        status: roomDisplayStatus ?? room.status,
+      })
+    : []
   const canInvite = Boolean(
     room &&
     user &&
-    room.status === 'waiting' &&
+    roomIsOpenForWaitingActions &&
     room.currentUserAccess === 'player',
   )
   const userSearch = useUserSearch(debouncedInviteQuery, isInviteOpen)
@@ -90,11 +102,11 @@ export function RoomPage({ code }: RoomPageProps) {
       })
     : []
   const canStartRoom = Boolean(
-    room && isHost && room.status === 'waiting' && playersAtTable.length > 0,
+    room && isHost && roomIsOpenForWaitingActions && playersAtTable.length > 0,
   )
   const canJoinRoom = Boolean(
     room &&
-    room.status === 'waiting' &&
+    roomIsOpenForWaitingActions &&
     room.currentUserAccess === 'none' &&
     playersAtTable.length < room.maxPlayers,
   )
@@ -106,7 +118,7 @@ export function RoomPage({ code }: RoomPageProps) {
   const willFillOpenSeats = Boolean(
     room &&
     isHost &&
-    room.status === 'waiting' &&
+    roomIsOpenForWaitingActions &&
     playersAtTable.length > 0 &&
     playersAtTable.length < room.maxPlayers,
   )
@@ -464,7 +476,7 @@ export function RoomPage({ code }: RoomPageProps) {
                     <div>
                       <p className="app-kicker">Status</p>
                       <h2 className="display-title mt-1 text-2xl font-semibold capitalize text-[var(--sea-ink)]">
-                        {room.status}
+                        {roomDisplayStatus ?? room.status}
                       </h2>
                     </div>
                     {isHost ? (
@@ -478,13 +490,13 @@ export function RoomPage({ code }: RoomPageProps) {
                     {getRoomStatusCopy({
                       access: room.currentUserAccess,
                       isHost,
-                      status: room.status,
+                      status: roomDisplayStatus ?? room.status,
                       playersAtTable: playersAtTable.length,
                       maxPlayers: room.maxPlayers,
                     })}
                   </p>
 
-                  {isHost && room.status === 'waiting' ? (
+                  {isHost && roomIsOpenForWaitingActions ? (
                     <>
                       {willFillOpenSeats ? (
                         <div className="mt-4 rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-3">
@@ -613,7 +625,9 @@ export function RoomPage({ code }: RoomPageProps) {
                     <PlayerSeat
                       key={player.key}
                       player={player.player}
-                      showStatus={room.status !== 'waiting'}
+                      showStatus={
+                        (roomDisplayStatus ?? room.status) !== 'waiting'
+                      }
                     />
                   ))}
                 </div>
