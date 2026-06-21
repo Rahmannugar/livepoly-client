@@ -380,11 +380,6 @@
   background: var(--surface);
 }
 
-.game-card-reveal {
-  animation: game-card-reveal-backdrop-in 260ms cubic-bezier(0.16, 1, 0.3, 1)
-    both;
-}
-
 .game-card-reveal__stack {
   perspective: 900px;
 }
@@ -411,7 +406,6 @@
 
 .game-card-reveal__card {
   transform-style: preserve-3d;
-  animation: game-card-reveal-card-in 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (min-width: 640px) {
@@ -557,35 +551,11 @@
   }
 }
 
-@keyframes game-card-reveal-backdrop-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes game-card-reveal-card-in {
-  from {
-    opacity: 0;
-    transform: translateY(22px) scale(0.94) rotateX(8deg);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1) rotateX(0deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .game-turn-summary,
   .game-decision-backdrop,
   .game-decision-sheet,
   .game-event-card,
-  .game-card-reveal,
-  .game-card-reveal__card,
   .game-tile--active,
   .game-tile--active::after,
   .dice-face--rolling,

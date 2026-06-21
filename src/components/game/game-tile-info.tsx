@@ -19,6 +19,7 @@ type TileInfoPanelProps = {
 type PropertyDecisionControlsProps = {
   tile: GameTile | null
   property?: GameProperty | null
+  availableCash: number
   commandPending: boolean
   onBuyProperty: () => void
   onDeclinePropertyPurchase: () => void
@@ -147,17 +148,20 @@ export function TileInfoPanel({
 
 export function PropertyDecisionControls({
   tile,
+  availableCash,
   commandPending,
   onBuyProperty,
   onDeclinePropertyPurchase,
 }: PropertyDecisionControlsProps) {
   const purchasePrice = getTilePurchasePrice(tile)
+  const canAffordProperty =
+    purchasePrice !== null && availableCash >= purchasePrice
 
   return (
     <div className="grid gap-3">
       <button
         type="button"
-        disabled={commandPending}
+        disabled={commandPending || !canAffordProperty}
         className={`game-command-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70 ${
           commandPending ? 'game-command-button--active' : ''
         }`}
@@ -170,6 +174,11 @@ export function PropertyDecisionControls({
           ? 'Buy property'
           : `Buy for ${formatCash(purchasePrice)}`}
       </button>
+      {!canAffordProperty && purchasePrice !== null ? (
+        <p className="text-center text-xs font-bold text-[var(--sea-ink-soft)]">
+          You need {formatCash(purchasePrice - availableCash)} more.
+        </p>
+      ) : null}
       <button
         type="button"
         disabled={commandPending}

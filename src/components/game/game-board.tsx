@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { useEffect, useState } from 'react'
 import type { GamePlayer, GameState } from '#/lib/game/game.types'
 import { findPlayer, gameTiles, type GameTile } from '#/lib/game/game-board'
 import { GameBoardCenter } from './game-board-center'
@@ -10,6 +11,7 @@ export function GameBoard({
   access,
   isCurrentTurn,
   isRollingDice,
+  movementPaused,
   activeTileKey,
   onSelectTile,
 }: {
@@ -17,6 +19,7 @@ export function GameBoard({
   access: string | null
   isCurrentTurn: boolean
   isRollingDice: boolean
+  movementPaused: boolean
   activeTileKey: string | null
   onSelectTile: (tile: GameTile) => void
 }) {
@@ -45,6 +48,7 @@ export function GameBoard({
         <BoardTokenLayer
           players={state?.players ?? []}
           currentTurnRoomPlayerId={state?.currentTurnRoomPlayerId ?? null}
+          movementPaused={movementPaused}
         />
       </div>
     </div>
@@ -68,19 +72,33 @@ function getTileOwner(state: GameState | null, tileKey: string) {
 function BoardTokenLayer({
   players,
   currentTurnRoomPlayerId,
+  movementPaused,
 }: {
   players: GamePlayer[]
   currentTurnRoomPlayerId: string | null
+  movementPaused: boolean
 }) {
   const visiblePlayers = players.filter((player) => !player.bankrupt)
+  const [displayedPositions, setDisplayedPositions] = useState<
+    Record<string, number>
+  >(() => getPlayerPositions(visiblePlayers))
   const positionCounts = new Map<number, number>()
+
+  useEffect(() => {
+    if (!movementPaused) {
+      setDisplayedPositions(getPlayerPositions(visiblePlayers))
+    }
+  }, [movementPaused, players])
 
   return (
     <div className="pointer-events-none absolute inset-0 z-50">
       {visiblePlayers.map((player) => {
-        const stackIndex = positionCounts.get(player.position) ?? 0
-        positionCounts.set(player.position, stackIndex + 1)
-        const position = getTokenPosition(player.position, stackIndex)
+        const displayedPosition =
+          displayedPositions[player.roomPlayerId] ?? player.position
+        const stackIndex = positionCounts.get(displayedPosition) ?? 0
+        positionCounts.set(displayedPosition, stackIndex + 1)
+        const position = getTokenPosition(displayedPosition, stackIndex)
+        const movingToJail = player.inJail && displayedPosition === 10
 
         return (
           <motion.div
@@ -92,7 +110,8 @@ function BoardTokenLayer({
               top: `${position.top}%`,
             }}
             transition={{
-              duration: 1.35,
+              delay: movingToJail ? 0.2 : 0,
+              duration: movingToJail ? 1.8 : 1.35,
               ease: [0.22, 1, 0.36, 1],
             }}
           >
@@ -113,6 +132,12 @@ function BoardTokenLayer({
         )
       })}
     </div>
+  )
+}
+
+function getPlayerPositions(players: GamePlayer[]) {
+  return Object.fromEntries(
+    players.map((player) => [player.roomPlayerId, player.position]),
   )
 }
 

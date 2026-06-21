@@ -152,6 +152,7 @@ export function GamePage({ gameId }: GamePageProps) {
             turnConsequence={model.turnConsequence}
             isCurrentTurn={model.isUserTurn}
             isRollingDice={model.isRollingDice}
+            movementPaused={Boolean(model.visibleCardReveal)}
             remainingTurnTimeMs={model.remainingTurnTimeMs}
             onSelectTile={(tile) => model.selectTile(tile.key)}
           />
@@ -529,30 +530,37 @@ function getTradeOutcomeToast(
     return null
   }
 
-  const otherRoomPlayerId =
-    roomPlayerId === fromRoomPlayerId ? toRoomPlayerId : fromRoomPlayerId
-  const otherPlayer = findPlayer(players, otherRoomPlayerId)
-  const otherPlayerName = otherPlayer
-    ? getPlayerName(otherPlayer)
-    : 'the other player'
+  const isTradeSender = roomPlayerId === fromRoomPlayerId
+  const sender = findPlayer(players, fromRoomPlayerId)
+  const recipient = findPlayer(players, toRoomPlayerId)
+  const senderName = sender ? getPlayerName(sender) : 'The other player'
+  const recipientName = recipient
+    ? getPlayerName(recipient)
+    : 'The other player'
 
   if (event.type === 'trade_accepted') {
     return {
       kind: 'success' as const,
-      message: `Trade with ${otherPlayerName} accepted.`,
+      message: isTradeSender
+        ? `${recipientName} accepted your trade.`
+        : `You accepted ${senderName}'s trade.`,
     }
   }
 
   if (event.type === 'trade_rejected') {
     return {
       kind: 'info' as const,
-      message: `Trade with ${otherPlayerName} rejected.`,
+      message: isTradeSender
+        ? `${recipientName} rejected your trade.`
+        : `You rejected ${senderName}'s trade.`,
     }
   }
 
   return {
     kind: 'info' as const,
-    message: `Trade with ${otherPlayerName} cancelled.`,
+    message: isTradeSender
+      ? `You cancelled your trade with ${recipientName}.`
+      : `${senderName} cancelled their trade with you.`,
   }
 }
 

@@ -19,6 +19,7 @@ export function GameStage({
   turnConsequence,
   isCurrentTurn,
   isRollingDice,
+  movementPaused,
   remainingTurnTimeMs,
   onSelectTile,
 }: {
@@ -30,6 +31,7 @@ export function GameStage({
   turnConsequence: string
   isCurrentTurn: boolean
   isRollingDice: boolean
+  movementPaused: boolean
   remainingTurnTimeMs: number | null
   onSelectTile: (tile: GameTile) => void
 }) {
@@ -65,6 +67,7 @@ export function GameStage({
         access={access}
         isCurrentTurn={isCurrentTurn}
         isRollingDice={isRollingDice}
+        movementPaused={movementPaused}
         activeTileKey={activeTile?.key ?? null}
         onSelectTile={onSelectTile}
       />

@@ -227,6 +227,7 @@ export function GameActionsPanel({
         <PropertyDecisionActions
           tile={pendingTile}
           property={pendingProperty}
+          availableCash={currentPlayer?.cash ?? 0}
           commandPending={commandPending}
           onBuyProperty={() => runAndClose(onBuyProperty)}
           onDeclinePropertyPurchase={() =>
