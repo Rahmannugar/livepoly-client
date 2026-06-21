@@ -202,7 +202,7 @@ export function MobilePropertyDecisionSheet({
 
   return (
     <div className="md:hidden" aria-live="polite">
-      <div className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.42)] backdrop-blur-sm" />
+      <div className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.34)]" />
       <section
         role="dialog"
         aria-modal="true"
@@ -238,7 +238,7 @@ export function TileInfoSheet({
       <button
         type="button"
         aria-label="Close square details"
-        className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.46)] backdrop-blur-sm"
+        className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.38)]"
         onClick={onClose}
       />
       <section

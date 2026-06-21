@@ -328,7 +328,7 @@ function GameActionSheet({
       <button
         type="button"
         aria-label="Close action"
-        className="game-decision-backdrop absolute inset-0 bg-[rgba(4,12,15,0.62)] backdrop-blur-md"
+        className="game-decision-backdrop absolute inset-0 bg-[rgba(4,12,15,0.5)]"
         onClick={onClose}
       />
       <section

@@ -448,7 +448,7 @@ function GameSidePanelDialog({
       <button
         type="button"
         aria-label={`Close ${title}`}
-        className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.46)] backdrop-blur-sm"
+        className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.38)]"
         onClick={onClose}
       />
       <section
