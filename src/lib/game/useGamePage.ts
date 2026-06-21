@@ -13,7 +13,7 @@ import { useGame } from './useGame'
 import { useGameResult } from './useGameResult'
 import type { GameEventLogItem } from './game.types'
 
-const GAME_EVENT_PACING_MS = 1_500
+const GAME_EVENT_PACING_MS = 2_000
 
 export function useGamePage(gameId: string) {
   const game = useGame(gameId)

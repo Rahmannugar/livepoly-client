@@ -113,6 +113,8 @@ export function GameActionsPanel({
     !actionableTradeOffer && actionAudiencePlayer
       ? getPlayerName(actionAudiencePlayer)
       : null
+  const actionSubject =
+    primaryAction.command === 'propertyDecision' ? pendingTile?.name : null
   const actionSheetTitle = useMemo(() => {
     if (actionableTradeOffer) return 'Trade offer'
     if (shouldShowDebtActions) return 'Settle payment'
@@ -288,6 +290,7 @@ export function GameActionsPanel({
           <GameActionSheet
             title={actionSheetTitle}
             audience={actionAudience}
+            subject={actionSubject ?? null}
             onClose={() => setActionSheetOpen(false)}
           >
             {renderActionControls()}
@@ -295,6 +298,7 @@ export function GameActionsPanel({
           <GameInlineAction
             title={actionSheetTitle}
             audience={actionAudience}
+            subject={actionSubject ?? null}
             onClose={() => setActionSheetOpen(false)}
           >
             {renderActionControls()}
@@ -308,11 +312,13 @@ export function GameActionsPanel({
 function GameActionSheet({
   title,
   audience,
+  subject,
   children,
   onClose,
 }: {
   title: string
   audience: string | null
+  subject: string | null
   children: ReactNode
   onClose: () => void
 }) {
@@ -337,7 +343,12 @@ function GameActionSheet({
         aria-label={title}
         className="game-decision-sheet relative z-10 grid max-h-[min(86vh,38rem)] w-full gap-3 overflow-y-auto rounded-t-[24px] border border-[var(--line)] bg-[var(--bg-base)] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:max-w-lg md:rounded-2xl md:p-5"
       >
-        <GameActionHeader title={title} audience={audience} onClose={onClose} />
+        <GameActionHeader
+          title={title}
+          audience={audience}
+          subject={subject}
+          onClose={onClose}
+        />
         {children}
       </section>
     </div>,
@@ -348,11 +359,13 @@ function GameActionSheet({
 function GameInlineAction({
   title,
   audience,
+  subject,
   children,
   onClose,
 }: {
   title: string
   audience: string | null
+  subject: string | null
   children: ReactNode
   onClose: () => void
 }) {
@@ -362,7 +375,12 @@ function GameInlineAction({
       aria-label={title}
       className="mt-3 hidden gap-3 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 xl:grid"
     >
-      <GameActionHeader title={title} audience={audience} onClose={onClose} />
+      <GameActionHeader
+        title={title}
+        audience={audience}
+        subject={subject}
+        onClose={onClose}
+      />
       {children}
     </section>
   )
@@ -371,10 +389,12 @@ function GameInlineAction({
 function GameActionHeader({
   title,
   audience,
+  subject,
   onClose,
 }: {
   title: string
   audience: string | null
+  subject: string | null
   onClose: () => void
 }) {
   return (
@@ -384,6 +404,11 @@ function GameActionHeader({
         <h3 className="display-title text-2xl font-semibold leading-tight text-[var(--sea-ink)] sm:text-3xl xl:text-2xl">
           {title}
         </h3>
+        {subject ? (
+          <p className="mt-1 truncate text-sm font-black leading-5 text-[var(--sea-ink-soft)]">
+            {subject}
+          </p>
+        ) : null}
       </div>
       <button
         type="button"

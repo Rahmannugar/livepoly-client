@@ -96,7 +96,7 @@ function MortgageMarker() {
     <span
       aria-hidden="true"
       title="Mortgaged"
-      className="pointer-events-none absolute right-0.5 top-1 z-30 grid h-3 w-3 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] text-[var(--sea-ink)] shadow-sm sm:right-1 sm:top-1.5 sm:h-4 sm:w-4"
+      className="game-tile__mortgage pointer-events-none absolute right-0.5 top-1 z-30 grid h-3 w-3 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface-strong)] text-[var(--sea-ink)] shadow-sm sm:right-1 sm:top-1.5 sm:h-4 sm:w-4"
     >
       <LockKeyIcon weight="fill" className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
     </span>
