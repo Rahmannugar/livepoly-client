@@ -17,6 +17,11 @@ type ProposeTradeInput = {
   requestedPropertyKeys: string[]
 }
 
+export type TradeOutcomeFeedback = {
+  kind: 'success' | 'info'
+  message: string
+}
+
 export function TradePanel({
   properties,
   players,
@@ -25,6 +30,7 @@ export function TradePanel({
   canCreateTrade,
   commandPending,
   initialCounterTargetRoomPlayerId,
+  outcomeFeedback,
   onProposeTrade,
   onAcceptTrade,
   onRejectTrade,
@@ -37,6 +43,7 @@ export function TradePanel({
   canCreateTrade: boolean
   commandPending: boolean
   initialCounterTargetRoomPlayerId?: string | null
+  outcomeFeedback?: TradeOutcomeFeedback | null
   onProposeTrade: (input: ProposeTradeInput) => void
   onAcceptTrade: (tradeId: string) => void
   onRejectTrade: (tradeId: string) => void
@@ -81,6 +88,18 @@ export function TradePanel({
 
   return (
     <GamePanel title="Trade" icon={HandshakeIcon} collapsible={false}>
+      {!tradeOffer && outcomeFeedback ? (
+        <div
+          role="status"
+          className={`rounded-xl border px-4 py-3 text-sm font-black leading-5 sm:rounded-2xl ${
+            outcomeFeedback.kind === 'success'
+              ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-700 dark:text-emerald-200'
+              : 'border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)]'
+          }`}
+        >
+          {outcomeFeedback.message}
+        </div>
+      ) : null}
       {tradeOffer && isInvolved ? (
         <TradeOfferActions
           tradeOffer={tradeOffer}

@@ -125,14 +125,15 @@ function isGameResponse<TResponse extends { gameId?: string }>(
   )
 }
 
-function createLiveEventItems(events: GameEngineEvent[]): GameEventLogItem[] {
-  const createdAt = new Date().toISOString()
-
+function createLiveEventItems(
+  events: GameEngineEvent[],
+  emittedAt = new Date().toISOString(),
+): GameEventLogItem[] {
   return events.map((event) => ({
     sequence: null,
     type: event.type,
     payload: event,
-    createdAt,
+    createdAt: emittedAt,
   }))
 }
 
@@ -524,7 +525,10 @@ export function useGame(gameId: string) {
       }
 
       setEvents((current) =>
-        mergeGameEvents(current, createLiveEventItems(payload.events)),
+        mergeGameEvents(
+          current,
+          createLiveEventItems(payload.events, payload.emittedAt),
+        ),
       )
     })
 

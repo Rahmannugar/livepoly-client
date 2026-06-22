@@ -28,7 +28,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
       window.setTimeout(() => {
         setToasts((current) => current.filter((toast) => toast.id !== id))
-      }, 3600)
+      }, 5_000)
     },
     [],
   )
@@ -38,7 +38,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const toastLayer = (
-    <div className="pointer-events-none fixed left-1/2 top-5 z-[200] grid w-[min(92vw,420px)] -translate-x-1/2 gap-3">
+    <div className="pointer-events-none fixed left-1/2 top-[calc(env(safe-area-inset-top)+1rem)] z-[200] grid w-[min(92vw,420px)] -translate-x-1/2 gap-3 sm:top-5">
       {toasts.map((toast) => (
         <div
           key={toast.id}

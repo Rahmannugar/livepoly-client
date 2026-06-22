@@ -116,6 +116,7 @@ export type GameEngineEvent = {
 export type GameEventsEvent = {
   gameId: string
   events: GameEngineEvent[]
+  emittedAt?: string
 }
 
 export type GameEventRecoveryItem = {

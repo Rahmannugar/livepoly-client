@@ -30,6 +30,7 @@ import { GameStatePanel } from '#/components/game/game-state-panel'
 import { GameStage } from '#/components/game/game-stage'
 import { TileInfoSheet } from '#/components/game/game-tile-info'
 import { TradePanel } from '#/components/game/game-trade-panel'
+import type { TradeOutcomeFeedback } from '#/components/game/game-trade-panel'
 import { useGamePage } from '#/lib/game/useGamePage'
 import { findPlayer, getPlayerName } from '#/lib/game/game-board'
 import type { GameEventLogItem, GamePlayer } from '#/lib/game/game.types'
@@ -39,6 +40,8 @@ import { ROOMS_QUERY_KEYS } from '#/lib/rooms/rooms.constants'
 type GamePageProps = {
   gameId: string
 }
+
+const TRADE_OUTCOME_FEEDBACK_MAX_AGE_MS = 15_000
 
 export function GamePage({ gameId }: GamePageProps) {
   const model = useGamePage(gameId)
@@ -55,6 +58,8 @@ export function GamePage({ gameId }: GamePageProps) {
   const [counterTargetRoomPlayerId, setCounterTargetRoomPlayerId] = useState<
     string | null
   >(null)
+  const [tradeOutcomeFeedback, setTradeOutcomeFeedback] =
+    useState<TradeOutcomeFeedback | null>(null)
   const leaveGame = useMutation({
     mutationFn: leaveRoom,
     onSuccess: () => {
@@ -107,7 +112,12 @@ export function GamePage({ gameId }: GamePageProps) {
 
     seenTradeOutcomeIdsRef.current.add(eventKey)
 
-    if (new Date(tradeEvent.createdAt).getTime() <= gameOpenedAtRef.current) {
+    const eventCreatedAt = new Date(tradeEvent.createdAt).getTime()
+
+    if (
+      eventCreatedAt <= gameOpenedAtRef.current ||
+      Date.now() - eventCreatedAt > TRADE_OUTCOME_FEEDBACK_MAX_AGE_MS
+    ) {
       return
     }
 
@@ -118,6 +128,7 @@ export function GamePage({ gameId }: GamePageProps) {
     )
 
     if (tradeToast) {
+      setTradeOutcomeFeedback(tradeToast)
       showToast(tradeToast)
     }
   }, [game.roomPlayerId, model.recentEvents, showToast, state?.players])
@@ -398,8 +409,10 @@ export function GamePage({ gameId }: GamePageProps) {
                   canCreateTrade={model.canCreateTrade}
                   commandPending={game.commandPending}
                   initialCounterTargetRoomPlayerId={counterTargetRoomPlayerId}
+                  outcomeFeedback={tradeOutcomeFeedback}
                   onProposeTrade={(input) => {
                     setCounterTargetRoomPlayerId(null)
+                    setTradeOutcomeFeedback(null)
                     void game.proposeTrade(input)
                   }}
                   onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
