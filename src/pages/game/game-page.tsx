@@ -171,7 +171,7 @@ export function GamePage({ gameId }: GamePageProps) {
             turnConsequence={model.turnConsequence}
             isCurrentTurn={model.isUserTurn}
             isRollingDice={model.isRollingDice}
-            movementPaused={Boolean(model.visibleCardReveal)}
+            movementPaused={model.movementPaused}
             remainingTurnTimeMs={model.remainingTurnTimeMs}
             onSelectTile={(tile) => model.selectTile(tile.key)}
           />
@@ -413,7 +413,35 @@ export function GamePage({ gameId }: GamePageProps) {
                   onProposeTrade={(input) => {
                     setCounterTargetRoomPlayerId(null)
                     setTradeOutcomeFeedback(null)
-                    void game.proposeTrade(input)
+                    void game.proposeTrade(input).then((response) => {
+                      const outcomeEvent = response?.events?.find((event) =>
+                        isTradeOutcomeEvent(event.type),
+                      )
+
+                      if (!outcomeEvent) {
+                        return
+                      }
+
+                      const eventItem: GameEventLogItem = {
+                        sequence: null,
+                        type: outcomeEvent.type,
+                        payload: outcomeEvent,
+                        createdAt: new Date().toISOString(),
+                      }
+                      const eventKey = getTradeOutcomeIdentity(eventItem)
+                      const feedback = getTradeOutcomeToast(
+                        eventItem,
+                        response.state.players,
+                        game.roomPlayerId,
+                      )
+
+                      seenTradeOutcomeIdsRef.current.add(eventKey)
+
+                      if (feedback) {
+                        setTradeOutcomeFeedback(feedback)
+                        showToast(feedback)
+                      }
+                    })
                   }}
                   onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
                   onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}

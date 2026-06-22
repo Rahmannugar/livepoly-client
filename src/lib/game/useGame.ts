@@ -620,14 +620,14 @@ export function useGame(gameId: string) {
       if (!socket) {
         setStatus('connecting')
         setErrorMessage(null)
-        return
+        return null
       }
 
       if (!socket.connected) {
         setStatus('connecting')
         setErrorMessage(null)
         socket.connect()
-        return
+        return null
       }
 
       setCommandPending(true)
@@ -650,6 +650,8 @@ export function useGame(gameId: string) {
             mergeGameEvents(current, createLiveEventItems(response.events!)),
           )
         }
+
+        return response
       } catch (error) {
         const message =
           error instanceof Error
@@ -661,10 +663,11 @@ export function useGame(gameId: string) {
           socketRef.current?.connected
         ) {
           setStatus('joined')
-          return
+          return null
         }
 
         setErrorMessage(message)
+        return null
       } finally {
         setCommandPending(false)
       }

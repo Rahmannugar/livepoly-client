@@ -47,6 +47,11 @@ export function useGamePage(gameId: string) {
     ? pacedEvents
     : game.events.slice(0, 5)
   const latestCardReveal = getLatestCardRevealFromEvents(game.events)
+  const hasPendingCardReveal = Boolean(
+    latestCardReveal &&
+      latestCardReveal.id !== lastCardRevealIdRef.current &&
+      new Date(latestCardReveal.createdAt).getTime() > gameOpenedAtRef.current,
+  )
   const pendingTile = state?.pendingTileKey
     ? gameTiles.find((tile) => tile.key === state.pendingTileKey)
     : null
@@ -335,6 +340,7 @@ export function useGamePage(gameId: string) {
     canLiquidateProperties,
     canCreateTrade,
     visibleCardReveal,
+    movementPaused: Boolean(visibleCardReveal || hasPendingCardReveal),
     visibleCardRevealPlayerName: visibleCardRevealPlayer
       ? getPlayerName(visibleCardRevealPlayer)
       : null,

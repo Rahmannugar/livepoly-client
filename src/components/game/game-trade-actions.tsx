@@ -180,6 +180,10 @@ export function TradeProposalForm({
   )
   const offeredCashAmount = normalizeCash(offeredCash)
   const requestedCashAmount = normalizeCash(requestedCash)
+  const hasOfferedValue =
+    offeredCashAmount > 0 || offeredPropertyKeys.length > 0
+  const hasRequestedValue =
+    requestedCashAmount > 0 || requestedPropertyKeys.length > 0
   const cashWithinLimits =
     offeredCashAmount <= (currentPlayer?.cash ?? 0) &&
     requestedCashAmount <= (targetPlayer?.cash ?? 0)
@@ -188,10 +192,8 @@ export function TradeProposalForm({
     !commandPending &&
     selectedTargetRoomPlayerId &&
     cashWithinLimits &&
-    (offeredPropertyKeys.length > 0 ||
-      requestedPropertyKeys.length > 0 ||
-      offeredCashAmount > 0 ||
-      requestedCashAmount > 0)
+    hasOfferedValue &&
+    hasRequestedValue
 
   if (!roomPlayerId) {
     return null
@@ -300,6 +302,10 @@ export function TradeProposalForm({
         <p role="alert" className="text-sm font-bold text-red-400">
           A trade cannot use more cash than either player has.
         </p>
+      ) : !hasOfferedValue || !hasRequestedValue ? (
+        <p className="text-xs font-bold leading-5 text-[var(--sea-ink-soft)]">
+          Add cash or property to both sides of the trade.
+        </p>
       ) : null}
 
       <button
@@ -387,7 +393,7 @@ function TradePropertyPicker({
           placeholder="0"
         />
       </label>
-      <div className="grid gap-2">
+      <div className="grid max-h-64 gap-2 overflow-y-auto overscroll-contain pr-1">
         {properties.length === 0 ? (
           <p className="rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-bold text-[var(--sea-ink-soft)]">
             No properties available.

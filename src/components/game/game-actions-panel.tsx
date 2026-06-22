@@ -331,11 +331,20 @@ function GameActionSheet({
   onClose: () => void
 }) {
   useEffect(() => {
+    const mobileSheetQuery = window.matchMedia('(max-width: 1279px)')
     const previousOverflow = document.body.style.overflow
 
-    document.body.style.overflow = 'hidden'
+    const syncScrollLock = () => {
+      document.body.style.overflow = mobileSheetQuery.matches
+        ? 'hidden'
+        : previousOverflow
+    }
+
+    syncScrollLock()
+    mobileSheetQuery.addEventListener('change', syncScrollLock)
 
     return () => {
+      mobileSheetQuery.removeEventListener('change', syncScrollLock)
       document.body.style.overflow = previousOverflow
     }
   }, [])

@@ -88,18 +88,6 @@ export function TradePanel({
 
   return (
     <GamePanel title="Trade" icon={HandshakeIcon} collapsible={false}>
-      {!tradeOffer && outcomeFeedback ? (
-        <div
-          role="status"
-          className={`rounded-xl border px-4 py-3 text-sm font-black leading-5 sm:rounded-2xl ${
-            outcomeFeedback.kind === 'success'
-              ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-700 dark:text-emerald-200'
-              : 'border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)]'
-          }`}
-        >
-          {outcomeFeedback.message}
-        </div>
-      ) : null}
       {tradeOffer && isInvolved ? (
         <TradeOfferActions
           tradeOffer={tradeOffer}
@@ -135,6 +123,18 @@ export function TradePanel({
           }}
         />
       )}
+      {!tradeOffer && outcomeFeedback ? (
+        <div
+          role="status"
+          className={`mt-3 rounded-xl border px-4 py-3 text-sm font-black leading-5 sm:rounded-2xl ${
+            outcomeFeedback.kind === 'success'
+              ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-700 dark:text-emerald-200'
+              : 'border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)]'
+          }`}
+        >
+          {outcomeFeedback.message}
+        </div>
+      ) : null}
     </GamePanel>
   )
 }
