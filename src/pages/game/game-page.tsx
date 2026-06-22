@@ -10,6 +10,7 @@ import {
 import type { Icon } from '@phosphor-icons/react'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
@@ -473,7 +474,11 @@ function GameSidePanelDialog({
     }
   }, [])
 
-  return (
+  if (typeof document === 'undefined') {
+    return null
+  }
+
+  return createPortal(
     <div aria-live="polite">
       <button
         type="button"
@@ -499,7 +504,8 @@ function GameSidePanelDialog({
         </div>
         {children}
       </section>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

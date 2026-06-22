@@ -1,5 +1,5 @@
 import { CaretDownIcon } from '@phosphor-icons/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   findPlayer,
   formatCash,
@@ -387,7 +387,7 @@ function TradePropertyPicker({
           placeholder="0"
         />
       </label>
-      <div className="grid max-h-64 gap-2 overflow-y-auto pr-1">
+      <div className="grid gap-2">
         {properties.length === 0 ? (
           <p className="rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-bold text-[var(--sea-ink-soft)]">
             No properties available.
@@ -420,12 +420,28 @@ function TradePropertyGroup({
   onToggleProperty: (tileKey: string) => void
 }) {
   const [expanded, setExpanded] = useState(false)
+  const groupRef = useRef<HTMLDivElement>(null)
   const selectedCount = group.properties.filter((property) =>
     selectedPropertyKeys.includes(property.tileKey),
   ).length
 
+  useEffect(() => {
+    if (!expanded) {
+      return
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      groupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [expanded])
+
   return (
-    <div className="overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface)]">
+    <div
+      ref={groupRef}
+      className="overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--surface)]"
+    >
       <button
         type="button"
         className="flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left"
