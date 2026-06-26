@@ -123,7 +123,7 @@ export function TradePanel({
           }}
         />
       )}
-      {!tradeOffer && outcomeFeedback ? (
+      {outcomeFeedback ? (
         <div
           role="status"
           className={`mt-3 rounded-xl border px-4 py-3 text-sm font-black leading-5 sm:rounded-2xl ${

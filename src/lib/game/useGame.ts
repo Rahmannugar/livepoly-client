@@ -250,6 +250,13 @@ export function useGame(gameId: string) {
             return
           }
 
+          if (
+            expectedEvent === GAME_SOCKET_EVENTS.state &&
+            !('events' in data)
+          ) {
+            return
+          }
+
           cleanup()
           resolve(data)
         }

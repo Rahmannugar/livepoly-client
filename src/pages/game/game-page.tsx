@@ -8,7 +8,7 @@ import {
   XIcon,
 } from '@phosphor-icons/react'
 import type { Icon } from '@phosphor-icons/react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -33,7 +33,11 @@ import { TradePanel } from '#/components/game/game-trade-panel'
 import type { TradeOutcomeFeedback } from '#/components/game/game-trade-panel'
 import { useGamePage } from '#/lib/game/useGamePage'
 import { findPlayer, getPlayerName } from '#/lib/game/game-board'
-import type { GameEventLogItem, GamePlayer } from '#/lib/game/game.types'
+import type {
+  GameEngineEvent,
+  GameEventLogItem,
+  GamePlayer,
+} from '#/lib/game/game.types'
 import { leaveRoom } from '#/lib/rooms/rooms.service'
 import { ROOMS_QUERY_KEYS } from '#/lib/rooms/rooms.constants'
 
@@ -79,6 +83,46 @@ export function GamePage({ gameId }: GamePageProps) {
     game.roomPlayerId,
     Boolean(model.gameResult.data),
   )
+  const showTradeFeedback = useCallback(
+    (event: GameEventLogItem, players: GamePlayer[]) => {
+      const eventKey = getTradeFeedbackIdentity(event)
+
+      if (seenTradeOutcomeIdsRef.current.has(eventKey)) {
+        return
+      }
+
+      const feedback = getTradeFeedback(event, players, game.roomPlayerId)
+
+      if (!feedback) {
+        return
+      }
+
+      seenTradeOutcomeIdsRef.current.add(eventKey)
+      setTradeOutcomeFeedback(feedback)
+      showToast(feedback)
+    },
+    [game.roomPlayerId, showToast],
+  )
+  const showTradeFeedbackFromCommandEvents = useCallback(
+    (events: GameEngineEvent[] | undefined, players: GamePlayer[]) => {
+      const event = getLatestTradeFeedbackEvent(events)
+
+      if (!event) {
+        return
+      }
+
+      showTradeFeedback(
+        {
+          sequence: null,
+          type: event.type,
+          payload: event,
+          createdAt: new Date().toISOString(),
+        },
+        players,
+      )
+    },
+    [showTradeFeedback],
+  )
 
   useEffect(() => {
     if (
@@ -97,20 +141,12 @@ export function GamePage({ gameId }: GamePageProps) {
 
   useEffect(() => {
     const tradeEvent = model.recentEvents.find((event) =>
-      isTradeOutcomeEvent(event.type),
+      isTradeFeedbackEvent(event.type),
     )
 
     if (!tradeEvent) {
       return
     }
-
-    const eventKey = getTradeOutcomeIdentity(tradeEvent)
-
-    if (seenTradeOutcomeIdsRef.current.has(eventKey)) {
-      return
-    }
-
-    seenTradeOutcomeIdsRef.current.add(eventKey)
 
     const eventCreatedAt = new Date(tradeEvent.createdAt).getTime()
 
@@ -121,17 +157,8 @@ export function GamePage({ gameId }: GamePageProps) {
       return
     }
 
-    const tradeToast = getTradeOutcomeToast(
-      tradeEvent,
-      state?.players ?? [],
-      game.roomPlayerId,
-    )
-
-    if (tradeToast) {
-      setTradeOutcomeFeedback(tradeToast)
-      showToast(tradeToast)
-    }
-  }, [game.roomPlayerId, model.recentEvents, showToast, state?.players])
+    showTradeFeedback(tradeEvent, state?.players ?? [])
+  }, [model.recentEvents, showTradeFeedback, state?.players])
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-7">
@@ -419,38 +446,48 @@ export function GamePage({ gameId }: GamePageProps) {
                         return
                       }
 
-                      const outcomeEvent = response.events?.find((event) =>
-                        isTradeOutcomeEvent(event.type),
+                      showTradeFeedbackFromCommandEvents(
+                        response.events,
+                        response.state.players,
                       )
-
-                      if (!outcomeEvent) {
+                    })
+                  }}
+                  onAcceptTrade={(tradeId) => {
+                    void game.acceptTrade(tradeId).then((response) => {
+                      if (!response) {
                         return
                       }
 
-                      const eventItem: GameEventLogItem = {
-                        sequence: null,
-                        type: outcomeEvent.type,
-                        payload: outcomeEvent,
-                        createdAt: new Date().toISOString(),
-                      }
-                      const eventKey = getTradeOutcomeIdentity(eventItem)
-                      const feedback = getTradeOutcomeToast(
-                        eventItem,
+                      showTradeFeedbackFromCommandEvents(
+                        response.events,
                         response.state.players,
-                        game.roomPlayerId,
                       )
-
-                      seenTradeOutcomeIdsRef.current.add(eventKey)
-
-                      if (feedback) {
-                        setTradeOutcomeFeedback(feedback)
-                        showToast(feedback)
-                      }
                     })
                   }}
-                  onAcceptTrade={(tradeId) => void game.acceptTrade(tradeId)}
-                  onRejectTrade={(tradeId) => void game.rejectTrade(tradeId)}
-                  onCancelTrade={(tradeId) => void game.cancelTrade(tradeId)}
+                  onRejectTrade={(tradeId) => {
+                    void game.rejectTrade(tradeId).then((response) => {
+                      if (!response) {
+                        return
+                      }
+
+                      showTradeFeedbackFromCommandEvents(
+                        response.events,
+                        response.state.players,
+                      )
+                    })
+                  }}
+                  onCancelTrade={(tradeId) => {
+                    void game.cancelTrade(tradeId).then((response) => {
+                      if (!response) {
+                        return
+                      }
+
+                      showTradeFeedbackFromCommandEvents(
+                        response.events,
+                        response.state.players,
+                      )
+                    })
+                  }}
                 />
               ) : (
                 <EventsPanel
@@ -596,15 +633,32 @@ function getVisibleGameErrorMessage(
   return errorMessage
 }
 
-function isTradeOutcomeEvent(type: string) {
+function isTradeFeedbackEvent(type: string) {
   return (
+    type === 'trade_proposed' ||
     type === 'trade_accepted' ||
     type === 'trade_rejected' ||
     type === 'trade_cancelled'
   )
 }
 
-function getTradeOutcomeIdentity(event: GameEventLogItem) {
+function getLatestTradeFeedbackEvent(events: GameEngineEvent[] | undefined) {
+  if (!events) {
+    return null
+  }
+
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index]
+
+    if (isTradeFeedbackEvent(event.type)) {
+      return event
+    }
+  }
+
+  return null
+}
+
+function getTradeFeedbackIdentity(event: GameEventLogItem) {
   const tradeId = event.payload['tradeId']
 
   return typeof tradeId === 'string'
@@ -612,7 +666,7 @@ function getTradeOutcomeIdentity(event: GameEventLogItem) {
     : `${event.type}:${JSON.stringify(event.payload)}`
 }
 
-function getTradeOutcomeToast(
+function getTradeFeedback(
   event: GameEventLogItem,
   players: GamePlayer[],
   roomPlayerId: string | null,
@@ -634,6 +688,15 @@ function getTradeOutcomeToast(
   const recipientName = recipient
     ? getPlayerName(recipient)
     : 'The other player'
+
+  if (event.type === 'trade_proposed') {
+    return {
+      kind: isTradeSender ? ('success' as const) : ('info' as const),
+      message: isTradeSender
+        ? `Offer sent to ${recipientName}.`
+        : `${senderName} sent you a trade offer.`,
+    }
+  }
 
   if (event.type === 'trade_accepted') {
     return {
