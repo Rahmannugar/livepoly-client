@@ -209,7 +209,7 @@ export function TradeProposalForm({
 
   return (
     <form
-      className="grid gap-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-2xl"
+      className="grid gap-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:rounded-2xl sm:p-4"
       onSubmit={(event) => {
         event.preventDefault()
 
@@ -271,7 +271,7 @@ export function TradeProposalForm({
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 lg:grid-cols-2">
         <TradePropertyPicker
           title="You give"
           cashValue={offeredCash}
@@ -308,13 +308,15 @@ export function TradeProposalForm({
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={!canSubmit}
-        className="game-command-button inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        Send offer
-      </button>
+      <div className="sticky bottom-0 -mx-3 -mb-3 border-t border-[var(--line)] bg-[color-mix(in_oklab,var(--surface)_92%,transparent)] p-3 backdrop-blur sm:-mx-4 sm:-mb-4 sm:p-4">
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="game-command-button inline-flex h-12 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-sm font-bold text-[var(--primary-foreground)] shadow-[0_14px_30px_rgba(23,58,64,0.18)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          Send offer
+        </button>
+      </div>
     </form>
   )
 }
@@ -376,7 +378,7 @@ function TradePropertyPicker({
   )
 
   return (
-    <div className="grid gap-3 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_72%,transparent)] p-3">
+    <div className="grid content-start gap-3 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface-strong)_72%,transparent)] p-3">
       <p className="text-sm font-black text-[var(--sea-ink)]">{title}</p>
       <label className="grid gap-1 text-xs font-black uppercase tracking-[0.12em] text-[var(--sea-ink-soft)]">
         Cash · {formatCash(availableCash)} available
@@ -393,7 +395,7 @@ function TradePropertyPicker({
           placeholder="0"
         />
       </label>
-      <div className="grid max-h-64 gap-2 overflow-y-auto overscroll-contain pr-1">
+      <div className="grid gap-2">
         {properties.length === 0 ? (
           <p className="rounded-xl border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-xs font-bold text-[var(--sea-ink-soft)]">
             No properties available.
@@ -425,7 +427,7 @@ function TradePropertyGroup({
   disabled: boolean
   onToggleProperty: (tileKey: string) => void
 }) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(true)
   const groupRef = useRef<HTMLDivElement>(null)
   const selectedCount = group.properties.filter((property) =>
     selectedPropertyKeys.includes(property.tileKey),

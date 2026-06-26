@@ -357,6 +357,7 @@ export function GamePage({ gameId }: GamePageProps) {
             <GameSidePanelDialog
               key="game-side-panel-dialog"
               title={getSidePanelTitle(activeSidePanel)}
+              size={activeSidePanel === 'trade' ? 'wide' : 'default'}
               onClose={() => {
                 setActiveSidePanel(null)
                 setCounterTargetRoomPlayerId(null)
@@ -414,7 +415,11 @@ export function GamePage({ gameId }: GamePageProps) {
                     setCounterTargetRoomPlayerId(null)
                     setTradeOutcomeFeedback(null)
                     void game.proposeTrade(input).then((response) => {
-                      const outcomeEvent = response?.events?.find((event) =>
+                      if (!response) {
+                        return
+                      }
+
+                      const outcomeEvent = response.events?.find((event) =>
                         isTradeOutcomeEvent(event.type),
                       )
 
@@ -498,10 +503,12 @@ function GameSidePanelLauncher({
 
 function GameSidePanelDialog({
   title,
+  size = 'default',
   children,
   onClose,
 }: {
   title: string
+  size?: 'default' | 'wide'
   children: ReactNode
   onClose: () => void
 }) {
@@ -527,24 +534,30 @@ function GameSidePanelDialog({
         className="game-decision-backdrop fixed inset-0 z-40 bg-[rgba(4,12,15,0.38)]"
         onClick={onClose}
       />
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className="game-decision-sheet fixed inset-x-0 bottom-0 z-50 mx-auto grid max-h-[min(86vh,46rem)] w-full gap-3 overflow-y-auto overscroll-contain rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:bottom-auto md:left-1/2 md:top-1/2 md:max-w-2xl md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[28px] md:p-4"
-      >
-        <div className="flex items-center justify-end gap-3">
-          <button
-            type="button"
-            aria-label={`Close ${title}`}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
-            onClick={onClose}
-          >
-            <XIcon weight="bold" className="h-4 w-4" />
-          </button>
-        </div>
-        {children}
-      </section>
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 mx-auto w-full md:inset-4 md:grid md:place-items-center">
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
+          className={`game-decision-sheet pointer-events-auto grid w-full gap-3 overflow-y-auto overscroll-contain rounded-t-[28px] border border-[var(--line)] bg-[var(--bg-base)] p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_28px_90px_rgba(4,12,15,0.34)] md:rounded-[28px] md:p-4 ${
+            size === 'wide'
+              ? 'max-h-[calc(100dvh-1rem)] md:max-h-[calc(100dvh-2rem)] md:max-w-5xl'
+              : 'max-h-[min(86vh,46rem)] md:max-w-2xl'
+          }`}
+        >
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              aria-label={`Close ${title}`}
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--sea-ink)] transition hover:translate-y-[-1px]"
+              onClick={onClose}
+            >
+              <XIcon weight="bold" className="h-4 w-4" />
+            </button>
+          </div>
+          {children}
+        </section>
+      </div>
     </div>,
     document.body,
   )
