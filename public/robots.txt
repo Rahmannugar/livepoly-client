@@ -1,3 +1,16 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /account-deleted
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /friends
+Disallow: /games/
+Disallow: /leaderboard
+Disallow: /matches
+Disallow: /notifications
+Disallow: /profile
+Disallow: /rooms/
+Disallow: /stats
+Disallow: /users/
+
+Sitemap: https://livepoly.site/sitemap.xml
